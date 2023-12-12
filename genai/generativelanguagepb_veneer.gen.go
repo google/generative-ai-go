@@ -110,7 +110,7 @@ func (v *Candidate) toProto() *pb.Candidate {
 		return nil
 	}
 	return &pb.Candidate{
-		Index:            support.ZeroToNil(v.Index),
+		Index:            support.AddrOrNil(v.Index),
 		Content:          v.Content.toProto(),
 		FinishReason:     pb.Candidate_FinishReason(v.FinishReason),
 		SafetyRatings:    support.TransformSlice(v.SafetyRatings, (*SafetyRating).toProto),
@@ -124,7 +124,7 @@ func (Candidate) fromProto(p *pb.Candidate) *Candidate {
 		return nil
 	}
 	return &Candidate{
-		Index:            support.NilToZero(p.Index),
+		Index:            support.DerefOrZero(p.Index),
 		Content:          (Content{}).fromProto(p.Content),
 		FinishReason:     FinishReason(p.FinishReason),
 		SafetyRatings:    support.TransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
@@ -183,7 +183,7 @@ func (v *CitationSource) toProto() *pb.CitationSource {
 		StartIndex: v.StartIndex,
 		EndIndex:   v.EndIndex,
 		Uri:        v.URI,
-		License:    support.ZeroToNil(v.License),
+		License:    support.AddrOrNil(v.License),
 	}
 }
 
@@ -195,7 +195,7 @@ func (CitationSource) fromProto(p *pb.CitationSource) *CitationSource {
 		StartIndex: p.StartIndex,
 		EndIndex:   p.EndIndex,
 		URI:        p.Uri,
-		License:    support.NilToZero(p.License),
+		License:    support.DerefOrZero(p.License),
 	}
 }
 
@@ -461,12 +461,12 @@ func (v *GenerationConfig) toProto() *pb.GenerationConfig {
 		return nil
 	}
 	return &pb.GenerationConfig{
-		CandidateCount:  support.ZeroToNil(v.CandidateCount),
+		CandidateCount:  support.AddrOrNil(v.CandidateCount),
 		StopSequences:   v.StopSequences,
-		MaxOutputTokens: support.ZeroToNil(v.MaxOutputTokens),
-		Temperature:     support.ZeroToNil(v.Temperature),
-		TopP:            support.ZeroToNil(v.TopP),
-		TopK:            support.ZeroToNil(v.TopK),
+		MaxOutputTokens: support.AddrOrNil(v.MaxOutputTokens),
+		Temperature:     support.AddrOrNil(v.Temperature),
+		TopP:            support.AddrOrNil(v.TopP),
+		TopK:            support.AddrOrNil(v.TopK),
 	}
 }
 
@@ -475,12 +475,12 @@ func (GenerationConfig) fromProto(p *pb.GenerationConfig) *GenerationConfig {
 		return nil
 	}
 	return &GenerationConfig{
-		CandidateCount:  support.NilToZero(p.CandidateCount),
+		CandidateCount:  support.DerefOrZero(p.CandidateCount),
 		StopSequences:   p.StopSequences,
-		MaxOutputTokens: support.NilToZero(p.MaxOutputTokens),
-		Temperature:     support.NilToZero(p.Temperature),
-		TopP:            support.NilToZero(p.TopP),
-		TopK:            support.NilToZero(p.TopK),
+		MaxOutputTokens: support.DerefOrZero(p.MaxOutputTokens),
+		Temperature:     support.DerefOrZero(p.Temperature),
+		TopP:            support.DerefOrZero(p.TopP),
+		TopK:            support.DerefOrZero(p.TopK),
 	}
 }
 
