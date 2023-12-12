@@ -1,0 +1,123 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Configuration for the protoveneer tool.
+
+package: genai
+
+protoImportPath: cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb
+supportImportPath: github.com/google/generative-ai-go/internal/support
+
+types:
+    HarmCategory:
+      protoPrefix: HarmCategory_HARM_CATEGORY_
+      docVerb: specifies
+
+    SafetySetting_HarmBlockThreshold:
+      name: HarmBlockThreshold
+      protoPrefix: SafetySetting_BLOCK_
+      veneerPrefix: HarmBlock
+      docVerb: specifies
+      valueNames:
+        SafetySetting_HARM_BLOCK_THRESHOLD_UNSPECIFIED: HarmBlockUnspecified
+
+    SafetyRating_HarmProbability:
+      name: HarmProbability
+      protoPrefix: SafetyRating_
+      docVerb: specifies
+      valueNames:
+        SafetyRating_HARM_PROBABILITY_UNSPECIFIED: HarmProbabilityUnspecified
+
+    Candidate_FinishReason:
+      name: FinishReason
+      protoPrefix: Candidate_
+      fields:
+        GroundingAttributions:
+          omit: true
+
+    GenerateContentResponse_PromptFeedback_BlockReason:
+      name: BlockReason
+      protoPrefix: GenerateContentResponse_PromptFeedback_
+
+    Type:
+      protoPrefix: Type_
+
+    Content:
+      fields:
+        Parts:
+          type: '[]Part'
+
+    Blob:
+      fields:
+        MimeType:
+          name: MIMEType
+      docVerb: contains
+
+    FunctionCall:
+    FunctionResponse:
+    FunctionDeclaration:
+
+    GenerationConfig:
+      fields:
+        Temperature:
+          type: float32
+        TopP:
+          type: float32
+        TopK:
+          type: int32
+        CandidateCount:
+          type: int32
+        MaxOutputTokens:
+          type: int32
+
+    SafetySetting:
+
+    SafetyRating:
+      docVerb: 'is the'
+
+    CitationMetadata:
+
+    CitationSource:
+      docVerb: contains
+      fields:
+        Uri:
+          name: URI
+        License:
+          type: string
+
+    Candidate:
+      fields:
+        Index:
+          type: int32
+        GroundingAttributions:
+          omit: true
+
+    GenerateContentResponse_PromptFeedback:
+      name: PromptFeedback
+      docVerb: contains
+
+    CountTokensResponse:
+
+    Tool:
+      docVerb: contains
+
+    Schema:
+
+
+# Omit everything not explicitly configured.
+omitTypes:
+  - '*'
+
+converters:
+  Part: partToProto, partFromProto
