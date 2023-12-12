@@ -1,5 +1,7 @@
 # Google AI Go SDK
 
+![Go](https://github.com/google/generative-ai-go/actions/workflows/go.yml/badge.svg?event=push) [![Go Reference](https://pkg.go.dev/badge/github.com/google/generative-ai-go.svg)](https://pkg.go.dev/github.com/google/generative-ai-go)
+
 > [!IMPORTANT]
 > Thanks for your interest in the Google AI SDKs! **You can start using this SDK
 > and its samples on December 13, 2023.** Until then, check out our [blog
