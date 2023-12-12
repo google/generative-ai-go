@@ -813,7 +813,11 @@ func identName(x any) string {
 func snakeToCamelCase(s string) string {
 	words := strings.Split(s, "_")
 	for i, w := range words {
-		words[i] = fmt.Sprintf("%c%s", unicode.ToUpper(rune(w[0])), strings.ToLower(w[1:]))
+		if len(w) == 0 {
+			words[i] = w
+		} else {
+			words[i] = fmt.Sprintf("%c%s", unicode.ToUpper(rune(w[0])), strings.ToLower(w[1:]))
+		}
 	}
 	return strings.Join(words, "")
 }
