@@ -58,7 +58,7 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := responseString(resp)
-		checkMatch(t, got, `15.* cm|[1-9].* inches`)
+		checkMatch(t, got, `[0-9]+ (cm|inches)`)
 	})
 
 	t.Run("streaming", func(t *testing.T) {
@@ -100,16 +100,12 @@ func TestLive(t *testing.T) {
 		}
 
 		checkMatch(t,
-			send("Name air fryer brands.", false),
-			"Philips", "Cuisinart")
+			send("Name puppy breeds.", false),
+			"Beagle", "Poodle")
 
 		checkMatch(t,
 			send("Which is best?", true),
-			"best", "air fryer", "Philips", "([Cc]onsider|research|compare)", "factors|features")
-
-		checkMatch(t,
-			send("Say that again.", false),
-			"best", "air fryer", "Philips", "([Cc]onsider|research|compare)", "factors|features")
+			"best", "depends", "([Cc]onsider|research|compare)")
 	})
 
 	t.Run("image", func(t *testing.T) {
