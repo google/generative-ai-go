@@ -18,25 +18,22 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-const projectID = "your-project"
-const model = "some-model"
-const location = "some-location"
-
 func ExampleGenerativeModel_GenerateContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
@@ -49,13 +46,13 @@ func ExampleGenerativeModel_GenerateContent() {
 // for the complete set of configuration options.
 func ExampleGenerativeModel_GenerateContent_config() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-api-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 	model.Temperature = 0.9
 	model.TopP = 0.5
 	model.TopK = 20
@@ -71,13 +68,13 @@ func ExampleGenerativeModel_GenerateContent_config() {
 // for unsafe responses.
 func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -98,13 +95,13 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 // This example shows how to get the model to call functions that you provide.
 func ExampleGenerativeModel_GenerateContent_tool() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 	weatherTool := &genai.Tool{
 		FunctionDeclarations: []*genai.FunctionDeclaration{{
 			Name:        "CurrentWeather",
@@ -157,13 +154,13 @@ func getCurrentWeather(any) string {
 
 func ExampleGenerativeModel_GenerateContentStream() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 
 	iter := model.GenerateContentStream(ctx, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
 	for {
@@ -180,13 +177,13 @@ func ExampleGenerativeModel_GenerateContentStream() {
 
 func ExampleGenerativeModel_CountTokens() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 
 	resp, err := model.CountTokens(ctx, genai.Text("What kind of fish is this?"))
 	if err != nil {
@@ -198,12 +195,12 @@ func ExampleGenerativeModel_CountTokens() {
 
 func ExampleChatSession() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel(model)
+	model := client.GenerativeModel("gemini-pro")
 	cs := model.StartChat()
 
 	send := func(msg string) *genai.GenerateContentResponse {
@@ -241,7 +238,7 @@ func ExampleChatSession() {
 
 func ExampleEmbeddingModel_EmbedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -257,7 +254,7 @@ func ExampleEmbeddingModel_EmbedContent() {
 
 func ExampleClient_ListModels() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
