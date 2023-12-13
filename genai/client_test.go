@@ -255,7 +255,7 @@ func TestLive(t *testing.T) {
 			t.Errorf("bad result: %v\n", res)
 		}
 
-		res, err = em.EmbedContentTitle(ctx, "My Cheese Report", Text("I love cheddar cheese."))
+		res, err = em.EmbedContentWithTitle(ctx, "My Cheese Report", Text("I love cheddar cheese."))
 		if err != nil {
 			t.Fatal(err)
 		}

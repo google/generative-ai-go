@@ -21,6 +21,7 @@ import (
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 )
 
+// EmbeddingModel creates a new instance of the named embedding model.
 func (c *Client) EmbeddingModel(name string) *EmbeddingModel {
 	return &EmbeddingModel{
 		c:        c,
@@ -35,14 +36,19 @@ type EmbeddingModel struct {
 	c        *Client
 	name     string
 	fullName string
+	// TaskType describes how the embedding will be used.
 	TaskType TaskType
 }
 
+// EmbedContent returns an embedding for the list of parts.
 func (m *EmbeddingModel) EmbedContent(ctx context.Context, parts ...Part) (*EmbedContentResponse, error) {
-	return m.EmbedContentTitle(ctx, "", parts...)
+	return m.EmbedContentWithTitle(ctx, "", parts...)
 }
 
-func (m *EmbeddingModel) EmbedContentTitle(ctx context.Context, title string, parts ...Part) (*EmbedContentResponse, error) {
+// EmbedContentWithTitle returns an embedding for the list of parts.
+// If the given title is non-empty, it is passed to the model and
+// the task type is set to TaskTypeRetrievalDocument.
+func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string, parts ...Part) (*EmbedContentResponse, error) {
 	req := &pb.EmbedContentRequest{
 		Model:   m.fullName,
 		Content: newUserContent(parts).toProto(),
@@ -63,33 +69,3 @@ func (m *EmbeddingModel) EmbedContentTitle(ctx context.Context, title string, pa
 	}
 	return (EmbedContentResponse{}).fromProto(res), nil
 }
-
-// 	req := m.newEmbedContentRequest(parts,
-
-// 	req := &pb.EmbedContentRequest{
-// 		Model:   m.fullName,
-// 		Content: newUserContent(parts).toProto(),
-// 		Title:   &title,
-// 	}
-// 	taskType := TaskTypeRetrievalDocument
-// 	req.TaskType = &taskType
-
-// }
-
-// func (m *EmbeddingModel) newEmbedContentRequest(parts []Part, tt TaskType, title string) *pb.EmbedContentRequest {
-// 	return req
-// }
-
-// 	req := &pb.EmbedContentRequest{
-// 		Model:   m.fullName,
-// 		Content: newUserContent(parts).toProto(),
-// 	}
-// 	if m.TaskType != TaskTypeUnspecified {
-// 		req.TaskType = (*pb.TaskType)(&m.TaskType)
-// 	}
-// 	res, err := m.c.c.EmbedContent(ctx, req)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return (EmbedContentResponse{}).fromProto(res), nil
-// }
