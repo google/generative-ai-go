@@ -650,6 +650,105 @@ func (v HarmProbability) String() string {
 	return fmt.Sprintf("HarmProbability(%d)", v)
 }
 
+// Model is information about a Generative Language Model.
+type Model struct {
+	// Required. The resource name of the `Model`.
+	//
+	// Format: `models/{model}` with a `{model}` naming convention of:
+	//
+	// * "{base_model_id}-{version}"
+	//
+	// Examples:
+	//
+	// * `models/chat-bison-001`
+	Name string
+	// Required. The name of the base model, pass this to the generation request.
+	//
+	// Examples:
+	//
+	// * `chat-bison`
+	BaseModeID string
+	// Required. The version number of the model.
+	//
+	// This represents the major version
+	Version string
+	// The human-readable name of the model. E.g. "Chat Bison".
+	//
+	// The name can be up to 128 characters long and can consist of any UTF-8
+	// characters.
+	DisplayName string
+	// A short description of the model.
+	Description string
+	// Maximum number of input tokens allowed for this model.
+	InputTokenLimit int32
+	// Maximum number of output tokens available for this model.
+	OutputTokenLimit int32
+	// The model's supported generation methods.
+	//
+	// The method names are defined as Pascal case
+	// strings, such as `generateMessage` which correspond to API methods.
+	SupportedGenerationMethods []string
+	// Controls the randomness of the output.
+	//
+	// Values can range over `[0.0,1.0]`, inclusive. A value closer to `1.0` will
+	// produce responses that are more varied, while a value closer to `0.0` will
+	// typically result in less surprising responses from the model.
+	// This value specifies default to be used by the backend while making the
+	// call to the model.
+	Temperature float32
+	// For Nucleus sampling.
+	//
+	// Nucleus sampling considers the smallest set of tokens whose probability
+	// sum is at least `top_p`.
+	// This value specifies default to be used by the backend while making the
+	// call to the model.
+	TopP float32
+	// For Top-k sampling.
+	//
+	// Top-k sampling considers the set of `top_k` most probable tokens.
+	// This value specifies default to be used by the backend while making the
+	// call to the model.
+	TopK int32
+}
+
+func (v *Model) toProto() *pb.Model {
+	if v == nil {
+		return nil
+	}
+	return &pb.Model{
+		Name:                       v.Name,
+		BaseModelId:                v.BaseModeID,
+		Version:                    v.Version,
+		DisplayName:                v.DisplayName,
+		Description:                v.Description,
+		InputTokenLimit:            v.InputTokenLimit,
+		OutputTokenLimit:           v.OutputTokenLimit,
+		SupportedGenerationMethods: v.SupportedGenerationMethods,
+		Temperature:                support.AddrOrNil(v.Temperature),
+		TopP:                       support.AddrOrNil(v.TopP),
+		TopK:                       support.AddrOrNil(v.TopK),
+	}
+}
+
+func (Model) fromProto(p *pb.Model) *Model {
+	if p == nil {
+		return nil
+	}
+	return &Model{
+		Name:                       p.Name,
+		BaseModeID:                 p.BaseModelId,
+		Version:                    p.Version,
+		DisplayName:                p.DisplayName,
+		Description:                p.Description,
+		InputTokenLimit:            p.InputTokenLimit,
+		OutputTokenLimit:           p.OutputTokenLimit,
+		SupportedGenerationMethods: p.SupportedGenerationMethods,
+		Temperature:                support.DerefOrZero(p.Temperature),
+		TopP:                       support.DerefOrZero(p.TopP),
+		TopK:                       support.DerefOrZero(p.TopK),
+	}
+}
+
 // PromptFeedback contains a set of the feedback metadata the prompt specified in
 // `GenerateContentRequest.content`.
 type PromptFeedback struct {

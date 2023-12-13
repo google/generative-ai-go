@@ -120,6 +120,16 @@ types:
 
     ContentEmbedding:
 
+    Model:
+      fields:
+        BaseModelId:
+          name: BaseModeID
+        Temperature:
+          type: float32
+        TopP:
+          type: float32
+        TopK:
+          type: int32
 
 
 

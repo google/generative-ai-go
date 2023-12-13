@@ -33,7 +33,8 @@ import (
 
 // A Client is a Google generative AI client.
 type Client struct {
-	c *gl.GenerativeClient
+	c  *gl.GenerativeClient
+	mc *gl.ModelClient
 }
 
 // NewClient creates a new Google generative AI client.
@@ -48,7 +49,11 @@ func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error
 	if err != nil {
 		return nil, err
 	}
-	return &Client{c: c}, nil
+	mc, err := gl.NewModelRESTClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{c: c, mc: mc}, nil
 }
 
 // Close closes the client.
