@@ -23,6 +23,31 @@ import (
 	"github.com/google/generative-ai-go/internal/support"
 )
 
+// BatchEmbedContentsResponse is the response to a `BatchEmbedContentsRequest`.
+type BatchEmbedContentsResponse struct {
+	// Output only. The embeddings for each request, in the same order as provided
+	// in the batch request.
+	Embeddings []*ContentEmbedding
+}
+
+func (v *BatchEmbedContentsResponse) toProto() *pb.BatchEmbedContentsResponse {
+	if v == nil {
+		return nil
+	}
+	return &pb.BatchEmbedContentsResponse{
+		Embeddings: support.TransformSlice(v.Embeddings, (*ContentEmbedding).toProto),
+	}
+}
+
+func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *BatchEmbedContentsResponse {
+	if p == nil {
+		return nil
+	}
+	return &BatchEmbedContentsResponse{
+		Embeddings: support.TransformSlice(p.Embeddings, (ContentEmbedding{}).fromProto),
+	}
+}
+
 // Blob contains raw media bytes.
 //
 // Text should not be sent as raw bytes, use the 'text' field.
