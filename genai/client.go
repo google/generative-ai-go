@@ -71,7 +71,7 @@ type GenerativeModel struct {
 
 const defaultMaxOutputTokens = 2048
 
-// GenerativeModel creates a new instance of the named model.
+// GenerativeModel creates a new instance of the named generative model.
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
 		GenerationConfig: GenerationConfig{

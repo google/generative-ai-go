@@ -42,9 +42,6 @@ types:
     Candidate_FinishReason:
       name: FinishReason
       protoPrefix: Candidate_
-      fields:
-        GroundingAttributions:
-          omit: true
 
     GenerateContentResponse_PromptFeedback_BlockReason:
       name: BlockReason
@@ -113,6 +110,17 @@ types:
       docVerb: contains
 
     Schema:
+
+    TaskType:
+      protoPrefix: TaskType
+      valueNames:
+        TaskType_TASK_TYPE_UNSPECIFIED: TaskTypeUnspecified
+
+    EmbedContentResponse:
+
+    ContentEmbedding:
+
+
 
 
 # Omit everything not explicitly configured.

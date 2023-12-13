@@ -245,6 +245,24 @@ func TestLive(t *testing.T) {
 		}
 		checkMatch(t, responseString(res), "(it's}|weather) .*cold")
 	})
+	t.Run("embed", func(t *testing.T) {
+		em := client.EmbeddingModel("embedding-001")
+		res, err := em.EmbedContent(ctx, Text("cheddar cheese"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res == nil || res.Embedding == nil || len(res.Embedding.Values) < 10 {
+			t.Errorf("bad result: %v\n", res)
+		}
+
+		res, err = em.EmbedContentWithTitle(ctx, "My Cheese Report", Text("I love cheddar cheese."))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res == nil || res.Embedding == nil || len(res.Embedding.Values) < 10 {
+			t.Errorf("bad result: %v\n", res)
+		}
+	})
 }
 
 func TestJoinResponses(t *testing.T) {

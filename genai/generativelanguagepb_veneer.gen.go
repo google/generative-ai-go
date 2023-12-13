@@ -235,6 +235,30 @@ func (Content) fromProto(p *pb.Content) *Content {
 	}
 }
 
+// ContentEmbedding is a list of floats representing an embedding.
+type ContentEmbedding struct {
+	// The embedding values.
+	Values []float32
+}
+
+func (v *ContentEmbedding) toProto() *pb.ContentEmbedding {
+	if v == nil {
+		return nil
+	}
+	return &pb.ContentEmbedding{
+		Values: v.Values,
+	}
+}
+
+func (ContentEmbedding) fromProto(p *pb.ContentEmbedding) *ContentEmbedding {
+	if p == nil {
+		return nil
+	}
+	return &ContentEmbedding{
+		Values: p.Values,
+	}
+}
+
 // CountTokensResponse is a response from `CountTokens`.
 //
 // It returns the model's `token_count` for the `prompt`.
@@ -260,6 +284,30 @@ func (CountTokensResponse) fromProto(p *pb.CountTokensResponse) *CountTokensResp
 	}
 	return &CountTokensResponse{
 		TotalTokens: p.TotalTokens,
+	}
+}
+
+// EmbedContentResponse is the response to an `EmbedContentRequest`.
+type EmbedContentResponse struct {
+	// Output only. The embedding generated from the input content.
+	Embedding *ContentEmbedding
+}
+
+func (v *EmbedContentResponse) toProto() *pb.EmbedContentResponse {
+	if v == nil {
+		return nil
+	}
+	return &pb.EmbedContentResponse{
+		Embedding: v.Embedding.toProto(),
+	}
+}
+
+func (EmbedContentResponse) fromProto(p *pb.EmbedContentResponse) *EmbedContentResponse {
+	if p == nil {
+		return nil
+	}
+	return &EmbedContentResponse{
+		Embedding: (ContentEmbedding{}).fromProto(p.Embedding),
 	}
 }
 
@@ -761,6 +809,40 @@ func (Schema) fromProto(p *pb.Schema) *Schema {
 		Properties:  support.TransformMapValues(p.Properties, (Schema{}).fromProto),
 		Required:    p.Required,
 	}
+}
+
+// TaskType is type of task for which the embedding will be used.
+type TaskType int32
+
+const (
+	// TaskTypeUnspecified means unset value, which will default to one of the other enum values.
+	TaskTypeUnspecified TaskType = 0
+	// TaskTypeRetrievalQuery means specifies the given text is a query in a search/retrieval setting.
+	TaskTypeRetrievalQuery TaskType = 1
+	// TaskTypeRetrievalDocument means specifies the given text is a document from the corpus being searched.
+	TaskTypeRetrievalDocument TaskType = 2
+	// TaskTypeSemanticSimilarity means specifies the given text will be used for STS.
+	TaskTypeSemanticSimilarity TaskType = 3
+	// TaskTypeClassification means specifies that the given text will be classified.
+	TaskTypeClassification TaskType = 4
+	// TaskTypeClustering means specifies that the embeddings will be used for clustering.
+	TaskTypeClustering TaskType = 5
+)
+
+var namesForTaskType = map[TaskType]string{
+	TaskTypeUnspecified:        "TaskTypeUnspecified",
+	TaskTypeRetrievalQuery:     "TaskTypeRetrievalQuery",
+	TaskTypeRetrievalDocument:  "TaskTypeRetrievalDocument",
+	TaskTypeSemanticSimilarity: "TaskTypeSemanticSimilarity",
+	TaskTypeClassification:     "TaskTypeClassification",
+	TaskTypeClustering:         "TaskTypeClustering",
+}
+
+func (v TaskType) String() string {
+	if n, ok := namesForTaskType[v]; ok {
+		return n
+	}
+	return fmt.Sprintf("TaskType(%d)", v)
 }
 
 // Tool details that the model may use to generate response.
