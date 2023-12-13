@@ -130,6 +130,22 @@ func ExampleChatSession() {
 	printResponse(res)
 }
 
+func ExampleEmbeddingModel_EmbedContent() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+	em := client.EmbeddingModel("embedding-001")
+	res, err := em.EmbedContent(ctx, genai.Text("cheddar cheese"))
+
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res.Embedding.Values)
+}
+
 func ExampleClient_ListModels() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
