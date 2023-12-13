@@ -37,13 +37,122 @@ func ExampleGenerativeModel_GenerateContent() {
 	defer client.Close()
 
 	model := client.GenerativeModel(model)
-	model.Temperature = 0.9
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	printResponse(resp)
+}
+
+// This example shows how to a configure a model. See [GenerationConfig]
+// for the complete set of configuration options.
+func ExampleGenerativeModel_GenerateContent_config() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("your-api-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel(model)
+	model.Temperature = 0.9
+	model.TopP = 0.5
+	model.TopK = 20
+	model.MaxOutputTokens = 100
+	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+}
+
+// This example shows how to use SafetySettings to change the threshold
+// for unsafe responses.
+func ExampleGenerativeModel_GenerateContent_safetySetting() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel(model)
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryDangerousContent,
+			Threshold: genai.HarmBlockLowAndAbove,
+		},
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockMediumAndAbove,
+		},
+	}
+	resp, err := model.GenerateContent(ctx, genai.Text("I want to be bad. Please help."))
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+}
+
+// This example shows how to get the model to call functions that you provide.
+func ExampleGenerativeModel_GenerateContent_tool() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel(model)
+	weatherTool := &genai.Tool{
+		FunctionDeclarations: []*genai.FunctionDeclaration{{
+			Name:        "CurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"location": {
+						Type:        genai.TypeString,
+						Description: "The city and state, e.g. San Francisco, CA",
+					},
+					"unit": {
+						Type: genai.TypeString,
+						Enum: []string{"celsius", "fahrenheit"},
+					},
+				},
+				Required: []string{"location"},
+			},
+		}},
+	}
+
+	model.Tools = []*genai.Tool{weatherTool}
+	session := model.StartChat()
+	res, err := session.SendMessage(ctx, genai.Text("What is the weather like in New York?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	part := res.Candidates[0].Content.Parts[0]
+	funcall, ok := part.(genai.FunctionCall)
+	if !ok {
+		log.Fatalf("want FunctionCall, got %T", part)
+	}
+	if funcall.Name != "CurrentWeather" {
+		log.Fatalf("unknown function %q", funcall.Name)
+	}
+	w := getCurrentWeather(funcall.Args["location"])
+	resp, err := session.SendMessage(ctx, genai.FunctionResponse{
+		Name:     "CurrentWeather",
+		Response: map[string]any{"weather_there": w},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+}
+
+func getCurrentWeather(any) string {
+	return "cold"
 }
 
 func ExampleGenerativeModel_GenerateContentStream() {
