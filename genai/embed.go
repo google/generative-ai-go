@@ -54,7 +54,7 @@ func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string
 		Content: newUserContent(parts).toProto(),
 	}
 	// A non-empty title overrides the task type.
-	var tt TaskType
+	tt := m.TaskType
 	if title != "" {
 		req.Title = &title
 		tt = TaskTypeRetrievalDocument
