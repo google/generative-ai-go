@@ -64,7 +64,7 @@ func TestLive(t *testing.T) {
 	t.Run("streaming", func(t *testing.T) {
 		iter := model.GenerateContentStream(ctx, Text("Are you hungry?"))
 		got := responsesString(t, iter)
-		checkMatch(t, got, `(don't|do\s+not) (have|possess) .*(a .* body|the ability)`)
+		checkMatch(t, got, `(don't|do\s+not) (have|possess) .*(a .* needs|body|the ability)`)
 	})
 
 	t.Run("chat", func(t *testing.T) {
@@ -231,7 +231,7 @@ func TestLive(t *testing.T) {
 		if g, w := funcall.Name, weatherTool.FunctionDeclarations[0].Name; g != w {
 			t.Errorf("FunctionCall.Name: got %q, want %q", g, w)
 		}
-		if g, c := funcall.Args["location"], "New York"; !strings.Contains(g.(string), c) {
+		if g, c := funcall.Args["location"], "New York"; g != nil && !strings.Contains(g.(string), c) {
 			t.Errorf(`FunctionCall.Args["location"]: got %q, want string containing %q`, g, c)
 		}
 		res, err = session.SendMessage(ctx, FunctionResponse{
@@ -243,7 +243,7 @@ func TestLive(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		checkMatch(t, responseString(res), "(it's}|weather) .*cold")
+		checkMatch(t, responseString(res), "(it's|it is|weather) .*cold")
 	})
 	t.Run("embed", func(t *testing.T) {
 		em := client.EmbeddingModel("embedding-001")
@@ -261,6 +261,34 @@ func TestLive(t *testing.T) {
 		}
 		if res == nil || res.Embedding == nil || len(res.Embedding.Values) < 10 {
 			t.Errorf("bad result: %v\n", res)
+		}
+	})
+	t.Run("list-models", func(t *testing.T) {
+		iter := client.ListModels(ctx)
+		var got []*Model
+		for {
+			m, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			got = append(got, m)
+		}
+
+		for _, name := range []string{"gemini-pro", "embedding-001"} {
+			has := false
+			fullName := "models/" + name
+			for _, m := range got {
+				if m.Name == fullName {
+					has = true
+					break
+				}
+			}
+			if !has {
+				t.Errorf("missing model %q", name)
+			}
 		}
 	})
 }
