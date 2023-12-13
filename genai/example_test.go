@@ -130,6 +130,27 @@ func ExampleChatSession() {
 	printResponse(res)
 }
 
+func ExampleClient_ListModels() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("your-API-key"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	iter := client.ListModels(ctx)
+	for {
+		m, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(m.Name, m.Description)
+	}
+}
+
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
 		for _, part := range cand.Content.Parts {
