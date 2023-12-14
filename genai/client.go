@@ -81,7 +81,7 @@ type GenerativeModel struct {
 const defaultMaxOutputTokens = 2048
 
 // GenerativeModel creates a new instance of the named generative model.
-// For instance, "gemini-pro".
+// For instance, "gemini-pro" or "models/gemini-pro".
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
 		GenerationConfig: GenerationConfig{
@@ -90,13 +90,15 @@ func (c *Client) GenerativeModel(name string) *GenerativeModel {
 		},
 		c:        c,
 		name:     name,
-		fullName: fmt.Sprintf("models/%s", name),
+		fullName: fullModelName(name),
 	}
 }
 
-// Name returns the name of the model.
-func (m *GenerativeModel) Name() string {
-	return m.name
+func fullModelName(name string) string {
+	if strings.HasPrefix(name, "models/") {
+		return name
+	}
+	return "models/" + name
 }
 
 // GenerateContent produces a single request and response.
