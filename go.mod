@@ -3,7 +3,7 @@ module github.com/google/generative-ai-go
 go 1.21
 
 require (
-	cloud.google.com/go/ai v0.2.0
+	cloud.google.com/go/ai v0.3.0
 	github.com/google/go-cmp v0.6.0
 	google.golang.org/api v0.149.0
 	google.golang.org/protobuf v1.31.0
