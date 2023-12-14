@@ -26,6 +26,7 @@ import (
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 
+	"github.com/google/generative-ai-go/internal"
 	"github.com/google/generative-ai-go/internal/support"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -53,6 +54,7 @@ func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error
 	if err != nil {
 		return nil, err
 	}
+	c.SetGoogleClientInfo("gccl", internal.Version)
 	return &Client{c: c, mc: mc}, nil
 }
 
