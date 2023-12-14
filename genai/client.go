@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run ../internal/cmd/protoveneer config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1beta/generativelanguagepb
+//go:generate go run ../internal/cmd/protoveneer config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
 
 // Package genai is a client for the Google Labs generative AI model.
 package genai
@@ -23,8 +23,8 @@ import (
 	"io"
 	"strings"
 
-	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	gl "cloud.google.com/go/ai/generativelanguage/apiv1"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
 
 	"github.com/google/generative-ai-go/internal"
 	"github.com/google/generative-ai-go/internal/support"
@@ -73,7 +73,6 @@ type GenerativeModel struct {
 
 	GenerationConfig
 	SafetySettings []*SafetySetting
-	Tools          []*Tool
 }
 
 const defaultMaxOutputTokens = 2048
@@ -138,7 +137,6 @@ func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) *pb.Ge
 		Model:            m.fullName,
 		Contents:         support.TransformSlice(contents, (*Content).toProto),
 		SafetySettings:   support.TransformSlice(m.SafetySettings, (*SafetySetting).toProto),
-		Tools:            support.TransformSlice(m.Tools, (*Tool).toProto),
 		GenerationConfig: m.GenerationConfig.toProto(),
 	}
 }

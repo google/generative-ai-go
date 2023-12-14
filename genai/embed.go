@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
 )
 
 // EmbeddingModel creates a new instance of the named embedding model.
