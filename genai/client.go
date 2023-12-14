@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run ../internal/cmd/protoveneer config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
+// To get the protoveneer tool:
+//    go install golang.org/x/exp/protoveneer/cmd/protoveneer@latest
+
+//go:generate protoveneer config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
 
 // Package genai is a client for the Google Labs generative AI model.
 package genai
