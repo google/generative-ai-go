@@ -219,9 +219,9 @@ func TestLive(t *testing.T) {
 	})
 	t.Run("batch-embed", func(t *testing.T) {
 		em := client.EmbeddingModel("embedding-001")
-		b := em.NewBatch()
-		b.AddContent(Text("cheddar cheese"))
-		b.AddContentWithTitle("My Cheese Report", Text("I love cheddar cheese."))
+		b := em.NewBatch().
+			AddContent(Text("cheddar cheese")).
+			AddContentWithTitle("My Cheese Report", Text("I love cheddar cheese."))
 		res, err := b.EmbedContents(ctx)
 		if err != nil {
 			t.Fatal(err)

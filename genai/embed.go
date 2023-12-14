@@ -102,13 +102,15 @@ func (m *EmbeddingModel) NewBatch() *EmbeddingBatch {
 }
 
 // AddContent adds a content to the batch.
-func (b *EmbeddingBatch) AddContent(parts ...Part) {
+func (b *EmbeddingBatch) AddContent(parts ...Part) *EmbeddingBatch {
 	b.AddContentWithTitle("", parts...)
+	return b
 }
 
 // AddContent adds a content to the batch with a title.
-func (b *EmbeddingBatch) AddContentWithTitle(title string, parts ...Part) {
+func (b *EmbeddingBatch) AddContentWithTitle(title string, parts ...Part) *EmbeddingBatch {
 	b.req.Requests = append(b.req.Requests, newEmbedContentRequest(b.req.Model, b.tt, title, parts))
+	return b
 }
 
 // EmbedContents returns the embeddings for all the contents in the batch.
