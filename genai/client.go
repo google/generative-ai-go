@@ -32,9 +32,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-// Names of common models.
-const GeminiProModel = "gemini-pro"
-
 // A Client is a Google generative AI client.
 type Client struct {
 	c  *gl.GenerativeClient
