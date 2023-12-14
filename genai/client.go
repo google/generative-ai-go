@@ -32,6 +32,9 @@ import (
 	"google.golang.org/api/option"
 )
 
+// Names of common models.
+const GeminiProModel = "gemini-pro"
+
 // A Client is a Google generative AI client.
 type Client struct {
 	c  *gl.GenerativeClient
@@ -79,6 +82,7 @@ type GenerativeModel struct {
 const defaultMaxOutputTokens = 2048
 
 // GenerativeModel creates a new instance of the named generative model.
+// For instance, "gemini-pro".
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
 		GenerationConfig: GenerationConfig{
