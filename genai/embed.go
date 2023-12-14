@@ -22,6 +22,7 @@ import (
 )
 
 // EmbeddingModel creates a new instance of the named embedding model.
+// Example name: "embedding-001".
 func (c *Client) EmbeddingModel(name string) *EmbeddingModel {
 	return &EmbeddingModel{
 		c:        c,
