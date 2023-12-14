@@ -16,18 +16,17 @@ package genai
 
 import (
 	"context"
-	"fmt"
 
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
 )
 
 // EmbeddingModel creates a new instance of the named embedding model.
-// Example name: "embedding-001".
+// Example name: "embedding-001" or "models/embedding-001".
 func (c *Client) EmbeddingModel(name string) *EmbeddingModel {
 	return &EmbeddingModel{
 		c:        c,
 		name:     name,
-		fullName: fmt.Sprintf("models/%s", name),
+		fullName: fullModelName(name),
 	}
 }
 
