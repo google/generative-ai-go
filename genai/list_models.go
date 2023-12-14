@@ -17,8 +17,8 @@ package genai
 import (
 	"context"
 
-	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	gl "cloud.google.com/go/ai/generativelanguage/apiv1"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
 
 	"google.golang.org/api/iterator"
 )

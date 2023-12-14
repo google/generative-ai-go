@@ -17,7 +17,7 @@ package genai
 import (
 	"fmt"
 
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
 )
 
 const (
@@ -46,12 +46,6 @@ func partFromProto(p *pb.Part) Part {
 			MIMEType: d.InlineData.MimeType,
 			Data:     d.InlineData.Data,
 		}
-	case *pb.Part_FunctionCall:
-		return *(FunctionCall{}).fromProto(d.FunctionCall)
-
-	case *pb.Part_FunctionResponse:
-		panic("FunctionResponse unimplemented")
-
 	default:
 		panic(fmt.Errorf("unknown Part.Data type %T", p.Data))
 	}
@@ -70,22 +64,6 @@ func (b Blob) toPart() *pb.Part {
 	return &pb.Part{
 		Data: &pb.Part_InlineData{
 			InlineData: b.toProto(),
-		},
-	}
-}
-
-func (f FunctionCall) toPart() *pb.Part {
-	return &pb.Part{
-		Data: &pb.Part_FunctionCall{
-			FunctionCall: f.toProto(),
-		},
-	}
-}
-
-func (f FunctionResponse) toPart() *pb.Part {
-	return &pb.Part{
-		Data: &pb.Part_FunctionResponse{
-			FunctionResponse: f.toProto(),
 		},
 	}
 }

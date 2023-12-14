@@ -92,66 +92,6 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	printResponse(resp)
 }
 
-// This example shows how to get the model to call functions that you provide.
-func ExampleGenerativeModel_GenerateContent_tool() {
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-
-	model := client.GenerativeModel("gemini-pro")
-	weatherTool := &genai.Tool{
-		FunctionDeclarations: []*genai.FunctionDeclaration{{
-			Name:        "CurrentWeather",
-			Description: "Get the current weather in a given location",
-			Parameters: &genai.Schema{
-				Type: genai.TypeObject,
-				Properties: map[string]*genai.Schema{
-					"location": {
-						Type:        genai.TypeString,
-						Description: "The city and state, e.g. San Francisco, CA",
-					},
-					"unit": {
-						Type: genai.TypeString,
-						Enum: []string{"celsius", "fahrenheit"},
-					},
-				},
-				Required: []string{"location"},
-			},
-		}},
-	}
-
-	model.Tools = []*genai.Tool{weatherTool}
-	session := model.StartChat()
-	res, err := session.SendMessage(ctx, genai.Text("What is the weather like in New York?"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	part := res.Candidates[0].Content.Parts[0]
-	funcall, ok := part.(genai.FunctionCall)
-	if !ok {
-		log.Fatalf("want FunctionCall, got %T", part)
-	}
-	if funcall.Name != "CurrentWeather" {
-		log.Fatalf("unknown function %q", funcall.Name)
-	}
-	w := getCurrentWeather(funcall.Args["location"])
-	resp, err := session.SendMessage(ctx, genai.FunctionResponse{
-		Name:     "CurrentWeather",
-		Response: map[string]any{"weather_there": w},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	printResponse(resp)
-}
-
-func getCurrentWeather(any) string {
-	return "cold"
-}
-
 func ExampleGenerativeModel_GenerateContentStream() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
