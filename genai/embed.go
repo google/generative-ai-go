@@ -81,7 +81,6 @@ func newEmbedContentRequest(model string, tt TaskType, title string, parts []Par
 
 // An EmbeddingBatch holds a collection of embedding requests.
 type EmbeddingBatch struct {
-	c   *Client
 	tt  TaskType
 	req *pb.BatchEmbedContentsRequest
 }
@@ -93,7 +92,6 @@ type EmbeddingBatch struct {
 // in a single call to the model.
 func (m *EmbeddingModel) NewBatch() *EmbeddingBatch {
 	return &EmbeddingBatch{
-		c:  m.c,
 		tt: m.TaskType,
 		req: &pb.BatchEmbedContentsRequest{
 			Model: m.fullName,
@@ -113,9 +111,9 @@ func (b *EmbeddingBatch) AddContentWithTitle(title string, parts ...Part) *Embed
 	return b
 }
 
-// EmbedContents returns the embeddings for all the contents in the batch.
-func (b *EmbeddingBatch) EmbedContents(ctx context.Context) (*BatchEmbedContentsResponse, error) {
-	res, err := b.c.c.BatchEmbedContents(ctx, b.req)
+// BatchEmbedContents returns the embeddings for all the contents in the batch.
+func (m *EmbeddingModel) BatchEmbedContents(ctx context.Context, b *EmbeddingBatch) (*BatchEmbedContentsResponse, error) {
+	res, err := m.c.c.BatchEmbedContents(ctx, b.req)
 	if err != nil {
 		return nil, err
 	}

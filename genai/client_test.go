@@ -222,7 +222,7 @@ func TestLive(t *testing.T) {
 		b := em.NewBatch().
 			AddContent(Text("cheddar cheese")).
 			AddContentWithTitle("My Cheese Report", Text("I love cheddar cheese."))
-		res, err := b.EmbedContents(ctx)
+		res, err := em.BatchEmbedContents(ctx, b)
 		if err != nil {
 			t.Fatal(err)
 		}

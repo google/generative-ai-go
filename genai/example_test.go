@@ -203,7 +203,7 @@ func ExampleEmbeddingBatch() {
 	b := em.NewBatch().
 		AddContent(genai.Text("cheddar cheese")).
 		AddContentWithTitle("My Cheese Report", genai.Text("I love cheddar cheese."))
-	res, err := b.EmbedContents(ctx)
+	res, err := em.BatchEmbedContents(ctx, b)
 	if err != nil {
 		panic(err)
 	}
