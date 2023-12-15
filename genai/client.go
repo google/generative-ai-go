@@ -194,8 +194,6 @@ func protoToResponse(resp *pb.GenerateContentResponse) (*GenerateContentResponse
 
 	// If any candidate is blocked, error.
 	// TODO: is this too harsh?
-	// If any candidate is blocked, error.
-	// TODO: is this too harsh?
 	for _, c := range gcp.Candidates {
 		if c.FinishReason == FinishReasonSafety {
 			return nil, &BlockedError{Candidate: c}
