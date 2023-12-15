@@ -157,7 +157,7 @@ func TestLive(t *testing.T) {
 	t.Run("max-tokens", func(t *testing.T) {
 		maxModel := client.GenerativeModel(*modelName)
 		maxModel.Temperature = Ptr(float32(0))
-		maxModel.MaxOutputTokens = Ptr[int32](10)
+		maxModel.SetMaxOutputTokens(10)
 		res, err := maxModel.GenerateContent(ctx, Text("What is a dog?"))
 		if err != nil {
 			t.Fatal(err)

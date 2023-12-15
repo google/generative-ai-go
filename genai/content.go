@@ -80,6 +80,9 @@ func ImageData(format string, data []byte) Blob {
 }
 
 // Ptr returns a pointer to its argument.
+// It can be used to initialize pointer fields:
+//
+//	model.Temperature = genai.Ptr[float32](0.1)
 func Ptr[T any](t T) *T { return &t }
 
 // SetCandidateCount sets the CandidateCount field.
