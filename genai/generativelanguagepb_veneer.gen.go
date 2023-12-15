@@ -389,7 +389,7 @@ type GenerationConfig struct {
 	//
 	// This value must be between [1, 8], inclusive. If unset, this will default
 	// to 1.
-	CandidateCount int32
+	CandidateCount *int32
 	// Optional. The set of character sequences (up to 5) that will stop output
 	// generation. If specified, the API will stop at the first appearance of a
 	// stop sequence. The stop sequence will not be included as part of the
@@ -399,7 +399,7 @@ type GenerationConfig struct {
 	//
 	// If unset, this will default to output_token_limit specified in the `Model`
 	// specification.
-	MaxOutputTokens int32
+	MaxOutputTokens *int32
 	// Optional. Controls the randomness of the output.
 	// Note: The default value varies by model, see the `Model.temperature`
 	// attribute of the `Model` returned the `getModel` function.
@@ -408,7 +408,7 @@ type GenerationConfig struct {
 	// inclusive. A value closer to 1.0 will produce responses that are more
 	// varied and creative, while a value closer to 0.0 will typically result in
 	// more straightforward responses from the model.
-	Temperature float32
+	Temperature *float32
 	// Optional. The maximum cumulative probability of tokens to consider when
 	// sampling.
 	//
@@ -421,7 +421,7 @@ type GenerationConfig struct {
 	//
 	// Note: The default value varies by model, see the `Model.top_p`
 	// attribute of the `Model` returned the `getModel` function.
-	TopP float32
+	TopP *float32
 	// Optional. The maximum number of tokens to consider when sampling.
 	//
 	// The model uses combined Top-k and nucleus sampling.
@@ -431,7 +431,7 @@ type GenerationConfig struct {
 	//
 	// Note: The default value varies by model, see the `Model.top_k`
 	// attribute of the `Model` returned the `getModel` function.
-	TopK int32
+	TopK *int32
 }
 
 func (v *GenerationConfig) toProto() *pb.GenerationConfig {
@@ -439,12 +439,12 @@ func (v *GenerationConfig) toProto() *pb.GenerationConfig {
 		return nil
 	}
 	return &pb.GenerationConfig{
-		CandidateCount:  support.AddrOrNil(v.CandidateCount),
+		CandidateCount:  v.CandidateCount,
 		StopSequences:   v.StopSequences,
-		MaxOutputTokens: support.AddrOrNil(v.MaxOutputTokens),
-		Temperature:     support.AddrOrNil(v.Temperature),
-		TopP:            support.AddrOrNil(v.TopP),
-		TopK:            support.AddrOrNil(v.TopK),
+		MaxOutputTokens: v.MaxOutputTokens,
+		Temperature:     v.Temperature,
+		TopP:            v.TopP,
+		TopK:            v.TopK,
 	}
 }
 
@@ -453,12 +453,12 @@ func (GenerationConfig) fromProto(p *pb.GenerationConfig) *GenerationConfig {
 		return nil
 	}
 	return &GenerationConfig{
-		CandidateCount:  support.DerefOrZero(p.CandidateCount),
+		CandidateCount:  p.CandidateCount,
 		StopSequences:   p.StopSequences,
-		MaxOutputTokens: support.DerefOrZero(p.MaxOutputTokens),
-		Temperature:     support.DerefOrZero(p.Temperature),
-		TopP:            support.DerefOrZero(p.TopP),
-		TopK:            support.DerefOrZero(p.TopK),
+		MaxOutputTokens: p.MaxOutputTokens,
+		Temperature:     p.Temperature,
+		TopP:            p.TopP,
+		TopK:            p.TopK,
 	}
 }
 

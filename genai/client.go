@@ -77,16 +77,10 @@ type GenerativeModel struct {
 	SafetySettings []*SafetySetting
 }
 
-const defaultMaxOutputTokens = 2048
-
 // GenerativeModel creates a new instance of the named generative model.
 // For instance, "gemini-pro" or "models/gemini-pro".
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
-		GenerationConfig: GenerationConfig{
-			MaxOutputTokens: defaultMaxOutputTokens,
-			TopK:            3,
-		},
 		c:        c,
 		fullName: fullModelName(name),
 	}
