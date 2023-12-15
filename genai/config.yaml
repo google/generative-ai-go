@@ -63,8 +63,6 @@ types:
 
     GenerationConfig:
       fields:
-        Temperature:
-          type: float32
         TopP:
           type: float32
         TopK:

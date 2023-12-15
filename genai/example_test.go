@@ -53,7 +53,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-pro")
-	model.Temperature = 0.9
+	model.SetTemperature(0.9)
 	model.TopP = 0.5
 	model.TopK = 20
 	model.MaxOutputTokens = 100

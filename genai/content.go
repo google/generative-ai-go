@@ -78,3 +78,8 @@ func ImageData(format string, data []byte) Blob {
 		Data:     data,
 	}
 }
+
+// SetTemperature sets the temperature on the config.
+func (gc *GenerationConfig) SetTemperature(t float32) {
+	gc.Temperature = &t
+}
