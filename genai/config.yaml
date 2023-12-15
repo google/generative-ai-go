@@ -43,6 +43,9 @@ types:
       name: FinishReason
       protoPrefix: Candidate_
 
+    GenerateContentResponse:
+      doc: 'is the response from a GenerateContent or GenerateContentStream call.'
+
     GenerateContentResponse_PromptFeedback_BlockReason:
       name: BlockReason
       protoPrefix: GenerateContentResponse_PromptFeedback_

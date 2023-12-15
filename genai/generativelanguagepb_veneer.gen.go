@@ -345,6 +345,43 @@ func (v FinishReason) String() string {
 	return fmt.Sprintf("FinishReason(%d)", v)
 }
 
+// GenerateContentResponse is the response from a GenerateContent or GenerateContentStream call.
+//
+// Note on safety ratings and content filtering. They are reported for both
+// prompt in `GenerateContentResponse.prompt_feedback` and for each candidate
+// in `finish_reason` and in `safety_ratings`. The API contract is that:
+//   - either all requested candidates are returned or no candidates at all
+//   - no candidates are returned only if there was something wrong with the
+//     prompt (see `prompt_feedback`)
+//   - feedback on each candidate is reported on `finish_reason` and
+//     `safety_ratings`.
+type GenerateContentResponse struct {
+	// Candidate responses from the model.
+	Candidates []*Candidate
+	// Returns the prompt's feedback related to the content filters.
+	PromptFeedback *PromptFeedback
+}
+
+func (v *GenerateContentResponse) toProto() *pb.GenerateContentResponse {
+	if v == nil {
+		return nil
+	}
+	return &pb.GenerateContentResponse{
+		Candidates:     support.TransformSlice(v.Candidates, (*Candidate).toProto),
+		PromptFeedback: v.PromptFeedback.toProto(),
+	}
+}
+
+func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *GenerateContentResponse {
+	if p == nil {
+		return nil
+	}
+	return &GenerateContentResponse{
+		Candidates:     support.TransformSlice(p.Candidates, (Candidate{}).fromProto),
+		PromptFeedback: (PromptFeedback{}).fromProto(p.PromptFeedback),
+	}
+}
+
 // GenerationConfig is configuration options for model generation and outputs. Not all parameters
 // may be configurable for every model.
 type GenerationConfig struct {
