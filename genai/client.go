@@ -71,7 +71,6 @@ func (c *Client) Close() error {
 // it by setting the exported fields.
 type GenerativeModel struct {
 	c        *Client
-	name     string
 	fullName string
 
 	GenerationConfig
@@ -89,7 +88,6 @@ func (c *Client) GenerativeModel(name string) *GenerativeModel {
 			TopK:            3,
 		},
 		c:        c,
-		name:     name,
 		fullName: fullModelName(name),
 	}
 }

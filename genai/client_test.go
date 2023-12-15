@@ -34,7 +34,7 @@ import (
 
 var (
 	apiKey    = flag.String("apikey", "", "API key")
-	modelName = flag.String("model", "", "model")
+	modelName = flag.String("model", "", "model name without vision suffix")
 )
 
 const imageFile = "personWorkingOnComputer.jpg"
