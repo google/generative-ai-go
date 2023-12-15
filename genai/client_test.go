@@ -58,15 +58,19 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := responseString(resp)
-		checkMatch(t, got, `[0-9]+ (cm|inches)`)
+		checkMatch(t, got, `[0-9]+ (cm|centimeters|inches)`)
 	})
 
 	t.Run("streaming", func(t *testing.T) {
 		iter := model.GenerateContentStream(ctx, Text("Are you hungry?"))
 		got := responsesString(t, iter)
-		checkMatch(t, got, `(don't|do\s+not) (have|possess) .*(a .* needs|body|the ability)`)
+		checkMatch(t, got, `(don't|do\s+not|not capable) (have|possess|experiencing) .*(a .* needs|body|sensations|the ability)`)
 	})
-
+	t.Run("streaming-counting", func(t *testing.T) {
+		// Verify only that we don't crash. See #18.
+		iter := model.GenerateContentStream(ctx, Text("count 1 to 100."))
+		_ = responsesString(t, iter)
+	})
 	t.Run("chat", func(t *testing.T) {
 		session := model.StartChat()
 
@@ -352,6 +356,9 @@ func responseString(resp *GenerateContentResponse) string {
 
 func contentString(c *Content) string {
 	var b strings.Builder
+	if c == nil || c.Parts == nil {
+		return ""
+	}
 	for i, part := range c.Parts {
 		if i > 0 {
 			fmt.Fprintf(&b, ";")
