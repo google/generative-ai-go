@@ -66,7 +66,11 @@ func TestLive(t *testing.T) {
 		got := responsesString(t, iter)
 		checkMatch(t, got, `(don't|do\s+not|not capable) (have|possess|experiencing) .*(a .* needs|body|sensations|the ability)`)
 	})
-
+	t.Run("streaming-counting", func(t *testing.T) {
+		// Verify only that we don't crash. See #18.
+		iter := model.GenerateContentStream(ctx, Text("count 1 to 100."))
+		_ = responsesString(t, iter)
+	})
 	t.Run("chat", func(t *testing.T) {
 		session := model.StartChat()
 
@@ -352,6 +356,9 @@ func responseString(resp *GenerateContentResponse) string {
 
 func contentString(c *Content) string {
 	var b strings.Builder
+	if c == nil || c.Parts == nil {
+		return ""
+	}
 	for i, part := range c.Parts {
 		if i > 0 {
 			fmt.Fprintf(&b, ";")
@@ -448,27 +455,5 @@ func TestMatchString(t *testing.T) {
 		if !re.MatchString(test.in) {
 			t.Errorf("%q doesn't match %q", test.re, test.in)
 		}
-	}
-}
-
-func TestStreamCount(t *testing.T) {
-	ctx := context.Background()
-	client, err := NewClient(ctx, option.WithAPIKey(*apiKey))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	model := client.GenerativeModel(*modelName)
-
-	iter := model.GenerateContentStream(ctx, Text("count 1 to 100."))
-	for {
-		resp, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = resp
 	}
 }
