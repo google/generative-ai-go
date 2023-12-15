@@ -58,13 +58,13 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := responseString(resp)
-		checkMatch(t, got, `[0-9]+ (cm|inches)`)
+		checkMatch(t, got, `[0-9]+ (cm|centimeters|inches)`)
 	})
 
 	t.Run("streaming", func(t *testing.T) {
 		iter := model.GenerateContentStream(ctx, Text("Are you hungry?"))
 		got := responsesString(t, iter)
-		checkMatch(t, got, `(don't|do\s+not) (have|possess) .*(a .* needs|body|the ability)`)
+		checkMatch(t, got, `(don't|do\s+not|not capable) (have|possess|experiencing) .*(a .* needs|body|sensations|the ability)`)
 	})
 
 	t.Run("chat", func(t *testing.T) {
@@ -448,5 +448,27 @@ func TestMatchString(t *testing.T) {
 		if !re.MatchString(test.in) {
 			t.Errorf("%q doesn't match %q", test.re, test.in)
 		}
+	}
+}
+
+func TestStreamCount(t *testing.T) {
+	ctx := context.Background()
+	client, err := NewClient(ctx, option.WithAPIKey(*apiKey))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	model := client.GenerativeModel(*modelName)
+
+	iter := model.GenerateContentStream(ctx, Text("count 1 to 100."))
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = resp
 	}
 }

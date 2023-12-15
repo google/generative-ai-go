@@ -215,8 +215,10 @@ func ExampleClient_ListModels() {
 
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
-		for _, part := range cand.Content.Parts {
-			fmt.Println(part)
+		if cand.Content != nil {
+			for _, part := range cand.Content.Parts {
+				fmt.Println(part)
+			}
 		}
 	}
 	fmt.Println("---")
