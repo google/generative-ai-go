@@ -62,15 +62,6 @@ types:
       docVerb: contains
 
     GenerationConfig:
-      fields:
-        TopP:
-          type: float32
-        TopK:
-          type: int32
-        CandidateCount:
-          type: int32
-        MaxOutputTokens:
-          type: int32
 
     SafetySetting:
 

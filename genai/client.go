@@ -84,8 +84,8 @@ const defaultMaxOutputTokens = 2048
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
 		GenerationConfig: GenerationConfig{
-			MaxOutputTokens: defaultMaxOutputTokens,
-			TopK:            3,
+			MaxOutputTokens: Ptr(int32(defaultMaxOutputTokens)),
+			TopK:            Ptr(int32(3)),
 		},
 		c:        c,
 		fullName: fullModelName(name),

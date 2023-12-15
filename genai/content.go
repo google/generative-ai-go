@@ -79,7 +79,5 @@ func ImageData(format string, data []byte) Blob {
 	}
 }
 
-// SetTemperature sets the temperature on the config.
-func (gc *GenerationConfig) SetTemperature(t float32) {
-	gc.Temperature = &t
-}
+// Ptr returns a pointer to its argument.
+func Ptr[T any](t T) *T { return &t }

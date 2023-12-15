@@ -53,10 +53,10 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-pro")
-	model.SetTemperature(0.9)
-	model.TopP = 0.5
-	model.TopK = 20
-	model.MaxOutputTokens = 100
+	model.Temperature = genai.Ptr[float32](0.9)
+	model.TopP = genai.Ptr[float32](0.5)
+	model.TopK = genai.Ptr[int32](20)
+	model.MaxOutputTokens = genai.Ptr[int32](100)
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
