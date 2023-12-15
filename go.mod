@@ -4,14 +4,11 @@ go 1.21
 
 require (
 	cloud.google.com/go/ai v0.3.0
-	github.com/google/go-cmp v0.6.0
 	google.golang.org/api v0.149.0
 	google.golang.org/protobuf v1.31.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/compute v1.23.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.5.2 // indirect
