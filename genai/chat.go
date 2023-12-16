@@ -34,8 +34,7 @@ func (cs *ChatSession) SendMessage(ctx context.Context, parts ...Part) (*Generat
 	// Call the underlying client with the entire history plus the argument Content.
 	cs.History = append(cs.History, newUserContent(parts))
 	req := cs.m.newGenerateContentRequest(cs.History...)
-	cc := int32(1)
-	req.GenerationConfig.CandidateCount = &cc
+	req.GenerationConfig.CandidateCount = Ptr[int32](1)
 	resp, err := cs.m.generateContent(ctx, req)
 	if err != nil {
 		return nil, err
@@ -48,8 +47,7 @@ func (cs *ChatSession) SendMessage(ctx context.Context, parts ...Part) (*Generat
 func (cs *ChatSession) SendMessageStream(ctx context.Context, parts ...Part) *GenerateContentResponseIterator {
 	cs.History = append(cs.History, newUserContent(parts))
 	req := cs.m.newGenerateContentRequest(cs.History...)
-	var cc int32 = 1
-	req.GenerationConfig.CandidateCount = &cc
+	req.GenerationConfig.CandidateCount = Ptr[int32](1)
 	streamClient, err := cs.m.c.c.StreamGenerateContent(ctx, req)
 	return &GenerateContentResponseIterator{
 		sc:  streamClient,
