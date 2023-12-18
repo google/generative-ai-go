@@ -192,6 +192,26 @@ func ExampleEmbeddingModel_EmbedContent() {
 	fmt.Println(res.Embedding.Values)
 }
 
+func ExampleEmbeddingBatch() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+	em := client.EmbeddingModel("embedding-001")
+	b := em.NewBatch().
+		AddContent(genai.Text("cheddar cheese")).
+		AddContentWithTitle("My Cheese Report", genai.Text("I love cheddar cheese."))
+	res, err := em.BatchEmbedContents(ctx, b)
+	if err != nil {
+		panic(err)
+	}
+	for _, e := range res.Embeddings {
+		fmt.Println(e.Values)
+	}
+}
+
 func ExampleClient_ListModels() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))

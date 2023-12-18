@@ -214,9 +214,23 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		if res == nil || res.Embedding == nil || len(res.Embedding.Values) < 10 {
-			t.Errorf("bad result: %v\n", res)
+			t.Errorf("bad result: %v", res)
 		}
 	})
+	t.Run("batch-embed", func(t *testing.T) {
+		em := client.EmbeddingModel("embedding-001")
+		b := em.NewBatch().
+			AddContent(Text("cheddar cheese")).
+			AddContentWithTitle("My Cheese Report", Text("I love cheddar cheese."))
+		res, err := em.BatchEmbedContents(ctx, b)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res == nil || len(res.Embeddings) != 2 {
+			t.Errorf("bad result: %v", res)
+		}
+	})
+
 	t.Run("list-models", func(t *testing.T) {
 		iter := client.ListModels(ctx)
 		var got []*Model

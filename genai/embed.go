@@ -40,6 +40,11 @@ type EmbeddingModel struct {
 	TaskType TaskType
 }
 
+// Name returns the name of the EmbeddingModel.
+func (m *EmbeddingModel) Name() string {
+	return m.name
+}
+
 // EmbedContent returns an embedding for the list of parts.
 func (m *EmbeddingModel) EmbedContent(ctx context.Context, parts ...Part) (*EmbedContentResponse, error) {
 	return m.EmbedContentWithTitle(ctx, "", parts...)
@@ -49,12 +54,20 @@ func (m *EmbeddingModel) EmbedContent(ctx context.Context, parts ...Part) (*Embe
 // If the given title is non-empty, it is passed to the model and
 // the task type is set to TaskTypeRetrievalDocument.
 func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string, parts ...Part) (*EmbedContentResponse, error) {
+	req := newEmbedContentRequest(m.fullName, m.TaskType, title, parts)
+	res, err := m.c.c.EmbedContent(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return (EmbedContentResponse{}).fromProto(res), nil
+}
+
+func newEmbedContentRequest(model string, tt TaskType, title string, parts []Part) *pb.EmbedContentRequest {
 	req := &pb.EmbedContentRequest{
-		Model:   m.fullName,
+		Model:   model,
 		Content: newUserContent(parts).toProto(),
 	}
 	// A non-empty title overrides the task type.
-	tt := m.TaskType
 	if title != "" {
 		req.Title = &title
 		tt = TaskTypeRetrievalDocument
@@ -63,9 +76,45 @@ func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string
 		taskType := pb.TaskType(tt)
 		req.TaskType = &taskType
 	}
-	res, err := m.c.c.EmbedContent(ctx, req)
+	return req
+}
+
+// An EmbeddingBatch holds a collection of embedding requests.
+type EmbeddingBatch struct {
+	tt  TaskType
+	req *pb.BatchEmbedContentsRequest
+}
+
+// NewBatch returns a new, empty EmbeddingBatch with the same TaskType as the model.
+// Make multiple calls to [EmbeddingBatch.AddContent] or EmbeddingBatch.AddContentWithTitle].
+// Then pass the EmbeddingBatch to [EmbeddingModel.BatchEmbedContents] to get
+// all the embeddings in a single call to the model.
+func (m *EmbeddingModel) NewBatch() *EmbeddingBatch {
+	return &EmbeddingBatch{
+		tt: m.TaskType,
+		req: &pb.BatchEmbedContentsRequest{
+			Model: m.fullName,
+		},
+	}
+}
+
+// AddContent adds a content to the batch.
+func (b *EmbeddingBatch) AddContent(parts ...Part) *EmbeddingBatch {
+	b.AddContentWithTitle("", parts...)
+	return b
+}
+
+// AddContent adds a content to the batch with a title.
+func (b *EmbeddingBatch) AddContentWithTitle(title string, parts ...Part) *EmbeddingBatch {
+	b.req.Requests = append(b.req.Requests, newEmbedContentRequest(b.req.Model, b.tt, title, parts))
+	return b
+}
+
+// BatchEmbedContents returns the embeddings for all the contents in the batch.
+func (m *EmbeddingModel) BatchEmbedContents(ctx context.Context, b *EmbeddingBatch) (*BatchEmbedContentsResponse, error) {
+	res, err := m.c.c.BatchEmbedContents(ctx, b.req)
 	if err != nil {
 		return nil, err
 	}
-	return (EmbedContentResponse{}).fromProto(res), nil
+	return (BatchEmbedContentsResponse{}).fromProto(res), nil
 }

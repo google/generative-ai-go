@@ -95,6 +95,7 @@ types:
         TaskType_TASK_TYPE_UNSPECIFIED: TaskTypeUnspecified
 
     EmbedContentResponse:
+    BatchEmbedContentsResponse:
 
     ContentEmbedding:
 
