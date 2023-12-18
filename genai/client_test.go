@@ -28,6 +28,7 @@ import (
 	"strings"
 	"testing"
 
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -70,6 +71,22 @@ func TestLive(t *testing.T) {
 		// Verify only that we don't crash. See #18.
 		iter := model.GenerateContentStream(ctx, Text("count 1 to 100."))
 		_ = responsesString(t, iter)
+	})
+	t.Run("streaming-error", func(t *testing.T) {
+		iter := model.GenerateContentStream(ctx, ImageData("foo", []byte("bar")))
+		_, err := iter.Next()
+		if err == nil {
+			t.Fatal("got nil, want error")
+		}
+		var gerr *googleapi.Error
+		if !errors.As(err, &gerr) {
+			t.Fatalf("does not wrap a googleapi.Error")
+		}
+		got := gerr.Error()
+		want := "invalid argument"
+		if !strings.Contains(got, want) {
+			t.Errorf("got %q\n\ndoes not contain %q", got, want)
+		}
 	})
 	t.Run("chat", func(t *testing.T) {
 		session := model.StartChat()
