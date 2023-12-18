@@ -17,7 +17,6 @@
 
 //go:generate protoveneer config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
 
-// Package genai is a client for the Google Labs generative AI model.
 package genai
 
 import (
