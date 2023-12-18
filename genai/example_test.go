@@ -16,11 +16,13 @@ package genai_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -210,6 +212,29 @@ func ExampleEmbeddingBatch() {
 	for _, e := range res.Embeddings {
 		fmt.Println(e.Values)
 	}
+}
+
+// This example shows how to get more information from an error.
+func ExampleGenerativeModel_GenerateContentStream_errors() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	model := client.GenerativeModel("gemini-pro")
+
+	iter := model.GenerateContentStream(ctx, genai.ImageData("foo", []byte("bar")))
+	res, err := iter.Next()
+	if err != nil {
+		var gerr *googleapi.Error
+		if !errors.As(err, &gerr) {
+			log.Fatalf("error: %s\n", err)
+		} else {
+			log.Fatalf("error details: %s\n", gerr)
+		}
+	}
+	_ = res
 }
 
 func ExampleClient_ListModels() {
