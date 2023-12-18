@@ -85,11 +85,10 @@ type EmbeddingBatch struct {
 	req *pb.BatchEmbedContentsRequest
 }
 
-// NewBatch returns a new, empty EmbeddingBatch.
-// Make multiple calls to [EmbeddingBatch.AddContent] or
-// [EmbeddingBatch.AddContentWithTitle].
-// [EmbeddingBatch.EmbedContents] will then get all the embeddings
-// in a single call to the model.
+// NewBatch returns a new, empty EmbeddingBatch with the same TaskType as the model.
+// Make multiple calls to [EmbeddingBatch.AddContent] or EmbeddingBatch.AddContentWithTitle].
+// Then pass the EmbeddingBatch to [EmbeddingModel.BatchEmbedContents] to get
+// all the embeddings in a single call to the model.
 func (m *EmbeddingModel) NewBatch() *EmbeddingBatch {
 	return &EmbeddingBatch{
 		tt: m.TaskType,
