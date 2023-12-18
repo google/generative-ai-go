@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package genai is a client for the Google Labs generative AI model.
+// Package genai is a client for the Google AI generative models.
 //
 // # Getting started
 //
