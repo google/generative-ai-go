@@ -19,7 +19,7 @@ supports use cases like:
 
 ## Documentation
 
-The documentation of th Google AI Go SDK is [on pkg.go.dev](https://pkg.go.dev/github.com/google/generative-ai-go/genai)
+The documentation of the Google AI Go SDK is [on pkg.go.dev](https://pkg.go.dev/github.com/google/generative-ai-go/genai)
 
 Find complete documentation for the Google AI SDKs and the Gemini model in the
 Google documentation: https://ai.google.dev/docs
