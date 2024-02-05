@@ -118,3 +118,6 @@ func (m *EmbeddingModel) BatchEmbedContents(ctx context.Context, b *EmbeddingBat
 	}
 	return (BatchEmbedContentsResponse{}).fromProto(res), nil
 }
+func (m *EmbeddingModel) Info(ctx context.Context) (*ModelInfo, error) {
+	return m.c.modelInfo(ctx, m.fullName)
+}

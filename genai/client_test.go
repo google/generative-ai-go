@@ -276,6 +276,25 @@ func TestLive(t *testing.T) {
 			}
 		}
 	})
+	t.Run("get-model", func(t *testing.T) {
+		modelName := "gemini-pro"
+		got, err := client.GenerativeModel(modelName).Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if w := "models/" + modelName; got.Name != w {
+			t.Errorf("got name %q, want %q", got.Name, w)
+		}
+
+		modelName = "embedding-001"
+		got, err = client.EmbeddingModel(modelName).Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if w := "models/" + modelName; got.Name != w {
+			t.Errorf("got name %q, want %q", got.Name, w)
+		}
+	})
 }
 
 func TestJoinResponses(t *testing.T) {
