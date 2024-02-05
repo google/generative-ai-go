@@ -100,9 +100,10 @@ types:
     ContentEmbedding:
 
     Model:
+      name: ModelInfo
       fields:
         BaseModelId:
-          name: BaseModeID
+          name: BaseModelID
         Temperature:
           type: float32
         TopP:
