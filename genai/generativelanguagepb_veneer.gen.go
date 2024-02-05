@@ -605,8 +605,8 @@ func (v HarmProbability) String() string {
 	return fmt.Sprintf("HarmProbability(%d)", v)
 }
 
-// Model is information about a Generative Language Model.
-type Model struct {
+// ModelInfo is information about a language model.
+type ModelInfo struct {
 	// Required. The resource name of the `Model`.
 	//
 	// Format: `models/{model}` with a `{model}` naming convention of:
@@ -622,7 +622,7 @@ type Model struct {
 	// Examples:
 	//
 	// * `chat-bison`
-	BaseModeID string
+	BaseModelID string
 	// Required. The version number of the model.
 	//
 	// This represents the major version
@@ -666,13 +666,13 @@ type Model struct {
 	TopK int32
 }
 
-func (v *Model) toProto() *pb.Model {
+func (v *ModelInfo) toProto() *pb.Model {
 	if v == nil {
 		return nil
 	}
 	return &pb.Model{
 		Name:                       v.Name,
-		BaseModelId:                v.BaseModeID,
+		BaseModelId:                v.BaseModelID,
 		Version:                    v.Version,
 		DisplayName:                v.DisplayName,
 		Description:                v.Description,
@@ -685,13 +685,13 @@ func (v *Model) toProto() *pb.Model {
 	}
 }
 
-func (Model) fromProto(p *pb.Model) *Model {
+func (ModelInfo) fromProto(p *pb.Model) *ModelInfo {
 	if p == nil {
 		return nil
 	}
-	return &Model{
+	return &ModelInfo{
 		Name:                       p.Name,
-		BaseModeID:                 p.BaseModelId,
+		BaseModelID:                p.BaseModelId,
 		Version:                    p.Version,
 		DisplayName:                p.DisplayName,
 		Description:                p.Description,

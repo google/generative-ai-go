@@ -250,7 +250,7 @@ func TestLive(t *testing.T) {
 
 	t.Run("list-models", func(t *testing.T) {
 		iter := client.ListModels(ctx)
-		var got []*Model
+		var got []*ModelInfo
 		for {
 			m, err := iter.Next()
 			if err == iterator.Done {

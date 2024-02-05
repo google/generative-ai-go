@@ -100,9 +100,11 @@ types:
     ContentEmbedding:
 
     Model:
+      name: ModelInfo
+      doc: 'is information about a language model.'
       fields:
         BaseModelId:
-          name: BaseModeID
+          name: BaseModelID
         Temperature:
           type: float32
         TopP:

@@ -23,28 +23,28 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func (c *Client) ListModels(ctx context.Context) *ModelIterator {
-	return &ModelIterator{
+func (c *Client) ListModels(ctx context.Context) *ModelInfoIterator {
+	return &ModelInfoIterator{
 		it: c.mc.ListModels(ctx, &pb.ListModelsRequest{}),
 	}
 }
 
-// A ModelIterator iterates over Models.
-type ModelIterator struct {
+// A ModelInfoIterator iterates over Models.
+type ModelInfoIterator struct {
 	it *gl.ModelIterator
 }
 
 // Next returns the next result. Its second return value is iterator.Done if there are no more
 // results. Once Next returns Done, all subsequent calls will return Done.
-func (it *ModelIterator) Next() (*Model, error) {
+func (it *ModelInfoIterator) Next() (*ModelInfo, error) {
 	m, err := it.it.Next()
 	if err != nil {
 		return nil, err
 	}
-	return (Model{}).fromProto(m), nil
+	return (ModelInfo{}).fromProto(m), nil
 }
 
 // PageInfo supports pagination. See the google.golang.org/api/iterator package for details.
-func (it *ModelIterator) PageInfo() *iterator.PageInfo {
+func (it *ModelInfoIterator) PageInfo() *iterator.PageInfo {
 	return it.it.PageInfo()
 }
