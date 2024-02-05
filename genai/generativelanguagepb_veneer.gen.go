@@ -605,7 +605,7 @@ func (v HarmProbability) String() string {
 	return fmt.Sprintf("HarmProbability(%d)", v)
 }
 
-// ModelInfo is information about a Generative Language Model.
+// ModelInfo is information about a language model.
 type ModelInfo struct {
 	// Required. The resource name of the `Model`.
 	//
