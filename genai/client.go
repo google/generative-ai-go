@@ -213,6 +213,7 @@ func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) *pb.CountT
 	}
 }
 
+// Info returns information about the model.
 func (m *GenerativeModel) Info(ctx context.Context) (*ModelInfo, error) {
 	return m.c.modelInfo(ctx, m.fullName)
 }
