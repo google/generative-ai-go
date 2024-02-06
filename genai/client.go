@@ -213,6 +213,20 @@ func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) *pb.CountT
 	}
 }
 
+// Info returns information about the model.
+func (m *GenerativeModel) Info(ctx context.Context) (*ModelInfo, error) {
+	return m.c.modelInfo(ctx, m.fullName)
+}
+
+func (c *Client) modelInfo(ctx context.Context, fullName string) (*ModelInfo, error) {
+	req := &pb.GetModelRequest{Name: fullName}
+	res, err := c.mc.GetModel(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return (ModelInfo{}).fromProto(res), nil
+}
+
 // A BlockedError indicates that the model's response was blocked.
 // There can be two underlying causes: the prompt or a candidate response.
 type BlockedError struct {
