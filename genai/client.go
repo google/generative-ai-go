@@ -78,6 +78,8 @@ type GenerativeModel struct {
 
 // GenerativeModel creates a new instance of the named generative model.
 // For instance, "gemini-pro" or "models/gemini-pro".
+//
+// To access a tuned model named NAME, pass "tunedModels/NAME".
 func (c *Client) GenerativeModel(name string) *GenerativeModel {
 	return &GenerativeModel{
 		c:        c,
@@ -86,7 +88,7 @@ func (c *Client) GenerativeModel(name string) *GenerativeModel {
 }
 
 func fullModelName(name string) string {
-	if strings.HasPrefix(name, "models/") {
+	if strings.HasPrefix(name, "models/") || strings.HasPrefix(name, "tunedModels/") {
 		return name
 	}
 	return "models/" + name
