@@ -83,7 +83,7 @@ func TestLive(t *testing.T) {
 			t.Fatalf("does not wrap a googleapi.Error")
 		}
 		got := gerr.Error()
-		want := "invalid argument"
+		want := "INVALID_ARGUMENT"
 		if !strings.Contains(got, want) {
 			t.Errorf("got %q\n\ndoes not contain %q", got, want)
 		}
