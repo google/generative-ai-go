@@ -1,4 +1,4 @@
-# Google AI Go SDK
+# Go SDK for Google Generative AI
 
 ![Go](https://github.com/google/generative-ai-go/actions/workflows/go.yml/badge.svg?event=push) [![Go Reference](https://pkg.go.dev/badge/github.com/google/generative-ai-go.svg)](https://pkg.go.dev/github.com/google/generative-ai-go)
 
