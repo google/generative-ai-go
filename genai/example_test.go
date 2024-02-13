@@ -35,7 +35,7 @@ func ExampleGenerativeModel_GenerateContent() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
@@ -54,7 +54,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 	model.SetTemperature(0.9)
 	model.SetTopP(0.5)
 	model.SetTopK(20)
@@ -76,7 +76,7 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -102,7 +102,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 
 	iter := model.GenerateContentStream(ctx, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
 	for {
@@ -125,7 +125,7 @@ func ExampleGenerativeModel_CountTokens() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 
 	resp, err := model.CountTokens(ctx, genai.Text("What kind of fish is this?"))
 	if err != nil {
@@ -142,7 +142,7 @@ func ExampleChatSession() {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 	cs := model.StartChat()
 
 	send := func(msg string) *genai.GenerateContentResponse {
@@ -222,7 +222,7 @@ func ExampleGenerativeModel_GenerateContentStream_errors() {
 		log.Fatal(err)
 	}
 
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-1.0-pro")
 
 	iter := model.GenerateContentStream(ctx, genai.ImageData("foo", []byte("bar")))
 	res, err := iter.Next()
