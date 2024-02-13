@@ -2,8 +2,8 @@
 
 ![Go](https://github.com/google/generative-ai-go/actions/workflows/go.yml/badge.svg?event=push) [![Go Reference](https://pkg.go.dev/badge/github.com/google/generative-ai-go.svg)](https://pkg.go.dev/github.com/google/generative-ai-go)
 
-The Google AI Go SDK enables developers to use Google's state-of-the-art generative
-AI models (like Gemini) to build AI-powered features and applications. This SDK
+This SDK enables developers to use Google's state-of-the-art generative
+AI models (like Gemini) to build AI-powered features and applications. It
 supports use cases like:
 
 - Generate text from text-only input
