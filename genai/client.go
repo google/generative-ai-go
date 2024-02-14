@@ -88,7 +88,7 @@ func (c *Client) GenerativeModel(name string) *GenerativeModel {
 }
 
 func fullModelName(name string) string {
-	if strings.HasPrefix(name, "models/") || strings.HasPrefix(name, "tunedModels/") {
+	if strings.ContainsRune(name, '/') {
 		return name
 	}
 	return "models/" + name
