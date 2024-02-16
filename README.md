@@ -24,6 +24,8 @@ The documentation of the Google AI Go SDK is [on pkg.go.dev](https://pkg.go.dev/
 Find complete documentation for the Google AI SDKs and the Gemini model in the
 Google documentation: https://ai.google.dev/docs
 
+For a list of the supported models and their capabilities, see https://ai.google.dev/models/gemini
+
 ## Contributing
 
 See [Contributing](https://github.com/google/generative-ai-go/blob/main/CONTRIBUTING.md) for
