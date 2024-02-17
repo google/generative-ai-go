@@ -21,8 +21,10 @@ package genai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1"
@@ -48,6 +50,13 @@ type Client struct {
 // You may configure the client by passing in options from the [google.golang.org/api/option]
 // package.
 func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error) {
+	if !hasAPIKey(opts) {
+		return nil, errors.New(`You need an API key to use this client.
+Visit https://ai.google.dev to get one, put it in an environment variable like GEMINI_API_KEY,
+then pass it as an option:
+    genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+Import the option package as "google.golang.org/api/option".`)
+	}
 	c, err := gl.NewGenerativeRESTClient(ctx, opts...)
 	if err != nil {
 		return nil, err
@@ -58,6 +67,20 @@ func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error
 	}
 	c.SetGoogleClientInfo("gccl", internal.Version)
 	return &Client{c: c, mc: mc}, nil
+}
+
+// hasAPIKey reports whether one of the options was created with
+// WithAPIKey.
+// There is no good way to do that, because the type of the option
+// is unexported, and the struct that it populates is in an internal package.
+func hasAPIKey(opts []option.ClientOption) bool {
+	for _, opt := range opts {
+		t := reflect.TypeOf(opt)
+		if t.String() == "option.withAPIKey" {
+			return true
+		}
+	}
+	return false
 }
 
 // Close closes the client.

@@ -507,3 +507,10 @@ func TestMatchString(t *testing.T) {
 		}
 	}
 }
+
+func TestNoAPIKey(t *testing.T) {
+	_, err := NewClient(context.Background())
+	if err == nil {
+		t.Fatal("got nil, want error")
+	}
+}
