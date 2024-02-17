@@ -100,7 +100,7 @@ type GenerativeModel struct {
 }
 
 // GenerativeModel creates a new instance of the named generative model.
-// For instance, "gemini-pro" or "models/gemini-pro".
+// For instance, "gemini-1.0-pro" or "models/gemini-1.0-pro".
 //
 // To access a tuned model named NAME, pass "tunedModels/NAME".
 func (c *Client) GenerativeModel(name string) *GenerativeModel {

@@ -130,7 +130,7 @@ func TestLive(t *testing.T) {
 	})
 
 	t.Run("image", func(t *testing.T) {
-		vmodel := client.GenerativeModel(*modelName + "-vision")
+		vmodel := client.GenerativeModel(*modelName + "-vision-latest")
 		vmodel.Temperature = Ptr[float32](0)
 
 		data, err := os.ReadFile(filepath.Join("testdata", imageFile))
@@ -262,7 +262,7 @@ func TestLive(t *testing.T) {
 			got = append(got, m)
 		}
 
-		for _, name := range []string{"gemini-pro", "embedding-001"} {
+		for _, name := range []string{"gemini-1.0-pro", "embedding-001"} {
 			has := false
 			fullName := "models/" + name
 			for _, m := range got {
@@ -277,21 +277,21 @@ func TestLive(t *testing.T) {
 		}
 	})
 	t.Run("get-model", func(t *testing.T) {
-		modelName := "gemini-pro"
-		got, err := client.GenerativeModel(modelName).Info(ctx)
+		modName := *modelName
+		got, err := client.GenerativeModel(modName).Info(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if w := "models/" + modelName; got.Name != w {
+		if w := "models/" + modName; got.Name != w {
 			t.Errorf("got name %q, want %q", got.Name, w)
 		}
 
-		modelName = "embedding-001"
-		got, err = client.EmbeddingModel(modelName).Info(ctx)
+		modName = "embedding-001"
+		got, err = client.EmbeddingModel(modName).Info(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if w := "models/" + modelName; got.Name != w {
+		if w := "models/" + modName; got.Name != w {
 			t.Errorf("got name %q, want %q", got.Name, w)
 		}
 	})
