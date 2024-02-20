@@ -60,6 +60,7 @@ types:
         MimeType:
           name: MIMEType
       docVerb: contains
+      removeOtherDoc: true
 
     GenerationConfig:
 

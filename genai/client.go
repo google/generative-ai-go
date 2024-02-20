@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // To get the protoveneer tool:
-//    go install golang.org/x/exp/protoveneer/cmd/protoveneer@latest
+//    go install cloud.google.com/go/internal/protoveneer/cmd/protoveneer@latest
 
 //go:generate protoveneer -license license.txt config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
 

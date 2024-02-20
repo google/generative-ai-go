@@ -49,8 +49,6 @@ func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *B
 }
 
 // Blob contains raw media bytes.
-//
-// Text should not be sent as raw bytes, use the 'text' field.
 type Blob struct {
 	// The IANA standard MIME type of the source data.
 	// Accepted types include: "image/png", "image/jpeg", "image/heic",
