@@ -55,6 +55,7 @@ func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error
 Visit https://ai.google.dev to get one, put it in an environment variable like GEMINI_API_KEY,
 then pass it as an option:
     genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+(If you're doing that already, then maybe the environment variable is empty or unset.)
 Import the option package as "google.golang.org/api/option".`)
 	}
 	c, err := gl.NewGenerativeRESTClient(ctx, opts...)
