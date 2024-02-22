@@ -164,8 +164,8 @@ func TestLive(t *testing.T) {
 		if resps != nil {
 			t.Errorf("got responses %v, want nil", resps)
 		}
-		if berr.PromptFeedback == nil || berr.PromptFeedback.BlockReason != BlockReasonSafety {
-			t.Errorf("got PromptFeedback %v, want BlockReasonSafety", berr.PromptFeedback)
+		if berr.PromptFeedback == nil || berr.PromptFeedback.BlockReason != BlockedReasonSafety {
+			t.Errorf("got PromptFeedback %v, want BlockedReasonSafety", berr.PromptFeedback)
 		}
 		if berr.Candidate != nil {
 			t.Fatal("got a candidate, expected nil")
@@ -311,7 +311,7 @@ func TestJoinResponses(t *testing.T) {
 				FinishReason: FinishReason(2),
 			},
 		},
-		PromptFeedback: &PromptFeedback{BlockReason: BlockReasonSafety},
+		PromptFeedback: &PromptFeedback{BlockReason: BlockedReasonSafety},
 	}
 	r2 := &GenerateContentResponse{
 		Candidates: []*Candidate{
@@ -328,7 +328,7 @@ func TestJoinResponses(t *testing.T) {
 			},
 		},
 
-		PromptFeedback: &PromptFeedback{BlockReason: BlockReasonOther},
+		PromptFeedback: &PromptFeedback{BlockReason: BlockedReasonOther},
 	}
 	got := joinResponses(r1, r2)
 	want := &GenerateContentResponse{
@@ -344,7 +344,7 @@ func TestJoinResponses(t *testing.T) {
 				FinishReason: FinishReason(3),
 			},
 		},
-		PromptFeedback: &PromptFeedback{BlockReason: BlockReasonSafety},
+		PromptFeedback: &PromptFeedback{BlockReason: BlockedReasonSafety},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("\ngot %+v\nwant %+v", got, want)

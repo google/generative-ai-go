@@ -78,30 +78,30 @@ func (Blob) fromProto(p *pb.Blob) *Blob {
 	}
 }
 
-// BlockReason is specifies what was the reason why prompt was blocked.
-type BlockReason int32
+// BlockedReason is specifies what was the reason why prompt was blocked.
+type BlockedReason int32
 
 const (
-	// BlockReasonUnspecified means default value. This value is unused.
-	BlockReasonUnspecified BlockReason = 0
-	// BlockReasonSafety means prompt was blocked due to safety reasons. You can inspect
+	// BlockedReasonUnspecified means default value. This value is unused.
+	BlockedReasonUnspecified BlockedReason = 0
+	// BlockedReasonSafety means prompt was blocked due to safety reasons. You can inspect
 	// `safety_ratings` to understand which safety category blocked it.
-	BlockReasonSafety BlockReason = 1
-	// BlockReasonOther means prompt was blocked due to unknown reaasons.
-	BlockReasonOther BlockReason = 2
+	BlockedReasonSafety BlockedReason = 1
+	// BlockedReasonOther means prompt was blocked due to unknown reaasons.
+	BlockedReasonOther BlockedReason = 2
 )
 
-var namesForBlockReason = map[BlockReason]string{
-	BlockReasonUnspecified: "BlockReasonUnspecified",
-	BlockReasonSafety:      "BlockReasonSafety",
-	BlockReasonOther:       "BlockReasonOther",
+var namesForBlockedReason = map[BlockedReason]string{
+	BlockedReasonUnspecified: "BlockedReasonUnspecified",
+	BlockedReasonSafety:      "BlockedReasonSafety",
+	BlockedReasonOther:       "BlockedReasonOther",
 }
 
-func (v BlockReason) String() string {
-	if n, ok := namesForBlockReason[v]; ok {
+func (v BlockedReason) String() string {
+	if n, ok := namesForBlockedReason[v]; ok {
 		return n
 	}
-	return fmt.Sprintf("BlockReason(%d)", v)
+	return fmt.Sprintf("BlockedReason(%d)", v)
 }
 
 // Candidate is a response candidate generated from the model.
@@ -707,7 +707,7 @@ func (ModelInfo) fromProto(p *pb.Model) *ModelInfo {
 type PromptFeedback struct {
 	// Optional. If set, the prompt was blocked and no candidates are returned.
 	// Rephrase your prompt.
-	BlockReason BlockReason
+	BlockReason BlockedReason
 	// Ratings for safety of the prompt.
 	// There is at most one rating per category.
 	SafetyRatings []*SafetyRating
@@ -728,7 +728,7 @@ func (PromptFeedback) fromProto(p *pb.GenerateContentResponse_PromptFeedback) *P
 		return nil
 	}
 	return &PromptFeedback{
-		BlockReason:   BlockReason(p.BlockReason),
+		BlockReason:   BlockedReason(p.BlockReason),
 		SafetyRatings: support.TransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
 	}
 }

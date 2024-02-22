@@ -47,8 +47,10 @@ types:
       doc: 'is the response from a GenerateContent or GenerateContentStream call.'
 
     GenerateContentResponse_PromptFeedback_BlockReason:
-      name: BlockReason
+      name: BlockedReason
       protoPrefix: GenerateContentResponse_PromptFeedback_
+      valueNames:
+        GenerateContentResponse_PromptFeedback_BLOCK_REASON_UNSPECIFIED: BlockedReasonUnspecified
 
     Content:
       fields:
