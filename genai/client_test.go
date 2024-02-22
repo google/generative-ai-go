@@ -513,4 +513,8 @@ func TestNoAPIKey(t *testing.T) {
 	if err == nil {
 		t.Fatal("got nil, want error")
 	}
+	_, err = NewClient(context.Background(), option.WithAPIKey(""))
+	if err == nil {
+		t.Fatal("got nil, want error")
+	}
 }

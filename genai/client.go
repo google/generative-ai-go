@@ -75,9 +75,9 @@ Import the option package as "google.golang.org/api/option".`)
 // is unexported, and the struct that it populates is in an internal package.
 func hasAPIKey(opts []option.ClientOption) bool {
 	for _, opt := range opts {
-		t := reflect.TypeOf(opt)
-		if t.String() == "option.withAPIKey" {
-			return true
+		v := reflect.ValueOf(opt)
+		if v.Type().String() == "option.withAPIKey" {
+			return v.String() != ""
 		}
 	}
 	return false
