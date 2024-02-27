@@ -29,7 +29,7 @@ import (
 
 func ExampleGenerativeModel_GenerateContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func ExampleGenerativeModel_GenerateContent() {
 // for the complete set of configuration options.
 func ExampleGenerativeModel_GenerateContent_config() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 // for unsafe responses.
 func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 
 func ExampleGenerativeModel_GenerateContentStream() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -119,7 +119,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 
 func ExampleGenerativeModel_CountTokens() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func ExampleGenerativeModel_CountTokens() {
 
 func ExampleChatSession() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -180,7 +180,7 @@ func ExampleChatSession() {
 
 func ExampleEmbeddingModel_EmbedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func ExampleEmbeddingModel_EmbedContent() {
 
 func ExampleEmbeddingBatch() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func ExampleEmbeddingBatch() {
 // This example shows how to get more information from an error.
 func ExampleGenerativeModel_GenerateContentStream_errors() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -239,7 +239,7 @@ func ExampleGenerativeModel_GenerateContentStream_errors() {
 
 func ExampleClient_ListModels() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
