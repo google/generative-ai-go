@@ -49,12 +49,7 @@ func TestLive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func(client *Client) {
-		err := client.Close()
-		if err != nil {
-			t.Fatal(err)
-		}
-	}(client)
+	defer client.Close()
 	model := client.GenerativeModel(*modelName)
 	model.Temperature = Ptr[float32](0)
 
@@ -104,7 +99,7 @@ func TestLive(t *testing.T) {
 				iter := session.SendMessageStream(ctx, Text(msg))
 				for {
 					_, err := iter.Next()
-					if errors.Is(err, iterator.Done) {
+					if err == iterator.Done {
 						break
 					}
 					if err != nil {
@@ -198,7 +193,7 @@ func TestLive(t *testing.T) {
 		var merged *GenerateContentResponse
 		for {
 			res, err := iter.Next()
-			if errors.Is(err, iterator.Done) {
+			if err == iterator.Done {
 				break
 			}
 			if err != nil {

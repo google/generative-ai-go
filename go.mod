@@ -1,6 +1,6 @@
 module github.com/google/generative-ai-go
 
-go 1.22
+go 1.21
 
 require (
 	cloud.google.com/go/ai v0.3.2
