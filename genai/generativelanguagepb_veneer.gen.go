@@ -173,7 +173,10 @@ func (v *CitationMetadata) toProto() *pb.CitationMetadata {
 
 func (CitationMetadata) fromProto(p *pb.CitationMetadata) *CitationMetadata {
 	if p == nil {
-		return nil
+		ls := make([]*CitationSource, 0)
+		return &CitationMetadata{
+			CitationSources: ls,
+		}
 	}
 	return &CitationMetadata{
 		CitationSources: support.TransformSlice(p.CitationSources, (CitationSource{}).fromProto),
