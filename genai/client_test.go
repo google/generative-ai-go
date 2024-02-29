@@ -49,7 +49,12 @@ func TestLive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
+	defer func(client *Client) {
+		err := client.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}(client)
 	model := client.GenerativeModel(*modelName)
 	model.Temperature = Ptr[float32](0)
 
@@ -99,7 +104,7 @@ func TestLive(t *testing.T) {
 				iter := session.SendMessageStream(ctx, Text(msg))
 				for {
 					_, err := iter.Next()
-					if err == iterator.Done {
+					if errors.Is(err, iterator.Done) {
 						break
 					}
 					if err != nil {
@@ -193,7 +198,7 @@ func TestLive(t *testing.T) {
 		var merged *GenerateContentResponse
 		for {
 			res, err := iter.Next()
-			if err == iterator.Done {
+			if errors.Is(err, iterator.Done) {
 				break
 			}
 			if err != nil {
@@ -482,6 +487,8 @@ func printValue(v reflect.Value, indent, first string, printf func(string, ...an
 					printValue(vf, indent1, sf.Name+": ", printf)
 				}
 			}
+		default:
+			panic("unhandled default case")
 		}
 		printf("%s}\n", indent)
 	case reflect.Pointer, reflect.Interface:
