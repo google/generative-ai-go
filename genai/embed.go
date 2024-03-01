@@ -86,7 +86,7 @@ type EmbeddingBatch struct {
 }
 
 // NewBatch returns a new, empty EmbeddingBatch with the same TaskType as the model.
-// Make multiple calls to [EmbeddingBatch.AddContent] or EmbeddingBatch.AddContentWithTitle].
+// Make multiple calls to [EmbeddingBatch.AddContent] or [EmbeddingBatch.AddContentWithTitle].
 // Then pass the EmbeddingBatch to [EmbeddingModel.BatchEmbedContents] to get
 // all the embeddings in a single call to the model.
 func (m *EmbeddingModel) NewBatch() *EmbeddingBatch {

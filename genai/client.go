@@ -279,7 +279,7 @@ func (e *BlockedError) Error() string {
 	return b.String()
 }
 
-// joinResponses  merges the two responses, which should be the result of a streaming call.
+// joinResponses merges the two responses, which should be the result of a streaming call.
 // The first argument is modified.
 func joinResponses(dest, src *GenerateContentResponse) *GenerateContentResponse {
 	if dest == nil {

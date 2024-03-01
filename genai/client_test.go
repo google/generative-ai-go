@@ -482,6 +482,8 @@ func printValue(v reflect.Value, indent, first string, printf func(string, ...an
 					printValue(vf, indent1, sf.Name+": ", printf)
 				}
 			}
+		default:
+			panic("unhandled default case")
 		}
 		printf("%s}\n", indent)
 	case reflect.Pointer, reflect.Interface:
