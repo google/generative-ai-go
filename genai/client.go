@@ -219,7 +219,7 @@ func protoToResponse(resp *pb.GenerateContentResponse) (*GenerateContentResponse
 	// If any candidate is blocked, error.
 	// TODO: is this too harsh?
 	for _, c := range gcp.Candidates {
-		if c.FinishReason == FinishReasonSafety {
+		if c.FinishReason == FinishReasonSafety || c.FinishReason == FinishReasonRecitation {
 			return nil, &BlockedError{Candidate: c}
 		}
 	}
@@ -262,7 +262,7 @@ func (c *Client) modelInfo(ctx context.Context, fullName string) (*ModelInfo, er
 // There can be two underlying causes: the prompt or a candidate response.
 type BlockedError struct {
 	// If non-nil, the model's response was blocked.
-	// Consult the Candidate and SafetyRatings fields for details.
+	// Consult the FinishReason field for details.
 	Candidate *Candidate
 
 	// If non-nil, there was a problem with the prompt.
