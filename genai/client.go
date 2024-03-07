@@ -146,11 +146,8 @@ func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateC
 	}
 	for {
 		_, err := iter.Next()
-		if err == iterator.Done {
-			if iter.merged != nil {
-				return iter.merged, nil
-			}
-			return nil, err
+		if err == iterator.Done && iter.merged != nil {
+			return iter.merged, nil
 		}
 		if err != nil {
 			return nil, err
