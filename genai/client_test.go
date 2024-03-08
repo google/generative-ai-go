@@ -121,12 +121,12 @@ func TestLive(t *testing.T) {
 		}
 
 		checkMatch(t,
-			send("Name puppy breeds.", false),
-			"Beagle", "Poodle")
+			send("Name the 5 most popular puppy breeds.", false),
+			"Retriever", "Poodle")
 
 		checkMatch(t,
 			send("Which is best?", true),
-			"best", "depends", "([Cc]onsider|research|compare)")
+			"best", "depends", "([Cc]onsider|research|compare|preferences)")
 	})
 
 	t.Run("image", func(t *testing.T) {

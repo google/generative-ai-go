@@ -15,7 +15,7 @@
 // To get the protoveneer tool:
 //    go install cloud.google.com/go/internal/protoveneer/cmd/protoveneer@latest
 
-//go:generate protoveneer -license license.txt config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1/generativelanguagepb
+//go:generate protoveneer -license license.txt config.yaml ../../../googleapis/google-cloud-go/ai/generativelanguage/apiv1beta/generativelanguagepb
 
 package genai
 
@@ -27,8 +27,8 @@ import (
 	"reflect"
 	"strings"
 
-	gl "cloud.google.com/go/ai/generativelanguage/apiv1"
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
+	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 
 	"github.com/google/generative-ai-go/internal"
 	"github.com/google/generative-ai-go/internal/support"
