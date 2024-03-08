@@ -115,6 +115,19 @@ types:
         TopK:
           type: int32
 
+    # Types for function calling
+    Tool:
+    FunctionDeclaration:
+    FunctionCall:
+    FunctionResponse:
+    Schema:
+
+    Type:
+      protoPrefix: Type_
+      veneerPrefix: ''
+
+
+
 
 # Omit everything not explicitly configured.
 omitTypes:
