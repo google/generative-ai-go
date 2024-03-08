@@ -122,7 +122,7 @@ func TestLive(t *testing.T) {
 
 		checkMatch(t,
 			send("Name puppy breeds.", false),
-			"Beagle", "Poodle")
+			"Beagle", "Boxer")
 
 		checkMatch(t,
 			send("Which is best?", true),

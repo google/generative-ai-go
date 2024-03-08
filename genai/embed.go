@@ -17,7 +17,7 @@ package genai
 import (
 	"context"
 
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 )
 
 // EmbeddingModel creates a new instance of the named embedding model.

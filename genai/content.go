@@ -17,7 +17,7 @@ package genai
 import (
 	"fmt"
 
-	pb "cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb"
+	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 )
 
 const (

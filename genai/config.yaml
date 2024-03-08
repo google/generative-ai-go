@@ -16,7 +16,7 @@
 
 package: genai
 
-protoImportPath: cloud.google.com/go/ai/generativelanguage/apiv1/generativelanguagepb
+protoImportPath: cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb
 supportImportPath: github.com/google/generative-ai-go/internal/support
 
 types:
@@ -83,6 +83,8 @@ types:
       fields:
         Index:
           type: int32
+        GroundingAttributions:
+          omit: true
 
     GenerateContentResponse_PromptFeedback:
       name: PromptFeedback
@@ -112,7 +114,6 @@ types:
           type: float32
         TopK:
           type: int32
-
 
 
 # Omit everything not explicitly configured.
