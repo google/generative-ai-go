@@ -98,6 +98,7 @@ type GenerativeModel struct {
 
 	GenerationConfig
 	SafetySettings []*SafetySetting
+	Tools          []*Tool
 }
 
 // GenerativeModel creates a new instance of the named generative model.
@@ -160,6 +161,7 @@ func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) *pb.Ge
 		Model:            m.fullName,
 		Contents:         support.TransformSlice(contents, (*Content).toProto),
 		SafetySettings:   support.TransformSlice(m.SafetySettings, (*SafetySetting).toProto),
+		Tools:            support.TransformSlice(m.Tools, (*Tool).toProto),
 		GenerationConfig: m.GenerationConfig.toProto(),
 	}
 }
