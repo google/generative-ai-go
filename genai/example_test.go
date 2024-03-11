@@ -258,6 +258,25 @@ func ExampleClient_ListModels() {
 	}
 }
 
+func ExampleFunctionSchema() {
+	// Define a function to use as a tool.
+	weatherToday := func(city string) string {
+		return "comfortable, if you have the right clothing"
+	}
+	// You can construct the Schema for this function by hand, or
+	// let Go reflection figure it out.
+	// Reflection can't see parameter names, so provide those too.
+	schema, err := genai.FunctionSchema(weatherToday, "city")
+	if err != nil {
+		// Not every type can be used in a tool function.
+		panic(err)
+	}
+
+	// Use the schema to create a FunctionDeclaration.
+	// Use that to populate Model.Tools.
+	_ = schema
+}
+
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {
