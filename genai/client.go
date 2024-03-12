@@ -207,6 +207,9 @@ func (iter *GenerateContentResponseIterator) Next() (*GenerateContentResponse, e
 
 func protoToResponse(resp *pb.GenerateContentResponse) (*GenerateContentResponse, error) {
 	gcp := (GenerateContentResponse{}).fromProto(resp)
+	if gcp == nil {
+		return nil, errors.New("empty response from model")
+	}
 	// Assume a non-nil PromptFeedback is an error.
 	// TODO: confirm.
 	if gcp.PromptFeedback != nil && gcp.PromptFeedback.BlockReason != BlockReasonUnspecified {
