@@ -268,7 +268,7 @@ func ExampleTool() {
 	defer client.Close()
 
 	// To use functions / tools, we have to first define a schema that describes
-	// the function to the model. The schema is similar to OpenAPI 3.0
+	// the function to the model. The schema is similar to OpenAPI 3.0.
 	//
 	// In this example, we create a single function that provides the model with
 	// a weather forecast in a given location.
@@ -296,7 +296,6 @@ func ExampleTool() {
 	}
 
 	model := client.GenerativeModel("gemini-1.0-pro")
-	model.SetTemperature(0)
 
 	// Before initiating a conversation, we tell the model which tools it has
 	// at its disposal.
