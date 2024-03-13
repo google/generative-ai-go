@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/googleapi"
@@ -267,6 +266,17 @@ func ExampleTool() {
 	}
 	defer client.Close()
 
+	currentWeather := func(city string) string {
+		switch city {
+		case "New York, NY":
+			return "cold"
+		case "Miami, FL":
+			return "warm"
+		default:
+			return "unknown"
+		}
+	}
+
 	// To use functions / tools, we have to first define a schema that describes
 	// the function to the model. The schema is similar to OpenAPI 3.0.
 	//
@@ -337,21 +347,18 @@ func ExampleTool() {
 		log.Fatalf("expected string: %v", funcall.Args["location"])
 	}
 
-	if strings.Contains(locArg, "New York") {
-		res, err := session.SendMessage(ctx, genai.FunctionResponse{
-			Name: weatherTool.FunctionDeclarations[0].Name,
-			Response: map[string]any{
-				"weather": "cold and drizzling",
-			},
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		printResponse(res)
-	} else {
-		fmt.Printf("Unexpected location: %s\n", locArg)
+	weatherData := currentWeather(locArg)
+	res, err = session.SendMessage(ctx, genai.FunctionResponse{
+		Name: weatherTool.FunctionDeclarations[0].Name,
+		Response: map[string]any{
+			"weather": weatherData,
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	printResponse(res)
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
