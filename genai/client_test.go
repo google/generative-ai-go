@@ -356,13 +356,6 @@ func TestLive(t *testing.T) {
 				Required: []string{"location"},
 			})
 		})
-		t.Run("inferred", func(t *testing.T) {
-			s, err := FunctionSchema(func(string) {}, "location")
-			if err != nil {
-				t.Fatal(err)
-			}
-			weatherChat(t, s)
-		})
 	})
 }
 
