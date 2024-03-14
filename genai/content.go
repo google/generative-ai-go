@@ -25,7 +25,7 @@ const (
 	roleModel = "model"
 )
 
-// A Part is either a Text or a Blob.
+// A Part is either a Text, a Blob or a FunctionResponse.
 type Part interface {
 	toPart() *pb.Part
 }

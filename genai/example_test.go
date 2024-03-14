@@ -189,7 +189,7 @@ func ExampleEmbeddingModel_EmbedContent() {
 	res, err := em.EmbedContent(ctx, genai.Text("cheddar cheese"))
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	fmt.Println(res.Embedding.Values)
 }
@@ -256,6 +256,109 @@ func ExampleClient_ListModels() {
 		}
 		fmt.Println(m.Name, m.Description)
 	}
+}
+
+func ExampleTool() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	currentWeather := func(city string) string {
+		switch city {
+		case "New York, NY":
+			return "cold"
+		case "Miami, FL":
+			return "warm"
+		default:
+			return "unknown"
+		}
+	}
+
+	// To use functions / tools, we have to first define a schema that describes
+	// the function to the model. The schema is similar to OpenAPI 3.0.
+	//
+	// In this example, we create a single function that provides the model with
+	// a weather forecast in a given location.
+	schema := &genai.Schema{
+		Type: genai.TypeObject,
+		Properties: map[string]*genai.Schema{
+			"location": {
+				Type:        genai.TypeString,
+				Description: "The city and state, e.g. San Francisco, CA",
+			},
+			"unit": {
+				Type: genai.TypeString,
+				Enum: []string{"celsius", "fahrenheit"},
+			},
+		},
+		Required: []string{"location"},
+	}
+
+	weatherTool := &genai.Tool{
+		FunctionDeclarations: []*genai.FunctionDeclaration{{
+			Name:        "CurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters:  schema,
+		}},
+	}
+
+	model := client.GenerativeModel("gemini-1.0-pro")
+
+	// Before initiating a conversation, we tell the model which tools it has
+	// at its disposal.
+	model.Tools = []*genai.Tool{weatherTool}
+
+	// For using tools, the chat mode is useful because it provides the required
+	// chat context. A model needs to have tools supplied to it in the chat
+	// history so it can use them in subsequent conversations.
+	//
+	// The flow of message expected here is:
+	//
+	// 1. We send a question to the model
+	// 2. The model recognizes that it needs to use a tool to answer the question,
+	//    an returns a FunctionCall response asking to use the CurrentWeather
+	//    tool.
+	// 3. We send a FunctionResponse message, simulating the return value of
+	//    CurrentWeather for the model's query.
+	// 4. The model provides its text answer in response to this message.
+	session := model.StartChat()
+
+	res, err := session.SendMessage(ctx, genai.Text("What is the weather like in New York?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	part := res.Candidates[0].Content.Parts[0]
+	funcall, ok := part.(genai.FunctionCall)
+	if !ok {
+		log.Fatalf("expected FunctionCall: %v", part)
+	}
+
+	if funcall.Name != "CurrentWeather" {
+		log.Fatalf("expected CurrentWeather: %v", funcall.Name)
+	}
+
+	// Expect the model to pass a proper string "location" argument to the tool.
+	locArg, ok := funcall.Args["location"].(string)
+	if !ok {
+		log.Fatalf("expected string: %v", funcall.Args["location"])
+	}
+
+	weatherData := currentWeather(locArg)
+	res, err = session.SendMessage(ctx, genai.FunctionResponse{
+		Name: weatherTool.FunctionDeclarations[0].Name,
+		Response: map[string]any{
+			"weather": weatherData,
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(res)
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
