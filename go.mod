@@ -5,7 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/ai v0.3.0
 	google.golang.org/api v0.149.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
