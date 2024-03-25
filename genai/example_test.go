@@ -361,6 +361,25 @@ func ExampleTool() {
 	printResponse(res)
 }
 
+func ExampleNewCallableFunctionDeclaration() {
+	// Define a function to use as a tool.
+	weatherToday := func(city string) string {
+		return "comfortable, if you have the right clothing"
+	}
+	// You can construct the Schema for this function by hand, or
+	// let Go reflection figure it out.
+	// This also makes the function automatically callable.
+	// Reflection can't see parameter names, so provide those too.
+	fd, err := genai.NewCallableFunctionDeclaration("CurrentWeather", "Get the current weather in a given location", weatherToday, "city")
+	if err != nil {
+		// Not every type can be used in a tool function.
+		panic(err)
+	}
+
+	// Use the FunctionDeclaration to populate Model.Tools.
+	_ = fd
+}
+
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {

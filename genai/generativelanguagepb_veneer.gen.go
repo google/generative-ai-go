@@ -400,47 +400,6 @@ func (FunctionCall) fromProto(p *pb.FunctionCall) *FunctionCall {
 	}
 }
 
-// FunctionDeclaration is structured representation of a function declaration as defined by the
-// [OpenAPI 3.03 specification](https://spec.openapis.org/oas/v3.0.3). Included
-// in this declaration are the function name and parameters. This
-// FunctionDeclaration is a representation of a block of code that can be used
-// as a `Tool` by the model and executed by the client.
-type FunctionDeclaration struct {
-	// Required. The name of the function.
-	// Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum
-	// length of 63.
-	Name string
-	// Required. A brief description of the function.
-	Description string
-	// Optional. Describes the parameters to this function. Reflects the Open
-	// API 3.03 Parameter Object string Key: the name of the parameter. Parameter
-	// names are case sensitive. Schema Value: the Schema defining the type used
-	// for the parameter.
-	Parameters *Schema
-}
-
-func (v *FunctionDeclaration) toProto() *pb.FunctionDeclaration {
-	if v == nil {
-		return nil
-	}
-	return &pb.FunctionDeclaration{
-		Name:        v.Name,
-		Description: v.Description,
-		Parameters:  v.Parameters.toProto(),
-	}
-}
-
-func (FunctionDeclaration) fromProto(p *pb.FunctionDeclaration) *FunctionDeclaration {
-	if p == nil {
-		return nil
-	}
-	return &FunctionDeclaration{
-		Name:        p.Name,
-		Description: p.Description,
-		Parameters:  (Schema{}).fromProto(p.Parameters),
-	}
-}
-
 // FunctionResponse is the result output from a `FunctionCall` that contains a string
 // representing the `FunctionDeclaration.name` and a structured JSON
 // object containing any output from the function is used as context to
@@ -1005,44 +964,6 @@ func (v TaskType) String() string {
 	return fmt.Sprintf("TaskType(%d)", v)
 }
 
-// Tool details that the model may use to generate response.
-//
-// A `Tool` is a piece of code that enables the system to interact with
-// external systems to perform an action, or set of actions, outside of
-// knowledge and scope of the model.
-type Tool struct {
-	// Optional. A list of `FunctionDeclarations` available to the model that can
-	// be used for function calling.
-	//
-	// The model or system does not execute the function. Instead the defined
-	// function may be returned as a [FunctionCall][content.part.function_call]
-	// with arguments to the client side for execution. The model may decide to
-	// call a subset of these functions by populating
-	// [FunctionCall][content.part.function_call] in the response. The next
-	// conversation turn may contain a
-	// [FunctionResponse][content.part.function_response]
-	// with the [content.role] "function" generation context for the next model
-	// turn.
-	FunctionDeclarations []*FunctionDeclaration
-}
-
-func (v *Tool) toProto() *pb.Tool {
-	if v == nil {
-		return nil
-	}
-	return &pb.Tool{
-		FunctionDeclarations: support.TransformSlice(v.FunctionDeclarations, (*FunctionDeclaration).toProto),
-	}
-}
-
-func (Tool) fromProto(p *pb.Tool) *Tool {
-	if p == nil {
-		return nil
-	}
-	return &Tool{
-		FunctionDeclarations: support.TransformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
-	}
-}
 
 // Type contains the list of OpenAPI data types as defined by
 // https://spec.openapis.org/oas/v3.0.3#data-types

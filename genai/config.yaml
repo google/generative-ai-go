@@ -117,7 +117,6 @@ types:
 
     # Types for function calling
     Tool:
-    FunctionDeclaration:
     FunctionCall:
     FunctionResponse:
     Schema:
