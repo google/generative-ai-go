@@ -376,8 +376,25 @@ func ExampleNewCallableFunctionDeclaration() {
 		panic(err)
 	}
 
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
 	// Use the FunctionDeclaration to populate Model.Tools.
-	_ = fd
+	model := client.GenerativeModel("gemini-1.0-pro")
+
+	// Before initiating a conversation, we tell the model which tools it has
+	// at its disposal.
+	weatherTool := &genai.Tool{
+		FunctionDeclarations: []*genai.FunctionDeclaration{fd},
+	}
+
+	model.Tools = []*genai.Tool{weatherTool}
+
+	// Now use the model in a ChatSession; see [ExampleTool].
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
