@@ -394,6 +394,42 @@ func ExampleTool() {
 	printResponse(res)
 }
 
+func ExampleNewCallableFunctionDeclaration() {
+	// Define a function to use as a tool.
+	weatherToday := func(city string) string {
+		return "comfortable, if you have the right clothing"
+	}
+	// You can construct the Schema for this function by hand, or
+	// let Go reflection figure it out.
+	// This also makes the function automatically callable.
+	// Reflection can't see parameter names, so provide those too.
+	fd, err := genai.NewCallableFunctionDeclaration("CurrentWeather", "Get the current weather in a given location", weatherToday, "city")
+	if err != nil {
+		// Not every type can be used in a tool function.
+		panic(err)
+	}
+
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// Use the FunctionDeclaration to populate Model.Tools.
+	model := client.GenerativeModel("gemini-1.0-pro")
+
+	// Before initiating a conversation, we tell the model which tools it has
+	// at its disposal.
+	weatherTool := &genai.Tool{
+		FunctionDeclarations: []*genai.FunctionDeclaration{fd},
+	}
+
+	model.Tools = []*genai.Tool{weatherTool}
+
+	// Now use the model in a ChatSession; see [ExampleTool].
+}
+
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {

@@ -297,13 +297,9 @@ func TestLive(t *testing.T) {
 	})
 	t.Run("tools", func(t *testing.T) {
 
-		weatherChat := func(t *testing.T, s *Schema) {
+		weatherChat := func(t *testing.T, fd *FunctionDeclaration) {
 			weatherTool := &Tool{
-				FunctionDeclarations: []*FunctionDeclaration{{
-					Name:        "CurrentWeather",
-					Description: "Get the current weather in a given location",
-					Parameters:  s,
-				}},
+				FunctionDeclarations: []*FunctionDeclaration{fd},
 			}
 			model := client.GenerativeModel(*modelName)
 			model.SetTemperature(0)
@@ -341,20 +337,35 @@ func TestLive(t *testing.T) {
 		}
 
 		t.Run("direct", func(t *testing.T) {
-			weatherChat(t, &Schema{
-				Type: TypeObject,
-				Properties: map[string]*Schema{
-					"location": {
-						Type:        TypeString,
-						Description: "The city and state, e.g. San Francisco, CA",
+			fd := &FunctionDeclaration{
+				Name:        "CurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: &Schema{
+					Type: TypeObject,
+					Properties: map[string]*Schema{
+						"location": {
+							Type:        TypeString,
+							Description: "The city and state, e.g. San Francisco, CA",
+						},
+						"unit": {
+							Type: TypeString,
+							Enum: []string{"celsius", "fahrenheit"},
+						},
 					},
-					"unit": {
-						Type: TypeString,
-						Enum: []string{"celsius", "fahrenheit"},
-					},
+					Required: []string{"location"},
 				},
-				Required: []string{"location"},
-			})
+			}
+			weatherChat(t, fd)
+		})
+		t.Run("inferred", func(t *testing.T) {
+			fds, err := NewCallableFunctionDeclaration(
+				"CurrentWeather",
+				"Get the current weather in a given location",
+				func(string) {}, "location")
+			if err != nil {
+				t.Fatal(err)
+			}
+			weatherChat(t, fds)
 		})
 	})
 }
