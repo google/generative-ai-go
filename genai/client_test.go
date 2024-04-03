@@ -313,11 +313,11 @@ func TestLive(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			part := res.Candidates[0].Content.Parts[0]
-			funcall, ok := part.(FunctionCall)
-			if !ok {
-				t.Fatalf("want FunctionCall, got %T", part)
+			funcalls := res.Candidates[0].FunctionCalls()
+			if len(funcalls) != 1 {
+				t.Fatalf("got %d FunctionCalls, want 1", len(funcalls))
 			}
+			funcall := funcalls[0]
 			if g, w := funcall.Name, weatherTool.FunctionDeclarations[0].Name; g != w {
 				t.Errorf("FunctionCall.Name: got %q, want %q", g, w)
 			}
