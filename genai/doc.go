@@ -14,6 +14,8 @@
 
 // Package genai is a client for the Google AI generative models.
 //
+// NOTE: This client uses the v1beta version of the API.
+//
 // # Getting started
 //
 // Reading the [examples] is the best way to learn how to use this package.
