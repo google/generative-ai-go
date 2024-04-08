@@ -70,15 +70,21 @@ Import the option package as "google.golang.org/api/option".`)
 	return &Client{c: c, mc: mc}, nil
 }
 
-// hasAPIKey reports whether one of the options was created with
-// WithAPIKey.
-// There is no good way to do that, because the type of the option
-// is unexported, and the struct that it populates is in an internal package.
+// hasAPIKey reports whether the options imply that there is an API key.
+// That is the case if either the WithAPIKey or WithHTTPClient options is present.
+// (If the latter is present, we assume it handles auth).
+//
+// There is no good way to make these checks, because the types of the options
+// are unexported, and the struct that they populates is in an internal package.
 func hasAPIKey(opts []option.ClientOption) bool {
 	for _, opt := range opts {
 		v := reflect.ValueOf(opt)
-		if v.Type().String() == "option.withAPIKey" {
+		ts := v.Type().String()
+		if ts == "option.withAPIKey" {
 			return v.String() != ""
+		}
+		if ts == "option.withHTTPClient" {
+			return true
 		}
 	}
 	return false
