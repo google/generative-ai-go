@@ -297,7 +297,7 @@ func TestLive(t *testing.T) {
 	})
 	t.Run("tools", func(t *testing.T) {
 
-		weatherChat := func(t *testing.T, s *Schema) {
+		weatherChat := func(t *testing.T, s *Schema, fcm FunctionCallingMode) {
 			weatherTool := &Tool{
 				FunctionDeclarations: []*FunctionDeclaration{{
 					Name:        "CurrentWeather",
@@ -308,12 +308,23 @@ func TestLive(t *testing.T) {
 			model := client.GenerativeModel(*modelName)
 			model.SetTemperature(0)
 			model.Tools = []*Tool{weatherTool}
+			model.ToolConfig = &ToolConfig{
+				FunctionCallingConfig: &FunctionCallingConfig{
+					Mode: fcm,
+				},
+			}
 			session := model.StartChat()
 			res, err := session.SendMessage(ctx, Text("What is the weather like in New York?"))
 			if err != nil {
 				t.Fatal(err)
 			}
 			funcalls := res.Candidates[0].FunctionCalls()
+			if fcm == FunctionCallingNone {
+				if len(funcalls) != 0 {
+					t.Fatalf("got %d FunctionCalls, want 0", len(funcalls))
+				}
+				return
+			}
 			if len(funcalls) != 1 {
 				t.Fatalf("got %d FunctionCalls, want 1", len(funcalls))
 			}
@@ -339,22 +350,25 @@ func TestLive(t *testing.T) {
 			}
 			checkMatch(t, responseString(res), "(it's|it is|weather) .*cold")
 		}
-
-		t.Run("direct", func(t *testing.T) {
-			weatherChat(t, &Schema{
-				Type: TypeObject,
-				Properties: map[string]*Schema{
-					"location": {
-						Type:        TypeString,
-						Description: "The city and state, e.g. San Francisco, CA",
-					},
-					"unit": {
-						Type: TypeString,
-						Enum: []string{"celsius", "fahrenheit"},
-					},
+		schema := &Schema{
+			Type: TypeObject,
+			Properties: map[string]*Schema{
+				"location": {
+					Type:        TypeString,
+					Description: "The city and state, e.g. San Francisco, CA",
 				},
-				Required: []string{"location"},
-			})
+				"unit": {
+					Type: TypeString,
+					Enum: []string{"celsius", "fahrenheit"},
+				},
+			},
+			Required: []string{"location"},
+		}
+		t.Run("direct", func(t *testing.T) {
+			weatherChat(t, schema, FunctionCallingAuto)
+		})
+		t.Run("none", func(t *testing.T) {
+			weatherChat(t, schema, FunctionCallingNone)
 		})
 	})
 }

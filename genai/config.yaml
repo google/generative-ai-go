@@ -117,6 +117,7 @@ types:
 
     # Types for function calling
     Tool:
+    ToolConfig:
     FunctionDeclaration:
     FunctionCall:
     FunctionResponse:
@@ -126,6 +127,15 @@ types:
       protoPrefix: Type_
       veneerPrefix: ''
 
+    FunctionCallingConfig:
+      doc: 'holds configuration for function calling.'
+
+    FunctionCallingConfig_Mode:
+      name: FunctionCallingMode
+      protoPrefix: FunctionCallingConfig
+      veneerPrefix: FunctionCalling
+      valueNames:
+        FunctionCallingConfig_MODE_UNSPECIFIED: FunctionCallingUnspecified
 
 
 
