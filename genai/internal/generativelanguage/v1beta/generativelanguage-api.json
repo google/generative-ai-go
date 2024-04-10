@@ -1,0 +1,3974 @@
+{
+  "batchPath": "batch",
+  "title": "Generative Language API",
+  "documentationLink": "https://developers.generativeai.google/api",
+  "revision": "20240410",
+  "ownerDomain": "google.com",
+  "name": "generativelanguage",
+  "canonicalName": "Generative Language",
+  "ownerName": "Google",
+  "rootUrl": "https://generativelanguage.googleapis.com/",
+  "servicePath": "",
+  "schemas": {
+    "GenerateTextRequest": {
+      "properties": {
+        "safetySettings": {
+          "type": "array",
+          "items": {
+            "$ref": "SafetySetting"
+          },
+          "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content. that will be enforced on the `GenerateTextRequest.prompt` and `GenerateTextResponse.candidates`. There should not be more than one setting for each `SafetyCategory` type. The API will block any prompts and responses that fail to meet the thresholds set by these settings. This list overrides the default settings for each `SafetyCategory` specified in the safety_settings. If there is no `SafetySetting` for a given `SafetyCategory` provided in the list, the API will use the default safety setting for that category. Harm categories HARM_CATEGORY_DEROGATORY, HARM_CATEGORY_TOXICITY, HARM_CATEGORY_VIOLENCE, HARM_CATEGORY_SEXUAL, HARM_CATEGORY_MEDICAL, HARM_CATEGORY_DANGEROUS are supported in text service."
+        },
+        "candidateCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Optional. Number of generated responses to return. This value must be between [1, 8], inclusive. If unset, this will default to 1."
+        },
+        "temperature": {
+          "description": "Optional. Controls the randomness of the output. Note: The default value varies by model, see the `Model.temperature` attribute of the `Model` returned the `getModel` function. Values can range from [0.0,1.0], inclusive. A value closer to 1.0 will produce responses that are more varied and creative, while a value closer to 0.0 will typically result in more straightforward responses from the model.",
+          "type": "number",
+          "format": "float"
+        },
+        "topP": {
+          "format": "float",
+          "description": "Optional. The maximum cumulative probability of tokens to consider when sampling. The model uses combined Top-k and nucleus sampling. Tokens are sorted based on their assigned probabilities so that only the most likely tokens are considered. Top-k sampling directly limits the maximum number of tokens to consider, while Nucleus sampling limits number of tokens based on the cumulative probability. Note: The default value varies by model, see the `Model.top_p` attribute of the `Model` returned the `getModel` function.",
+          "type": "number"
+        },
+        "maxOutputTokens": {
+          "description": "Optional. The maximum number of tokens to include in a candidate. If unset, this will default to output_token_limit specified in the `Model` specification.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "stopSequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The set of character sequences (up to 5) that will stop output generation. If specified, the API will stop at the first appearance of a stop sequence. The stop sequence will not be included as part of the response."
+        },
+        "topK": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Optional. The maximum number of tokens to consider when sampling. The model uses combined Top-k and nucleus sampling. Top-k sampling considers the set of `top_k` most probable tokens. Defaults to 40. Note: The default value varies by model, see the `Model.top_k` attribute of the `Model` returned the `getModel` function."
+        },
+        "prompt": {
+          "description": "Required. The free-form input text given to the model as a prompt. Given a prompt, the model will generate a TextCompletion response it predicts as the completion of the input text.",
+          "$ref": "TextPrompt"
+        }
+      },
+      "description": "Request to generate a text completion response from the model.",
+      "type": "object",
+      "id": "GenerateTextRequest"
+    },
+    "MetadataFilter": {
+      "description": "User provided filter to limit retrieval based on `Chunk` or `Document` level metadata values. Example (genre = drama OR genre = action): key = \"document.custom_metadata.genre\" conditions = [{string_value = \"drama\", operation = EQUAL}, {string_value = \"action\", operation = EQUAL}]",
+      "properties": {
+        "conditions": {
+          "description": "Required. The `Condition`s for the given key that will trigger this filter. Multiple `Condition`s are joined by logical ORs.",
+          "items": {
+            "$ref": "Condition"
+          },
+          "type": "array"
+        },
+        "key": {
+          "type": "string",
+          "description": "Required. The key of the metadata to filter on."
+        }
+      },
+      "id": "MetadataFilter",
+      "type": "object"
+    },
+    "ListTunedModelsResponse": {
+      "type": "object",
+      "description": "Response from `ListTunedModels` containing a paginated list of Models.",
+      "properties": {
+        "tunedModels": {
+          "type": "array",
+          "items": {
+            "$ref": "TunedModel"
+          },
+          "description": "The returned Models."
+        },
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages.",
+          "type": "string"
+        }
+      },
+      "id": "ListTunedModelsResponse"
+    },
+    "BatchDeleteChunksRequest": {
+      "id": "BatchDeleteChunksRequest",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "description": "Required. The request messages specifying the `Chunk`s to delete.",
+          "items": {
+            "$ref": "DeleteChunkRequest"
+          },
+          "type": "array"
+        }
+      },
+      "description": "Request to batch delete `Chunk`s."
+    },
+    "QueryCorpusRequest": {
+      "type": "object",
+      "id": "QueryCorpusRequest",
+      "description": "Request for querying a `Corpus`.",
+      "properties": {
+        "metadataFilters": {
+          "type": "array",
+          "description": "Optional. Filter for `Chunk` and `Document` metadata. Each `MetadataFilter` object should correspond to a unique key. Multiple `MetadataFilter` objects are joined by logical \"AND\"s. Example query at document level: (year \u003e= 2020 OR year \u003c 2010) AND (genre = drama OR genre = action) `MetadataFilter` object list: metadata_filters = [ {key = \"document.custom_metadata.year\" conditions = [{int_value = 2020, operation = GREATER_EQUAL}, {int_value = 2010, operation = LESS}]}, {key = \"document.custom_metadata.year\" conditions = [{int_value = 2020, operation = GREATER_EQUAL}, {int_value = 2010, operation = LESS}]}, {key = \"document.custom_metadata.genre\" conditions = [{string_value = \"drama\", operation = EQUAL}, {string_value = \"action\", operation = EQUAL}]}] Example query at chunk level for a numeric range of values: (year \u003e 2015 AND year \u003c= 2020) `MetadataFilter` object list: metadata_filters = [ {key = \"chunk.custom_metadata.year\" conditions = [{int_value = 2015, operation = GREATER}]}, {key = \"chunk.custom_metadata.year\" conditions = [{int_value = 2020, operation = LESS_EQUAL}]}] Note: \"AND\"s for the same key are only supported for numeric values. String values only support \"OR\"s for the same key.",
+          "items": {
+            "$ref": "MetadataFilter"
+          }
+        },
+        "query": {
+          "description": "Required. Query string to perform semantic search.",
+          "type": "string"
+        },
+        "resultsCount": {
+          "type": "integer",
+          "description": "Optional. The maximum number of `Chunk`s to return. The service may return fewer `Chunk`s. If unspecified, at most 10 `Chunk`s will be returned. The maximum specified result count is 100.",
+          "format": "int32"
+        }
+      }
+    },
+    "GenerationConfig": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Optional. Number of generated responses to return. Currently, this value can only be set to 1. If unset, this will default to 1."
+        },
+        "responseMimeType": {
+          "description": "Optional. Output response mimetype of the generated candidate text. Supported mimetype: `text/plain`: (default) Text output. `application/json`: JSON response in the candidates.",
+          "type": "string"
+        },
+        "topK": {
+          "description": "Optional. The maximum number of tokens to consider when sampling. Models use nucleus sampling or combined Top-k and nucleus sampling. Top-k sampling considers the set of `top_k` most probable tokens. Models running with nucleus sampling don't allow top_k setting. Note: The default value varies by model, see the `Model.top_k` attribute of the `Model` returned from the `getModel` function. Empty `top_k` field in `Model` indicates the model doesn't apply top-k sampling and doesn't allow setting `top_k` on requests.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "stopSequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. The set of character sequences (up to 5) that will stop output generation. If specified, the API will stop at the first appearance of a stop sequence. The stop sequence will not be included as part of the response."
+        },
+        "maxOutputTokens": {
+          "format": "int32",
+          "description": "Optional. The maximum number of tokens to include in a candidate. Note: The default value varies by model, see the `Model.output_token_limit` attribute of the `Model` returned from the `getModel` function.",
+          "type": "integer"
+        },
+        "topP": {
+          "format": "float",
+          "description": "Optional. The maximum cumulative probability of tokens to consider when sampling. The model uses combined Top-k and nucleus sampling. Tokens are sorted based on their assigned probabilities so that only the most likely tokens are considered. Top-k sampling directly limits the maximum number of tokens to consider, while Nucleus sampling limits number of tokens based on the cumulative probability. Note: The default value varies by model, see the `Model.top_p` attribute of the `Model` returned from the `getModel` function.",
+          "type": "number"
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Optional. Controls the randomness of the output. Note: The default value varies by model, see the `Model.temperature` attribute of the `Model` returned from the `getModel` function. Values can range from [0.0, 2.0].",
+          "format": "float"
+        }
+      },
+      "description": "Configuration options for model generation and outputs. Not all parameters may be configurable for every model.",
+      "id": "GenerationConfig"
+    },
+    "BatchEmbedContentsRequest": {
+      "id": "BatchEmbedContentsRequest",
+      "description": "Batch request to get embeddings from the model for a list of prompts.",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "EmbedContentRequest"
+          },
+          "description": "Required. Embed requests for the batch. The model in each of these requests must match the model specified `BatchEmbedContentsRequest.model`."
+        }
+      }
+    },
+    "TextCompletion": {
+      "properties": {
+        "safetyRatings": {
+          "description": "Ratings for the safety of a response. There is at most one rating per category.",
+          "type": "array",
+          "items": {
+            "$ref": "SafetyRating"
+          }
+        },
+        "citationMetadata": {
+          "description": "Output only. Citation information for model-generated `output` in this `TextCompletion`. This field may be populated with attribution information for any text included in the `output`.",
+          "$ref": "CitationMetadata",
+          "readOnly": true
+        },
+        "output": {
+          "description": "Output only. The generated text returned from the model.",
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "description": "Output text returned from a model.",
+      "id": "TextCompletion",
+      "type": "object"
+    },
+    "TuningExamples": {
+      "type": "object",
+      "description": "A set of tuning examples. Can be training or validation data.",
+      "id": "TuningExamples",
+      "properties": {
+        "examples": {
+          "type": "array",
+          "items": {
+            "$ref": "TuningExample"
+          },
+          "description": "Required. The examples. Example input can be for text or discuss, but all examples in a set must be of the same type."
+        }
+      }
+    },
+    "CountMessageTokensResponse": {
+      "description": "A response from `CountMessageTokens`. It returns the model's `token_count` for the `prompt`.",
+      "id": "CountMessageTokensResponse",
+      "type": "object",
+      "properties": {
+        "tokenCount": {
+          "format": "int32",
+          "type": "integer",
+          "description": "The number of tokens that the `model` tokenizes the `prompt` into. Always non-negative."
+        }
+      }
+    },
+    "Example": {
+      "properties": {
+        "input": {
+          "$ref": "Message",
+          "description": "Required. An example of an input `Message` from the user."
+        },
+        "output": {
+          "description": "Required. An example of what the model should output given the input.",
+          "$ref": "Message"
+        }
+      },
+      "description": "An input/output example used to instruct the Model. It demonstrates how the model should respond or format its response.",
+      "id": "Example",
+      "type": "object"
+    },
+    "TransferOwnershipRequest": {
+      "type": "object",
+      "description": "Request to transfer the ownership of the tuned model.",
+      "properties": {
+        "emailAddress": {
+          "description": "Required. The email address of the user to whom the tuned model is being transferred to.",
+          "type": "string"
+        }
+      },
+      "id": "TransferOwnershipRequest"
+    },
+    "SemanticRetrieverConfig": {
+      "id": "SemanticRetrieverConfig",
+      "description": "Configuration for retrieving grounding content from a `Corpus` or `Document` created using the Semantic Retriever API.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Required. Name of the resource for retrieval, e.g. corpora/123 or corpora/123/documents/abc."
+        },
+        "minimumRelevanceScore": {
+          "description": "Optional. Minimum relevance score for retrieved relevant `Chunk`s.",
+          "format": "float",
+          "type": "number"
+        },
+        "maxChunksCount": {
+          "type": "integer",
+          "description": "Optional. Maximum number of relevant `Chunk`s to retrieve.",
+          "format": "int32"
+        },
+        "query": {
+          "description": "Required. Query to use for similarity matching `Chunk`s in the given resource.",
+          "$ref": "Content"
+        },
+        "metadataFilters": {
+          "items": {
+            "$ref": "MetadataFilter"
+          },
+          "type": "array",
+          "description": "Optional. Filters for selecting `Document`s and/or `Chunk`s from the resource."
+        }
+      }
+    },
+    "TextPrompt": {
+      "properties": {
+        "text": {
+          "description": "Required. The prompt text.",
+          "type": "string"
+        }
+      },
+      "id": "TextPrompt",
+      "description": "Text given to the model as a prompt. The Model will use this TextPrompt to Generate a text completion.",
+      "type": "object"
+    },
+    "SafetySetting": {
+      "properties": {
+        "category": {
+          "description": "Required. The category for this setting.",
+          "enum": [
+            "HARM_CATEGORY_UNSPECIFIED",
+            "HARM_CATEGORY_DEROGATORY",
+            "HARM_CATEGORY_TOXICITY",
+            "HARM_CATEGORY_VIOLENCE",
+            "HARM_CATEGORY_SEXUAL",
+            "HARM_CATEGORY_MEDICAL",
+            "HARM_CATEGORY_DANGEROUS",
+            "HARM_CATEGORY_HARASSMENT",
+            "HARM_CATEGORY_HATE_SPEECH",
+            "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "HARM_CATEGORY_DANGEROUS_CONTENT"
+          ],
+          "enumDescriptions": [
+            "Category is unspecified.",
+            "Negative or harmful comments targeting identity and/or protected attribute.",
+            "Content that is rude, disrespectful, or profane.",
+            "Describes scenarios depicting violence against an individual or group, or general descriptions of gore.",
+            "Contains references to sexual acts or other lewd content.",
+            "Promotes unchecked medical advice.",
+            "Dangerous content that promotes, facilitates, or encourages harmful acts.",
+            "Harasment content.",
+            "Hate speech and content.",
+            "Sexually explicit content.",
+            "Dangerous content."
+          ],
+          "type": "string"
+        },
+        "threshold": {
+          "type": "string",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "description": "Required. Controls the probability threshold at which harm is blocked.",
+          "enumDescriptions": [
+            "Threshold is unspecified.",
+            "Content with NEGLIGIBLE will be allowed.",
+            "Content with NEGLIGIBLE and LOW will be allowed.",
+            "Content with NEGLIGIBLE, LOW, and MEDIUM will be allowed.",
+            "All content will be allowed."
+          ]
+        }
+      },
+      "id": "SafetySetting",
+      "type": "object",
+      "description": "Safety setting, affecting the safety-blocking behavior. Passing a safety setting for a category changes the allowed proability that content is blocked."
+    },
+    "ListModelsResponse": {
+      "description": "Response from `ListModel` containing a paginated list of Models.",
+      "id": "ListModelsResponse",
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages."
+        },
+        "models": {
+          "type": "array",
+          "description": "The returned Models.",
+          "items": {
+            "$ref": "Model"
+          }
+        }
+      },
+      "type": "object"
+    },
+    "Blob": {
+      "id": "Blob",
+      "properties": {
+        "data": {
+          "format": "byte",
+          "type": "string",
+          "description": "Raw bytes for media formats."
+        },
+        "mimeType": {
+          "description": "The IANA standard MIME type of the source data. Accepted types include: \"image/png\", \"image/jpeg\", \"image/heic\", \"image/heif\", \"image/webp\".",
+          "type": "string"
+        }
+      },
+      "description": "Raw media bytes. Text should not be sent as raw bytes, use the 'text' field.",
+      "type": "object"
+    },
+    "UpdateChunkRequest": {
+      "id": "UpdateChunkRequest",
+      "type": "object",
+      "properties": {
+        "chunk": {
+          "description": "Required. The `Chunk` to update.",
+          "$ref": "Chunk"
+        },
+        "updateMask": {
+          "type": "string",
+          "description": "Required. The list of fields to update. Currently, this only supports updating `custom_metadata` and `data`.",
+          "format": "google-fieldmask"
+        }
+      },
+      "description": "Request to update a `Chunk`."
+    },
+    "QueryDocumentResponse": {
+      "description": "Response from `QueryDocument` containing a list of relevant chunks.",
+      "properties": {
+        "relevantChunks": {
+          "items": {
+            "$ref": "RelevantChunk"
+          },
+          "type": "array",
+          "description": "The returned relevant chunks."
+        }
+      },
+      "type": "object",
+      "id": "QueryDocumentResponse"
+    },
+    "GenerateMessageResponse": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "description": "Candidate response messages from the model.",
+          "items": {
+            "$ref": "Message"
+          },
+          "type": "array"
+        },
+        "messages": {
+          "description": "The conversation history used by the model.",
+          "type": "array",
+          "items": {
+            "$ref": "Message"
+          }
+        },
+        "filters": {
+          "description": "A set of content filtering metadata for the prompt and response text. This indicates which `SafetyCategory`(s) blocked a candidate from this response, the lowest `HarmProbability` that triggered a block, and the HarmThreshold setting for that category.",
+          "items": {
+            "$ref": "ContentFilter"
+          },
+          "type": "array"
+        }
+      },
+      "id": "GenerateMessageResponse",
+      "description": "The response from the model. This includes candidate messages and conversation history in the form of chronologically-ordered messages."
+    },
+    "BatchCreateChunksResponse": {
+      "description": "Response from `BatchCreateChunks` containing a list of created `Chunk`s.",
+      "type": "object",
+      "id": "BatchCreateChunksResponse",
+      "properties": {
+        "chunks": {
+          "description": "`Chunk`s created.",
+          "items": {
+            "$ref": "Chunk"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "BatchUpdateChunksResponse": {
+      "description": "Response from `BatchUpdateChunks` containing a list of updated `Chunk`s.",
+      "type": "object",
+      "id": "BatchUpdateChunksResponse",
+      "properties": {
+        "chunks": {
+          "type": "array",
+          "description": "`Chunk`s updated.",
+          "items": {
+            "$ref": "Chunk"
+          }
+        }
+      }
+    },
+    "ListCorporaResponse": {
+      "properties": {
+        "corpora": {
+          "description": "The returned corpora.",
+          "type": "array",
+          "items": {
+            "$ref": "Corpus"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages."
+        }
+      },
+      "description": "Response from `ListCorpora` containing a paginated list of `Corpora`. The results are sorted by ascending `corpus.create_time`.",
+      "type": "object",
+      "id": "ListCorporaResponse"
+    },
+    "DeleteChunkRequest": {
+      "description": "Request to delete a `Chunk`.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Required. The resource name of the `Chunk` to delete. Example: `corpora/my-corpus-123/documents/the-doc-abc/chunks/some-chunk`",
+          "type": "string"
+        }
+      },
+      "id": "DeleteChunkRequest"
+    },
+    "TunedModel": {
+      "properties": {
+        "updateTime": {
+          "format": "google-datetime",
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The timestamp when this model was updated."
+        },
+        "tuningTask": {
+          "$ref": "TuningTask",
+          "description": "Required. The tuning task that creates the tuned model."
+        },
+        "baseModel": {
+          "description": "Immutable. The name of the `Model` to tune. Example: `models/text-bison-001`",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "Optional. The name to display for this model in user interfaces. The display name must be up to 40 characters including spaces.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The tuned model name. A unique name will be generated on create. Example: `tunedModels/az2mb0bpw6i` If display_name is set on create, the id portion of the name will be set by concatenating the words of the display_name with hyphens and adding a random portion for uniqueness. Example: display_name = \"Sentence Translator\" name = \"tunedModels/sentence-translator-u3b7m\""
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional. A short description of this model."
+        },
+        "tunedModelSource": {
+          "description": "Optional. TunedModel to use as the starting point for training the new model.",
+          "$ref": "TunedModelSource"
+        },
+        "temperature": {
+          "format": "float",
+          "type": "number",
+          "description": "Optional. Controls the randomness of the output. Values can range over `[0.0,1.0]`, inclusive. A value closer to `1.0` will produce responses that are more varied, while a value closer to `0.0` will typically result in less surprising responses from the model. This value specifies default to be the one used by the base model while creating the model."
+        },
+        "topK": {
+          "type": "integer",
+          "description": "Optional. For Top-k sampling. Top-k sampling considers the set of `top_k` most probable tokens. This value specifies default to be used by the backend while making the call to the model. This value specifies default to be the one used by the base model while creating the model.",
+          "format": "int32"
+        },
+        "state": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. The state of the tuned model.",
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "CREATING",
+            "ACTIVE",
+            "FAILED"
+          ],
+          "enumDescriptions": [
+            "The default value. This value is unused.",
+            "The model is being created.",
+            "The model is ready to be used.",
+            "The model failed to be created."
+          ]
+        },
+        "createTime": {
+          "readOnly": true,
+          "format": "google-datetime",
+          "description": "Output only. The timestamp when this model was created.",
+          "type": "string"
+        },
+        "topP": {
+          "format": "float",
+          "description": "Optional. For Nucleus sampling. Nucleus sampling considers the smallest set of tokens whose probability sum is at least `top_p`. This value specifies default to be the one used by the base model while creating the model.",
+          "type": "number"
+        }
+      },
+      "type": "object",
+      "id": "TunedModel",
+      "description": "A fine-tuned model created using ModelService.CreateTunedModel."
+    },
+    "FunctionDeclaration": {
+      "properties": {
+        "parameters": {
+          "description": "Optional. Describes the parameters to this function. Reflects the Open API 3.03 Parameter Object string Key: the name of the parameter. Parameter names are case sensitive. Schema Value: the Schema defining the type used for the parameter.",
+          "$ref": "Schema"
+        },
+        "name": {
+          "description": "Required. The name of the function. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 63.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Required. A brief description of the function.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "description": "Structured representation of a function declaration as defined by the [OpenAPI 3.03 specification](https://spec.openapis.org/oas/v3.0.3). Included in this declaration are the function name and parameters. This FunctionDeclaration is a representation of a block of code that can be used as a `Tool` by the model and executed by the client.",
+      "id": "FunctionDeclaration"
+    },
+    "QueryCorpusResponse": {
+      "type": "object",
+      "properties": {
+        "relevantChunks": {
+          "items": {
+            "$ref": "RelevantChunk"
+          },
+          "type": "array",
+          "description": "The relevant chunks."
+        }
+      },
+      "description": "Response from `QueryCorpus` containing a list of relevant chunks.",
+      "id": "QueryCorpusResponse"
+    },
+    "TuningSnapshot": {
+      "description": "Record for a single tuning step.",
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "description": "Output only. The epoch this step was part of.",
+          "format": "int32",
+          "readOnly": true
+        },
+        "computeTime": {
+          "readOnly": true,
+          "description": "Output only. The timestamp when this metric was computed.",
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "meanLoss": {
+          "readOnly": true,
+          "description": "Output only. The mean loss of the training examples for this step.",
+          "format": "float",
+          "type": "number"
+        },
+        "step": {
+          "format": "int32",
+          "description": "Output only. The tuning step.",
+          "type": "integer",
+          "readOnly": true
+        }
+      },
+      "type": "object",
+      "id": "TuningSnapshot"
+    },
+    "CitationMetadata": {
+      "description": "A collection of source attributions for a piece of content.",
+      "id": "CitationMetadata",
+      "type": "object",
+      "properties": {
+        "citationSources": {
+          "items": {
+            "$ref": "CitationSource"
+          },
+          "type": "array",
+          "description": "Citations to sources for a specific response."
+        }
+      }
+    },
+    "Document": {
+      "description": "A `Document` is a collection of `Chunk`s. A `Corpus` can have a maximum of 10,000 `Document`s.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "description": "Optional. The human-readable display name for the `Document`. The display name must be no more than 512 characters in length, including spaces. Example: \"Semantic Retriever Documentation\"",
+          "type": "string"
+        },
+        "createTime": {
+          "description": "Output only. The Timestamp of when the `Document` was created.",
+          "format": "google-datetime",
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Immutable. Identifier. The `Document` resource name. The ID (name excluding the \"corpora/*/documents/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a unique name will be derived from `display_name` along with a 12 character random suffix. Example: `corpora/{corpus_id}/documents/my-awesome-doc-123a456b789c`"
+        },
+        "customMetadata": {
+          "type": "array",
+          "items": {
+            "$ref": "CustomMetadata"
+          },
+          "description": "Optional. User provided custom metadata stored as key-value pairs used for querying. A `Document` can have a maximum of 20 `CustomMetadata`."
+        },
+        "updateTime": {
+          "format": "google-datetime",
+          "description": "Output only. The Timestamp of when the `Document` was last updated.",
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "id": "Document"
+    },
+    "BatchCreateChunksRequest": {
+      "type": "object",
+      "description": "Request to batch create `Chunk`s.",
+      "id": "BatchCreateChunksRequest",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "description": "Required. The request messages specifying the `Chunk`s to create. A maximum of 100 `Chunk`s can be created in a batch.",
+          "items": {
+            "$ref": "CreateChunkRequest"
+          }
+        }
+      }
+    },
+    "TuningTask": {
+      "id": "TuningTask",
+      "properties": {
+        "startTime": {
+          "readOnly": true,
+          "format": "google-datetime",
+          "type": "string",
+          "description": "Output only. The timestamp when tuning this model started."
+        },
+        "completeTime": {
+          "readOnly": true,
+          "description": "Output only. The timestamp when tuning this model completed.",
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "trainingData": {
+          "description": "Required. Input only. Immutable. The model training data.",
+          "$ref": "Dataset"
+        },
+        "snapshots": {
+          "type": "array",
+          "readOnly": true,
+          "description": "Output only. Metrics collected during tuning.",
+          "items": {
+            "$ref": "TuningSnapshot"
+          }
+        },
+        "hyperparameters": {
+          "description": "Immutable. Hyperparameters controlling the tuning process. If not provided, default values will be used.",
+          "$ref": "Hyperparameters"
+        }
+      },
+      "description": "Tuning tasks that create tuned models.",
+      "type": "object"
+    },
+    "Corpus": {
+      "description": "A `Corpus` is a collection of `Document`s. A project can create up to 5 corpora.",
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "readOnly": true,
+          "format": "google-datetime",
+          "description": "Output only. The Timestamp of when the `Corpus` was created.",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "Optional. The human-readable display name for the `Corpus`. The display name must be no more than 512 characters in length, including spaces. Example: \"Docs on Semantic Retriever\"",
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "string",
+          "readOnly": true,
+          "format": "google-datetime",
+          "description": "Output only. The Timestamp of when the `Corpus` was last updated."
+        },
+        "name": {
+          "type": "string",
+          "description": "Immutable. Identifier. The `Corpus` resource name. The ID (name excluding the \"corpora/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a unique name will be derived from `display_name` along with a 12 character random suffix. Example: `corpora/my-awesome-corpora-123a456b789c`"
+        }
+      },
+      "id": "Corpus"
+    },
+    "InputFeedback": {
+      "type": "object",
+      "description": "Feedback related to the input data used to answer the question, as opposed to model-generated response to the question.",
+      "properties": {
+        "blockReason": {
+          "description": "Optional. If set, the input was blocked and no candidates are returned. Rephrase your input.",
+          "enum": [
+            "BLOCK_REASON_UNSPECIFIED",
+            "SAFETY",
+            "OTHER"
+          ],
+          "type": "string",
+          "enumDescriptions": [
+            "Default value. This value is unused.",
+            "Input was blocked due to safety reasons. You can inspect `safety_ratings` to understand which safety category blocked it.",
+            "Input was blocked due to other reasons."
+          ]
+        },
+        "safetyRatings": {
+          "description": "Ratings for safety of the input. There is at most one rating per category.",
+          "type": "array",
+          "items": {
+            "$ref": "SafetyRating"
+          }
+        }
+      },
+      "id": "InputFeedback"
+    },
+    "EmbedContentRequest": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Optional. An optional title for the text. Only applicable when TaskType is `RETRIEVAL_DOCUMENT`. Note: Specifying a `title` for `RETRIEVAL_DOCUMENT` provides better quality embeddings for retrieval."
+        },
+        "outputDimensionality": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Optional. Optional reduced dimension for the output embedding. If set, excessive values in the output embedding are truncated from the end. Supported by newer models since 2024, and the earlier model (`models/embedding-001`) cannot specify this value."
+        },
+        "taskType": {
+          "type": "string",
+          "enum": [
+            "TASK_TYPE_UNSPECIFIED",
+            "RETRIEVAL_QUERY",
+            "RETRIEVAL_DOCUMENT",
+            "SEMANTIC_SIMILARITY",
+            "CLASSIFICATION",
+            "CLUSTERING",
+            "QUESTION_ANSWERING",
+            "FACT_VERIFICATION"
+          ],
+          "description": "Optional. Optional task type for which the embeddings will be used. Can only be set for `models/embedding-001`.",
+          "enumDescriptions": [
+            "Unset value, which will default to one of the other enum values.",
+            "Specifies the given text is a query in a search/retrieval setting.",
+            "Specifies the given text is a document from the corpus being searched.",
+            "Specifies the given text will be used for STS.",
+            "Specifies that the given text will be classified.",
+            "Specifies that the embeddings will be used for clustering.",
+            "Specifies that the given text will be used for question answering.",
+            "Specifies that the given text will be used for fact verification."
+          ]
+        },
+        "content": {
+          "description": "Required. The content to embed. Only the `parts.text` fields will be counted.",
+          "$ref": "Content"
+        },
+        "model": {
+          "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+          "type": "string"
+        }
+      },
+      "description": "Request containing the `Content` for the model to embed.",
+      "type": "object",
+      "id": "EmbedContentRequest"
+    },
+    "Permission": {
+      "type": "object",
+      "description": "Permission resource grants user, group or the rest of the world access to the PaLM API resource (e.g. a tuned model, corpus). A role is a collection of permitted operations that allows users to perform specific actions on PaLM API resources. To make them available to users, groups, or service accounts, you assign roles. When you assign a role, you grant permissions that the role contains. There are three concentric roles. Each role is a superset of the previous role's permitted operations: - reader can use the resource (e.g. tuned model, corpus) for inference - writer has reader's permissions and additionally can edit and share - owner has writer's permissions and additionally can delete",
+      "id": "Permission",
+      "properties": {
+        "name": {
+          "description": "Output only. Identifier. The permission name. A unique name will be generated on create. Examples: tunedModels/{tuned_model}/permissions/{permission} corpora/{corpus}/permissions/{permission} Output only.",
+          "type": "string",
+          "readOnly": true
+        },
+        "role": {
+          "description": "Required. The role granted by this permission.",
+          "type": "string",
+          "enum": [
+            "ROLE_UNSPECIFIED",
+            "OWNER",
+            "WRITER",
+            "READER"
+          ],
+          "enumDescriptions": [
+            "The default value. This value is unused.",
+            "Owner can use, update, share and delete the resource.",
+            "Writer can use, update and share the resource.",
+            "Reader can use the resource."
+          ]
+        },
+        "granteeType": {
+          "type": "string",
+          "enumDescriptions": [
+            "The default value. This value is unused.",
+            "Represents a user. When set, you must provide email_address for the user.",
+            "Represents a group. When set, you must provide email_address for the group.",
+            "Represents access to everyone. No extra information is required."
+          ],
+          "description": "Optional. Immutable. The type of the grantee.",
+          "enum": [
+            "GRANTEE_TYPE_UNSPECIFIED",
+            "USER",
+            "GROUP",
+            "EVERYONE"
+          ]
+        },
+        "emailAddress": {
+          "type": "string",
+          "description": "Optional. Immutable. The email address of the user of group which this permission refers. Field is not set when permission's grantee type is EVERYONE."
+        }
+      }
+    },
+    "Embedding": {
+      "type": "object",
+      "id": "Embedding",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "format": "float",
+            "type": "number"
+          },
+          "description": "The embedding values."
+        }
+      },
+      "description": "A list of floats representing the embedding."
+    },
+    "EmbedTextRequest": {
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Optional. The free-form input text that the model will turn into an embedding."
+        },
+        "model": {
+          "type": "string",
+          "description": "Required. The model name to use with the format model=models/{model}."
+        }
+      },
+      "description": "Request to get a text embedding from the model.",
+      "id": "EmbedTextRequest",
+      "type": "object"
+    },
+    "Empty": {
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "id": "Empty",
+      "properties": {},
+      "type": "object"
+    },
+    "GenerateAnswerRequest": {
+      "id": "GenerateAnswerRequest",
+      "description": "Request to generate a grounded answer from the model.",
+      "type": "object",
+      "properties": {
+        "safetySettings": {
+          "items": {
+            "$ref": "SafetySetting"
+          },
+          "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content. This will be enforced on the `GenerateAnswerRequest.contents` and `GenerateAnswerResponse.candidate`. There should not be more than one setting for each `SafetyCategory` type. The API will block any contents and responses that fail to meet the thresholds set by these settings. This list overrides the default settings for each `SafetyCategory` specified in the safety_settings. If there is no `SafetySetting` for a given `SafetyCategory` provided in the list, the API will use the default safety setting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH, HARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT, HARM_CATEGORY_HARASSMENT are supported.",
+          "type": "array"
+        },
+        "temperature": {
+          "description": "Optional. Controls the randomness of the output. Values can range from [0.0,1.0], inclusive. A value closer to 1.0 will produce responses that are more varied and creative, while a value closer to 0.0 will typically result in more straightforward responses from the model. A low temperature (~0.2) is usually recommended for Attributed-Question-Answering use cases.",
+          "type": "number",
+          "format": "float"
+        },
+        "semanticRetriever": {
+          "$ref": "SemanticRetrieverConfig",
+          "description": "Content retrieved from resources created via the Semantic Retriever API."
+        },
+        "inlinePassages": {
+          "$ref": "GroundingPassages",
+          "description": "Passages provided inline with the request."
+        },
+        "answerStyle": {
+          "description": "Required. Style in which answers should be returned.",
+          "type": "string",
+          "enumDescriptions": [
+            "Unspecified answer style.",
+            "Succint but abstract style.",
+            "Very brief and extractive style.",
+            "Verbose style including extra details. The response may be formatted as a sentence, paragraph, multiple paragraphs, or bullet points, etc."
+          ],
+          "enum": [
+            "ANSWER_STYLE_UNSPECIFIED",
+            "ABSTRACTIVE",
+            "EXTRACTIVE",
+            "VERBOSE"
+          ]
+        },
+        "contents": {
+          "items": {
+            "$ref": "Content"
+          },
+          "type": "array",
+          "description": "Required. The content of the current conversation with the model. For single-turn queries, this is a single question to answer. For multi-turn queries, this is a repeated field that contains conversation history and the last `Content` in the list containing the question. Note: GenerateAnswer currently only supports queries in English."
+        }
+      }
+    },
+    "ListFilesResponse": {
+      "id": "ListFilesResponse",
+      "properties": {
+        "files": {
+          "items": {
+            "$ref": "File"
+          },
+          "description": "The list of `File`s.",
+          "type": "array"
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token that can be sent as a `page_token` into a subsequent `ListFiles` call."
+        }
+      },
+      "type": "object",
+      "description": "Response for `ListFiles`."
+    },
+    "AttributionSourceId": {
+      "properties": {
+        "semanticRetrieverChunk": {
+          "description": "Identifier for a `Chunk` fetched via Semantic Retriever.",
+          "$ref": "SemanticRetrieverChunk"
+        },
+        "groundingPassage": {
+          "$ref": "GroundingPassageId",
+          "description": "Identifier for an inline passage."
+        }
+      },
+      "type": "object",
+      "description": "Identifier for the source contributing to this attribution.",
+      "id": "AttributionSourceId"
+    },
+    "CreateChunkRequest": {
+      "id": "CreateChunkRequest",
+      "type": "object",
+      "properties": {
+        "chunk": {
+          "$ref": "Chunk",
+          "description": "Required. The `Chunk` to create."
+        },
+        "parent": {
+          "type": "string",
+          "description": "Required. The name of the `Document` where this `Chunk` will be created. Example: `corpora/my-corpus-123/documents/the-doc-abc`"
+        }
+      },
+      "description": "Request to create a `Chunk`."
+    },
+    "Tool": {
+      "id": "Tool",
+      "type": "object",
+      "description": "Tool details that the model may use to generate response. A `Tool` is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the model.",
+      "properties": {
+        "functionDeclarations": {
+          "items": {
+            "$ref": "FunctionDeclaration"
+          },
+          "type": "array",
+          "description": "Optional. A list of `FunctionDeclarations` available to the model that can be used for function calling. The model or system does not execute the function. Instead the defined function may be returned as a FunctionCall with arguments to the client side for execution. The model may decide to call a subset of these functions by populating FunctionCall in the response. The next conversation turn may contain a FunctionResponse with the [content.role] \"function\" generation context for the next model turn."
+        }
+      }
+    },
+    "Part": {
+      "properties": {
+        "text": {
+          "description": "Inline text.",
+          "type": "string"
+        },
+        "inlineData": {
+          "$ref": "Blob",
+          "description": "Inline media bytes."
+        },
+        "fileData": {
+          "$ref": "FileData",
+          "description": "URI based data."
+        },
+        "functionResponse": {
+          "$ref": "FunctionResponse",
+          "description": "The result output of a `FunctionCall` that contains a string representing the `FunctionDeclaration.name` and a structured JSON object containing any output from the function is used as context to the model."
+        },
+        "functionCall": {
+          "description": "A predicted `FunctionCall` returned from the model that contains a string representing the `FunctionDeclaration.name` with the arguments and their values.",
+          "$ref": "FunctionCall"
+        }
+      },
+      "id": "Part",
+      "type": "object",
+      "description": "A datatype containing media that is part of a multi-part `Content` message. A `Part` consists of data which has an associated datatype. A `Part` can only contain one of the accepted types in `Part.data`. A `Part` must have a fixed IANA MIME type identifying the type and subtype of the media if the `inline_data` field is filled with raw bytes."
+    },
+    "GroundingAttribution": {
+      "id": "GroundingAttribution",
+      "properties": {
+        "content": {
+          "description": "Grounding source content that makes up this attribution.",
+          "$ref": "Content"
+        },
+        "sourceId": {
+          "readOnly": true,
+          "$ref": "AttributionSourceId",
+          "description": "Output only. Identifier for the source contributing to this attribution."
+        }
+      },
+      "type": "object",
+      "description": "Attribution for a source that contributed to an answer."
+    },
+    "CustomMetadata": {
+      "id": "CustomMetadata",
+      "type": "object",
+      "description": "User provided metadata stored as key-value pairs.",
+      "properties": {
+        "numericValue": {
+          "format": "float",
+          "description": "The numeric value of the metadata to store.",
+          "type": "number"
+        },
+        "key": {
+          "description": "Required. The key of the metadata to store.",
+          "type": "string"
+        },
+        "stringListValue": {
+          "description": "The StringList value of the metadata to store.",
+          "$ref": "StringList"
+        },
+        "stringValue": {
+          "description": "The string value of the metadata to store.",
+          "type": "string"
+        }
+      }
+    },
+    "GenerateContentResponse": {
+      "description": "Response from the model supporting multiple candidates. Note on safety ratings and content filtering. They are reported for both prompt in `GenerateContentResponse.prompt_feedback` and for each candidate in `finish_reason` and in `safety_ratings`. The API contract is that: - either all requested candidates are returned or no candidates at all - no candidates are returned only if there was something wrong with the prompt (see `prompt_feedback`) - feedback on each candidate is reported on `finish_reason` and `safety_ratings`.",
+      "type": "object",
+      "id": "GenerateContentResponse",
+      "properties": {
+        "promptFeedback": {
+          "description": "Returns the prompt's feedback related to the content filters.",
+          "$ref": "PromptFeedback"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "Candidate"
+          },
+          "type": "array",
+          "description": "Candidate responses from the model."
+        }
+      }
+    },
+    "CountTokensRequest": {
+      "type": "object",
+      "properties": {
+        "contents": {
+          "description": "Required. The input given to the model as a prompt.",
+          "items": {
+            "$ref": "Content"
+          },
+          "type": "array"
+        }
+      },
+      "id": "CountTokensRequest",
+      "description": "Counts the number of tokens in the `prompt` sent to a model. Models may tokenize text differently, so each model may return a different `token_count`."
+    },
+    "BatchUpdateChunksRequest": {
+      "type": "object",
+      "description": "Request to batch update `Chunk`s.",
+      "id": "BatchUpdateChunksRequest",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "description": "Required. The request messages specifying the `Chunk`s to update. A maximum of 100 `Chunk`s can be updated in a batch.",
+          "items": {
+            "$ref": "UpdateChunkRequest"
+          }
+        }
+      }
+    },
+    "GenerateTextResponse": {
+      "type": "object",
+      "properties": {
+        "filters": {
+          "items": {
+            "$ref": "ContentFilter"
+          },
+          "type": "array",
+          "description": "A set of content filtering metadata for the prompt and response text. This indicates which `SafetyCategory`(s) blocked a candidate from this response, the lowest `HarmProbability` that triggered a block, and the HarmThreshold setting for that category. This indicates the smallest change to the `SafetySettings` that would be necessary to unblock at least 1 response. The blocking is configured by the `SafetySettings` in the request (or the default `SafetySettings` of the API)."
+        },
+        "safetyFeedback": {
+          "items": {
+            "$ref": "SafetyFeedback"
+          },
+          "description": "Returns any safety feedback related to content filtering.",
+          "type": "array"
+        },
+        "candidates": {
+          "description": "Candidate responses from the model.",
+          "items": {
+            "$ref": "TextCompletion"
+          },
+          "type": "array"
+        }
+      },
+      "description": "The response from the model, including candidate completions.",
+      "id": "GenerateTextResponse"
+    },
+    "BatchEmbedContentsResponse": {
+      "id": "BatchEmbedContentsResponse",
+      "properties": {
+        "embeddings": {
+          "type": "array",
+          "readOnly": true,
+          "description": "Output only. The embeddings for each request, in the same order as provided in the batch request.",
+          "items": {
+            "$ref": "ContentEmbedding"
+          }
+        }
+      },
+      "description": "The response to a `BatchEmbedContentsRequest`.",
+      "type": "object"
+    },
+    "ListDocumentsResponse": {
+      "description": "Response from `ListDocuments` containing a paginated list of `Document`s. The `Document`s are sorted by ascending `document.create_time`.",
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages."
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "Document"
+          },
+          "description": "The returned `Document`s."
+        }
+      },
+      "type": "object",
+      "id": "ListDocumentsResponse"
+    },
+    "BatchEmbedTextRequest": {
+      "description": "Batch request to get a text embedding from the model.",
+      "id": "BatchEmbedTextRequest",
+      "properties": {
+        "requests": {
+          "description": "Optional. Embed requests for the batch. Only one of `texts` or `requests` can be set.",
+          "type": "array",
+          "items": {
+            "$ref": "EmbedTextRequest"
+          }
+        },
+        "texts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. The free-form input texts that the model will turn into an embedding. The current limit is 100 texts, over which an error will be thrown."
+        }
+      },
+      "type": "object"
+    },
+    "EmbedTextResponse": {
+      "id": "EmbedTextResponse",
+      "type": "object",
+      "properties": {
+        "embedding": {
+          "$ref": "Embedding",
+          "readOnly": true,
+          "description": "Output only. The embedding generated from the input text."
+        }
+      },
+      "description": "The response to a EmbedTextRequest."
+    },
+    "CreateFileResponse": {
+      "type": "object",
+      "id": "CreateFileResponse",
+      "description": "Response for `CreateFile`.",
+      "properties": {
+        "file": {
+          "$ref": "File",
+          "description": "Metadata for the created file."
+        }
+      }
+    },
+    "ListChunksResponse": {
+      "description": "Response from `ListChunks` containing a paginated list of `Chunk`s. The `Chunk`s are sorted by ascending `chunk.create_time`.",
+      "type": "object",
+      "properties": {
+        "chunks": {
+          "description": "The returned `Chunk`s.",
+          "type": "array",
+          "items": {
+            "$ref": "Chunk"
+          }
+        },
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages.",
+          "type": "string"
+        }
+      },
+      "id": "ListChunksResponse"
+    },
+    "MessagePrompt": {
+      "id": "MessagePrompt",
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string",
+          "description": "Optional. Text that should be provided to the model first to ground the response. If not empty, this `context` will be given to the model first before the `examples` and `messages`. When using a `context` be sure to provide it with every request to maintain continuity. This field can be a description of your prompt to the model to help provide context and guide the responses. Examples: \"Translate the phrase from English to French.\" or \"Given a statement, classify the sentiment as happy, sad or neutral.\" Anything included in this field will take precedence over message history if the total input size exceeds the model's `input_token_limit` and the input request is truncated."
+        },
+        "messages": {
+          "description": "Required. A snapshot of the recent conversation history sorted chronologically. Turns alternate between two authors. If the total input size exceeds the model's `input_token_limit` the input will be truncated: The oldest items will be dropped from `messages`.",
+          "items": {
+            "$ref": "Message"
+          },
+          "type": "array"
+        },
+        "examples": {
+          "description": "Optional. Examples of what the model should generate. This includes both user input and the response that the model should emulate. These `examples` are treated identically to conversation messages except that they take precedence over the history in `messages`: If the total input size exceeds the model's `input_token_limit` the input will be truncated. Items will be dropped from `messages` before `examples`.",
+          "type": "array",
+          "items": {
+            "$ref": "Example"
+          }
+        }
+      },
+      "description": "All of the structured input text passed to the model as a prompt. A `MessagePrompt` contains a structured set of fields that provide context for the conversation, examples of user input/model output message pairs that prime the model to respond in different ways, and the conversation history or list of messages representing the alternating turns of the conversation between the user and the model."
+    },
+    "Candidate": {
+      "type": "object",
+      "id": "Candidate",
+      "properties": {
+        "finishReason": {
+          "type": "string",
+          "description": "Optional. Output only. The reason why the model stopped generating tokens. If empty, the model has not stopped generating the tokens.",
+          "readOnly": true,
+          "enumDescriptions": [
+            "Default value. This value is unused.",
+            "Natural stop point of the model or provided stop sequence.",
+            "The maximum number of tokens as specified in the request was reached.",
+            "The candidate content was flagged for safety reasons.",
+            "The candidate content was flagged for recitation reasons.",
+            "Unknown reason."
+          ],
+          "enum": [
+            "FINISH_REASON_UNSPECIFIED",
+            "STOP",
+            "MAX_TOKENS",
+            "SAFETY",
+            "RECITATION",
+            "OTHER"
+          ]
+        },
+        "safetyRatings": {
+          "items": {
+            "$ref": "SafetyRating"
+          },
+          "type": "array",
+          "description": "List of ratings for the safety of a response candidate. There is at most one rating per category."
+        },
+        "content": {
+          "description": "Output only. Generated content returned from the model.",
+          "$ref": "Content",
+          "readOnly": true
+        },
+        "groundingAttributions": {
+          "items": {
+            "$ref": "GroundingAttribution"
+          },
+          "description": "Output only. Attribution information for sources that contributed to a grounded answer. This field is populated for `GenerateAnswer` calls.",
+          "type": "array",
+          "readOnly": true
+        },
+        "citationMetadata": {
+          "description": "Output only. Citation information for model-generated candidate. This field may be populated with recitation information for any text included in the `content`. These are passages that are \"recited\" from copyrighted material in the foundational LLM's training data.",
+          "$ref": "CitationMetadata",
+          "readOnly": true
+        },
+        "tokenCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true,
+          "description": "Output only. Token count for this candidate."
+        },
+        "index": {
+          "format": "int32",
+          "readOnly": true,
+          "type": "integer",
+          "description": "Output only. Index of the candidate in the list of candidates."
+        }
+      },
+      "description": "A response candidate generated from the model."
+    },
+    "BatchEmbedTextResponse": {
+      "id": "BatchEmbedTextResponse",
+      "properties": {
+        "embeddings": {
+          "description": "Output only. The embeddings generated from the input text.",
+          "readOnly": true,
+          "items": {
+            "$ref": "Embedding"
+          },
+          "type": "array"
+        }
+      },
+      "description": "The response to a EmbedTextRequest.",
+      "type": "object"
+    },
+    "EmbedContentResponse": {
+      "properties": {
+        "embedding": {
+          "$ref": "ContentEmbedding",
+          "description": "Output only. The embedding generated from the input content.",
+          "readOnly": true
+        }
+      },
+      "description": "The response to an `EmbedContentRequest`.",
+      "id": "EmbedContentResponse",
+      "type": "object"
+    },
+    "TransferOwnershipResponse": {
+      "description": "Response from `TransferOwnership`.",
+      "id": "TransferOwnershipResponse",
+      "type": "object",
+      "properties": {}
+    },
+    "FunctionResponse": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Required. The name of the function to call. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 63."
+        },
+        "response": {
+          "type": "object",
+          "description": "Required. The function response in JSON object format.",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object."
+          }
+        }
+      },
+      "type": "object",
+      "description": "The result output from a `FunctionCall` that contains a string representing the `FunctionDeclaration.name` and a structured JSON object containing any output from the function is used as context to the model. This should contain the result of a`FunctionCall` made based on model prediction.",
+      "id": "FunctionResponse"
+    },
+    "StringList": {
+      "properties": {
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The string values of the metadata to store."
+        }
+      },
+      "description": "User provided string values assigned to a single metadata key.",
+      "type": "object",
+      "id": "StringList"
+    },
+    "CountTextTokensResponse": {
+      "id": "CountTextTokensResponse",
+      "properties": {
+        "tokenCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of tokens that the `model` tokenizes the `prompt` into. Always non-negative."
+        }
+      },
+      "type": "object",
+      "description": "A response from `CountTextTokens`. It returns the model's `token_count` for the `prompt`."
+    },
+    "GroundingPassages": {
+      "id": "GroundingPassages",
+      "description": "A repeated list of passages.",
+      "type": "object",
+      "properties": {
+        "passages": {
+          "description": "List of passages.",
+          "type": "array",
+          "items": {
+            "$ref": "GroundingPassage"
+          }
+        }
+      }
+    },
+    "Model": {
+      "id": "Model",
+      "description": "Information about a Generative Language Model.",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The human-readable name of the model. E.g. \"Chat Bison\". The name can be up to 128 characters long and can consist of any UTF-8 characters."
+        },
+        "topP": {
+          "description": "For Nucleus sampling. Nucleus sampling considers the smallest set of tokens whose probability sum is at least `top_p`. This value specifies default to be used by the backend while making the call to the model.",
+          "type": "number",
+          "format": "float"
+        },
+        "name": {
+          "type": "string",
+          "description": "Required. The resource name of the `Model`. Format: `models/{model}` with a `{model}` naming convention of: * \"{base_model_id}-{version}\" Examples: * `models/chat-bison-001`"
+        },
+        "inputTokenLimit": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Maximum number of input tokens allowed for this model."
+        },
+        "baseModelId": {
+          "description": "Required. The name of the base model, pass this to the generation request. Examples: * `chat-bison`",
+          "type": "string"
+        },
+        "temperature": {
+          "format": "float",
+          "type": "number",
+          "description": "Controls the randomness of the output. Values can range over `[0.0,1.0]`, inclusive. A value closer to `1.0` will produce responses that are more varied, while a value closer to `0.0` will typically result in less surprising responses from the model. This value specifies default to be used by the backend while making the call to the model."
+        },
+        "version": {
+          "type": "string",
+          "description": "Required. The version number of the model. This represents the major version"
+        },
+        "supportedGenerationMethods": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "The model's supported generation methods. The method names are defined as Pascal case strings, such as `generateMessage` which correspond to API methods."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short description of the model."
+        },
+        "outputTokenLimit": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Maximum number of output tokens available for this model."
+        },
+        "topK": {
+          "format": "int32",
+          "description": "For Top-k sampling. Top-k sampling considers the set of `top_k` most probable tokens. This value specifies default to be used by the backend while making the call to the model. If empty, indicates the model doesn't use top-k sampling, and `top_k` isn't allowed as a generation parameter.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "Schema": {
+      "properties": {
+        "properties": {
+          "additionalProperties": {
+            "$ref": "Schema"
+          },
+          "description": "Optional. Properties of Type.OBJECT.",
+          "type": "object"
+        },
+        "type": {
+          "description": "Required. Data type.",
+          "enum": [
+            "TYPE_UNSPECIFIED",
+            "STRING",
+            "NUMBER",
+            "INTEGER",
+            "BOOLEAN",
+            "ARRAY",
+            "OBJECT"
+          ],
+          "enumDescriptions": [
+            "Not specified, should not be used.",
+            "String type.",
+            "Number type.",
+            "Integer type.",
+            "Boolean type.",
+            "Array type.",
+            "Object type."
+          ],
+          "type": "string"
+        },
+        "format": {
+          "description": "Optional. The format of the data. This is used only for primitive datatypes. Supported formats: for NUMBER type: float, double for INTEGER type: int32, int64",
+          "type": "string"
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "Optional. Indicates if the value may be null."
+        },
+        "enum": {
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Possible values of the element of Type.STRING with enum format. For example we can define an Enum Direction as : {type:STRING, format:enum, enum:[\"EAST\", NORTH\", \"SOUTH\", \"WEST\"]}",
+          "type": "array"
+        },
+        "items": {
+          "$ref": "Schema",
+          "description": "Optional. Schema of the elements of Type.ARRAY."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional. A brief description of the parameter. This could contain examples of use. Parameter description may be formatted as Markdown."
+        },
+        "required": {
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. Required properties of Type.OBJECT.",
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "The `Schema` object allows the definition of input and output data types. These types can be objects, but also primitives and arrays. Represents a select subset of an [OpenAPI 3.0 schema object](https://spec.openapis.org/oas/v3.0.3#schema).",
+      "id": "Schema"
+    },
+    "CountTokensResponse": {
+      "type": "object",
+      "description": "A response from `CountTokens`. It returns the model's `token_count` for the `prompt`.",
+      "id": "CountTokensResponse",
+      "properties": {
+        "totalTokens": {
+          "type": "integer",
+          "description": "The number of tokens that the `model` tokenizes the `prompt` into. Always non-negative.",
+          "format": "int32"
+        }
+      }
+    },
+    "GenerateContentRequest": {
+      "type": "object",
+      "id": "GenerateContentRequest",
+      "properties": {
+        "safetySettings": {
+          "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content. This will be enforced on the `GenerateContentRequest.contents` and `GenerateContentResponse.candidates`. There should not be more than one setting for each `SafetyCategory` type. The API will block any contents and responses that fail to meet the thresholds set by these settings. This list overrides the default settings for each `SafetyCategory` specified in the safety_settings. If there is no `SafetySetting` for a given `SafetyCategory` provided in the list, the API will use the default safety setting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH, HARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT, HARM_CATEGORY_HARASSMENT are supported.",
+          "items": {
+            "$ref": "SafetySetting"
+          },
+          "type": "array"
+        },
+        "generationConfig": {
+          "$ref": "GenerationConfig",
+          "description": "Optional. Configuration options for model generation and outputs."
+        },
+        "toolConfig": {
+          "description": "Optional. Tool configuration for any `Tool` specified in the request.",
+          "$ref": "ToolConfig"
+        },
+        "contents": {
+          "description": "Required. The content of the current conversation with the model. For single-turn queries, this is a single instance. For multi-turn queries, this is a repeated field that contains conversation history + latest request.",
+          "type": "array",
+          "items": {
+            "$ref": "Content"
+          }
+        },
+        "systemInstruction": {
+          "description": "Optional. Developer set system instruction. Currently, text only.",
+          "$ref": "Content"
+        },
+        "tools": {
+          "type": "array",
+          "description": "Optional. A list of `Tools` the model may use to generate the next response. A `Tool` is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the model. The only supported tool is currently `Function`.",
+          "items": {
+            "$ref": "Tool"
+          }
+        }
+      },
+      "description": "Request to generate a completion from the model."
+    },
+    "CitationSource": {
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Optional. URI that is attributed as a source for a portion of the text."
+        },
+        "startIndex": {
+          "type": "integer",
+          "description": "Optional. Start of segment of the response that is attributed to this source. Index indicates the start of the segment, measured in bytes.",
+          "format": "int32"
+        },
+        "endIndex": {
+          "description": "Optional. End of the attributed segment, exclusive.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "license": {
+          "type": "string",
+          "description": "Optional. License for the GitHub project that is attributed as a source for segment. License info is required for code citations."
+        }
+      },
+      "type": "object",
+      "id": "CitationSource",
+      "description": "A citation to a source for a portion of a specific response."
+    },
+    "Chunk": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Immutable. Identifier. The `Chunk` resource name. The ID (name excluding the \"corpora/*/documents/*/chunks/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a random 12-character unique ID will be generated. Example: `corpora/{corpus_id}/documents/{document_id}/chunks/123a456b789c`"
+        },
+        "updateTime": {
+          "description": "Output only. The Timestamp of when the `Chunk` was last updated.",
+          "format": "google-datetime",
+          "type": "string",
+          "readOnly": true
+        },
+        "createTime": {
+          "format": "google-datetime",
+          "description": "Output only. The Timestamp of when the `Chunk` was created.",
+          "type": "string",
+          "readOnly": true
+        },
+        "data": {
+          "description": "Required. The content for the `Chunk`, such as the text string. The maximum number of tokens per chunk is 2043.",
+          "$ref": "ChunkData"
+        },
+        "state": {
+          "enumDescriptions": [
+            "The default value. This value is used if the state is omitted.",
+            "`Chunk` is being processed (embedding and vector storage).",
+            "`Chunk` is processed and available for querying.",
+            "`Chunk` failed processing."
+          ],
+          "description": "Output only. Current state of the `Chunk`.",
+          "readOnly": true,
+          "type": "string",
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "STATE_PENDING_PROCESSING",
+            "STATE_ACTIVE",
+            "STATE_FAILED"
+          ]
+        },
+        "customMetadata": {
+          "description": "Optional. User provided custom metadata stored as key-value pairs. The maximum number of `CustomMetadata` per chunk is 20.",
+          "type": "array",
+          "items": {
+            "$ref": "CustomMetadata"
+          }
+        }
+      },
+      "description": "A `Chunk` is a subpart of a `Document` that is treated as an independent unit for the purposes of vector representation and storage. A `Corpus` can have a maximum of 1 million `Chunk`s.",
+      "id": "Chunk"
+    },
+    "ContentFilter": {
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A string that describes the filtering behavior in more detail."
+        },
+        "reason": {
+          "enum": [
+            "BLOCKED_REASON_UNSPECIFIED",
+            "SAFETY",
+            "OTHER"
+          ],
+          "description": "The reason content was blocked during request processing.",
+          "enumDescriptions": [
+            "A blocked reason was not specified.",
+            "Content was blocked by safety settings.",
+            "Content was blocked, but the reason is uncategorized."
+          ],
+          "type": "string"
+        }
+      },
+      "id": "ContentFilter",
+      "description": "Content filtering metadata associated with processing a single request. ContentFilter contains a reason and an optional supporting string. The reason may be unspecified.",
+      "type": "object"
+    },
+    "CreateFileRequest": {
+      "description": "Request for `CreateFile`.",
+      "type": "object",
+      "id": "CreateFileRequest",
+      "properties": {
+        "file": {
+          "$ref": "File",
+          "description": "Optional. Metadata for the file to create."
+        }
+      }
+    },
+    "GenerateAnswerResponse": {
+      "description": "Response from the model for a grounded answer.",
+      "properties": {
+        "answer": {
+          "$ref": "Candidate",
+          "description": "Candidate answer from the model. Note: The model *always* attempts to provide a grounded answer, even when the answer is unlikely to be answerable from the given passages. In that case, a low-quality or ungrounded answer may be provided, along with a low `answerable_probability`."
+        },
+        "answerableProbability": {
+          "format": "float",
+          "description": "Output only. The model's estimate of the probability that its answer is correct and grounded in the input passages. A low answerable_probability indicates that the answer might not be grounded in the sources. When `answerable_probability` is low, some clients may wish to: * Display a message to the effect of \"We couldn’t answer that question\" to the user. * Fall back to a general-purpose LLM that answers the question from world knowledge. The threshold and nature of such fallbacks will depend on individual clients’ use cases. 0.5 is a good starting threshold.",
+          "type": "number",
+          "readOnly": true
+        },
+        "inputFeedback": {
+          "description": "Output only. Feedback related to the input data used to answer the question, as opposed to model-generated response to the question. \"Input data\" can be one or more of the following: - Question specified by the last entry in `GenerateAnswerRequest.content` - Conversation history specified by the other entries in `GenerateAnswerRequest.content` - Grounding sources (`GenerateAnswerRequest.semantic_retriever` or `GenerateAnswerRequest.inline_passages`)",
+          "$ref": "InputFeedback",
+          "readOnly": true
+        }
+      },
+      "id": "GenerateAnswerResponse",
+      "type": "object"
+    },
+    "QueryDocumentRequest": {
+      "properties": {
+        "resultsCount": {
+          "type": "integer",
+          "description": "Optional. The maximum number of `Chunk`s to return. The service may return fewer `Chunk`s. If unspecified, at most 10 `Chunk`s will be returned. The maximum specified result count is 100.",
+          "format": "int32"
+        },
+        "query": {
+          "type": "string",
+          "description": "Required. Query string to perform semantic search."
+        },
+        "metadataFilters": {
+          "type": "array",
+          "description": "Optional. Filter for `Chunk` metadata. Each `MetadataFilter` object should correspond to a unique key. Multiple `MetadataFilter` objects are joined by logical \"AND\"s. Note: `Document`-level filtering is not supported for this request because a `Document` name is already specified. Example query: (year \u003e= 2020 OR year \u003c 2010) AND (genre = drama OR genre = action) `MetadataFilter` object list: metadata_filters = [ {key = \"chunk.custom_metadata.year\" conditions = [{int_value = 2020, operation = GREATER_EQUAL}, {int_value = 2010, operation = LESS}}, {key = \"chunk.custom_metadata.genre\" conditions = [{string_value = \"drama\", operation = EQUAL}, {string_value = \"action\", operation = EQUAL}}] Example query for a numeric range of values: (year \u003e 2015 AND year \u003c= 2020) `MetadataFilter` object list: metadata_filters = [ {key = \"chunk.custom_metadata.year\" conditions = [{int_value = 2015, operation = GREATER}]}, {key = \"chunk.custom_metadata.year\" conditions = [{int_value = 2020, operation = LESS_EQUAL}]}] Note: \"AND\"s for the same key are only supported for numeric values. String values only support \"OR\"s for the same key.",
+          "items": {
+            "$ref": "MetadataFilter"
+          }
+        }
+      },
+      "id": "QueryDocumentRequest",
+      "type": "object",
+      "description": "Request for querying a `Document`."
+    },
+    "GenerateMessageRequest": {
+      "type": "object",
+      "properties": {
+        "topK": {
+          "type": "integer",
+          "description": "Optional. The maximum number of tokens to consider when sampling. The model uses combined Top-k and nucleus sampling. Top-k sampling considers the set of `top_k` most probable tokens.",
+          "format": "int32"
+        },
+        "prompt": {
+          "$ref": "MessagePrompt",
+          "description": "Required. The structured textual input given to the model as a prompt. Given a prompt, the model will return what it predicts is the next message in the discussion."
+        },
+        "candidateCount": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Optional. The number of generated response messages to return. This value must be between `[1, 8]`, inclusive. If unset, this will default to `1`."
+        },
+        "temperature": {
+          "format": "float",
+          "type": "number",
+          "description": "Optional. Controls the randomness of the output. Values can range over `[0.0,1.0]`, inclusive. A value closer to `1.0` will produce responses that are more varied, while a value closer to `0.0` will typically result in less surprising responses from the model."
+        },
+        "topP": {
+          "description": "Optional. The maximum cumulative probability of tokens to consider when sampling. The model uses combined Top-k and nucleus sampling. Nucleus sampling considers the smallest set of tokens whose probability sum is at least `top_p`.",
+          "format": "float",
+          "type": "number"
+        }
+      },
+      "description": "Request to generate a message response from the model.",
+      "id": "GenerateMessageRequest"
+    },
+    "ContentEmbedding": {
+      "properties": {
+        "values": {
+          "items": {
+            "format": "float",
+            "type": "number"
+          },
+          "description": "The embedding values.",
+          "type": "array"
+        }
+      },
+      "id": "ContentEmbedding",
+      "type": "object",
+      "description": "A list of floats representing an embedding."
+    },
+    "FunctionCallingConfig": {
+      "id": "FunctionCallingConfig",
+      "description": "Configuration for specifying function calling behavior.",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "MODE_UNSPECIFIED",
+            "AUTO",
+            "ANY",
+            "NONE"
+          ],
+          "type": "string",
+          "description": "Optional. Specifies the mode in which function calling should execute. If unspecified, the default value will be set to AUTO.",
+          "enumDescriptions": [
+            "Unspecified function calling mode. This value should not be used.",
+            "Default model behavior, model decides to predict either a function call or a natural language repspose.",
+            "Model is constrained to always predicting a function call only. If \"allowed_function_names\" are set, the predicted function call will be limited to any one of \"allowed_function_names\", else the predicted function call will be any one of the provided \"function_declarations\".",
+            "Model will not predict any function call. Model behavior is same as when not passing any function declarations."
+          ]
+        },
+        "allowedFunctionNames": {
+          "description": "Optional. A set of function names that, when provided, limits the functions the model will call. This should only be set when the Mode is ANY. Function names should match [FunctionDeclaration.name]. With mode set to ANY, model will predict a function call from the set of function names provided.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "ListPermissionsResponse": {
+      "id": "ListPermissionsResponse",
+      "description": "Response from `ListPermissions` containing a paginated list of permissions.",
+      "type": "object",
+      "properties": {
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no more pages.",
+          "type": "string"
+        },
+        "permissions": {
+          "type": "array",
+          "description": "Returned permissions.",
+          "items": {
+            "$ref": "Permission"
+          }
+        }
+      }
+    },
+    "SemanticRetrieverChunk": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Output only. Name of the source matching the request's `SemanticRetrieverConfig.source`. Example: `corpora/123` or `corpora/123/documents/abc`",
+          "readOnly": true
+        },
+        "chunk": {
+          "type": "string",
+          "description": "Output only. Name of the `Chunk` containing the attributed text. Example: `corpora/123/documents/abc/chunks/xyz`",
+          "readOnly": true
+        }
+      },
+      "description": "Identifier for a `Chunk` retrieved via Semantic Retriever specified in the `GenerateAnswerRequest` using `SemanticRetrieverConfig`.",
+      "id": "SemanticRetrieverChunk"
+    },
+    "FunctionCall": {
+      "type": "object",
+      "id": "FunctionCall",
+      "description": "A predicted `FunctionCall` returned from the model that contains a string representing the `FunctionDeclaration.name` with the arguments and their values.",
+      "properties": {
+        "name": {
+          "description": "Required. The name of the function to call. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 63.",
+          "type": "string"
+        },
+        "args": {
+          "type": "object",
+          "additionalProperties": {
+            "description": "Properties of the object.",
+            "type": "any"
+          },
+          "description": "Optional. The function parameters and values in JSON object format."
+        }
+      }
+    },
+    "Content": {
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "Optional. The producer of the content. Must be either 'user' or 'model'. Useful to set for multi-turn conversations, otherwise can be left blank or unset."
+        },
+        "parts": {
+          "items": {
+            "$ref": "Part"
+          },
+          "description": "Ordered `Parts` that constitute a single message. Parts may have different MIME types.",
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "The base structured datatype containing multi-part content of a message. A `Content` includes a `role` field designating the producer of the `Content` and a `parts` field containing multi-part data that contains the content of the message turn.",
+      "id": "Content"
+    },
+    "RelevantChunk": {
+      "description": "The information for a chunk relevant to a query.",
+      "type": "object",
+      "properties": {
+        "chunk": {
+          "$ref": "Chunk",
+          "description": "`Chunk` associated with the query."
+        },
+        "chunkRelevanceScore": {
+          "format": "float",
+          "type": "number",
+          "description": "`Chunk` relevance to the query."
+        }
+      },
+      "id": "RelevantChunk"
+    },
+    "GroundingPassageId": {
+      "properties": {
+        "partIndex": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Output only. Index of the part within the `GenerateAnswerRequest`'s `GroundingPassage.content`.",
+          "readOnly": true
+        },
+        "passageId": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. ID of the passage matching the `GenerateAnswerRequest`'s `GroundingPassage.id`."
+        }
+      },
+      "id": "GroundingPassageId",
+      "description": "Identifier for a part within a `GroundingPassage`.",
+      "type": "object"
+    },
+    "Hyperparameters": {
+      "description": "Hyperparameters controlling the tuning process. Read more at https://ai.google.dev/docs/model_tuning_guidance",
+      "type": "object",
+      "properties": {
+        "learningRateMultiplier": {
+          "description": "Optional. Immutable. The learning rate multiplier is used to calculate a final learning_rate based on the default (recommended) value. Actual learning rate := learning_rate_multiplier * default learning rate Default learning rate is dependent on base model and dataset size. If not set, a default of 1.0 will be used.",
+          "type": "number",
+          "format": "float"
+        },
+        "batchSize": {
+          "type": "integer",
+          "description": "Immutable. The batch size hyperparameter for tuning. If not set, a default of 4 or 16 will be used based on the number of training examples.",
+          "format": "int32"
+        },
+        "epochCount": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Immutable. The number of training epochs. An epoch is one pass through the training data. If not set, a default of 5 will be used."
+        },
+        "learningRate": {
+          "description": "Optional. Immutable. The learning rate hyperparameter for tuning. If not set, a default of 0.001 or 0.0002 will be calculated based on the number of training examples.",
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "id": "Hyperparameters"
+    },
+    "TuningExample": {
+      "description": "A single example for tuning.",
+      "type": "object",
+      "id": "TuningExample",
+      "properties": {
+        "output": {
+          "description": "Required. The expected model output.",
+          "type": "string"
+        },
+        "textInput": {
+          "description": "Optional. Text model input.",
+          "type": "string"
+        }
+      }
+    },
+    "File": {
+      "description": "A file uploaded to the API.",
+      "type": "object",
+      "properties": {
+        "updateTime": {
+          "description": "Output only. The timestamp of when the `File` was last updated.",
+          "format": "google-datetime",
+          "type": "string",
+          "readOnly": true
+        },
+        "expirationTime": {
+          "description": "Output only. The timestamp of when the `File` will be deleted. Only set if the `File` is scheduled to expire.",
+          "type": "string",
+          "readOnly": true,
+          "format": "google-datetime"
+        },
+        "mimeType": {
+          "description": "Output only. MIME type of the file.",
+          "readOnly": true,
+          "type": "string"
+        },
+        "createTime": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. The timestamp of when the `File` was created.",
+          "format": "google-datetime"
+        },
+        "uri": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. The uri of the `File`."
+        },
+        "sizeBytes": {
+          "description": "Output only. Size of the file in bytes.",
+          "type": "string",
+          "readOnly": true,
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "description": "Immutable. Identifier. The `File` resource name. The ID (name excluding the \"files/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a unique name will be generated. Example: `files/123-456`"
+        },
+        "sha256Hash": {
+          "readOnly": true,
+          "format": "byte",
+          "type": "string",
+          "description": "Output only. SHA-256 hash of the uploaded bytes."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Optional. The human-readable display name for the `File`. The display name must be no more than 512 characters in length, including spaces. Example: \"Welcome Image\""
+        }
+      },
+      "id": "File"
+    },
+    "GroundingPassage": {
+      "id": "GroundingPassage",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier for the passage for attributing this passage in grounded answers."
+        },
+        "content": {
+          "$ref": "Content",
+          "description": "Content of the passage."
+        }
+      },
+      "description": "Passage included inline with a grounding configuration."
+    },
+    "SafetyFeedback": {
+      "properties": {
+        "setting": {
+          "$ref": "SafetySetting",
+          "description": "Safety settings applied to the request."
+        },
+        "rating": {
+          "description": "Safety rating evaluated from content.",
+          "$ref": "SafetyRating"
+        }
+      },
+      "id": "SafetyFeedback",
+      "description": "Safety feedback for an entire request. This field is populated if content in the input and/or response is blocked due to safety settings. SafetyFeedback may not exist for every HarmCategory. Each SafetyFeedback will return the safety settings used by the request as well as the lowest HarmProbability that should be allowed in order to return a result.",
+      "type": "object"
+    },
+    "SafetyRating": {
+      "type": "object",
+      "properties": {
+        "probability": {
+          "enumDescriptions": [
+            "Probability is unspecified.",
+            "Content has a negligible chance of being unsafe.",
+            "Content has a low chance of being unsafe.",
+            "Content has a medium chance of being unsafe.",
+            "Content has a high chance of being unsafe."
+          ],
+          "description": "Required. The probability of harm for this content.",
+          "type": "string",
+          "enum": [
+            "HARM_PROBABILITY_UNSPECIFIED",
+            "NEGLIGIBLE",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "blocked": {
+          "type": "boolean",
+          "description": "Was this content blocked because of this rating?"
+        },
+        "category": {
+          "enumDescriptions": [
+            "Category is unspecified.",
+            "Negative or harmful comments targeting identity and/or protected attribute.",
+            "Content that is rude, disrespectful, or profane.",
+            "Describes scenarios depicting violence against an individual or group, or general descriptions of gore.",
+            "Contains references to sexual acts or other lewd content.",
+            "Promotes unchecked medical advice.",
+            "Dangerous content that promotes, facilitates, or encourages harmful acts.",
+            "Harasment content.",
+            "Hate speech and content.",
+            "Sexually explicit content.",
+            "Dangerous content."
+          ],
+          "description": "Required. The category for this rating.",
+          "enum": [
+            "HARM_CATEGORY_UNSPECIFIED",
+            "HARM_CATEGORY_DEROGATORY",
+            "HARM_CATEGORY_TOXICITY",
+            "HARM_CATEGORY_VIOLENCE",
+            "HARM_CATEGORY_SEXUAL",
+            "HARM_CATEGORY_MEDICAL",
+            "HARM_CATEGORY_DANGEROUS",
+            "HARM_CATEGORY_HARASSMENT",
+            "HARM_CATEGORY_HATE_SPEECH",
+            "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "HARM_CATEGORY_DANGEROUS_CONTENT"
+          ],
+          "type": "string"
+        }
+      },
+      "description": "Safety rating for a piece of content. The safety rating contains the category of harm and the harm probability level in that category for a piece of content. Content is classified for safety across a number of harm categories and the probability of the harm classification is included here.",
+      "id": "SafetyRating"
+    },
+    "Status": {
+      "properties": {
+        "message": {
+          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+          "type": "string"
+        },
+        "details": {
+          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
+          "items": {
+            "additionalProperties": {
+              "description": "Properties of the object. Contains field @type with type URL.",
+              "type": "any"
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "code": {
+          "description": "The status code, which should be an enum value of google.rpc.Code.",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "id": "Status",
+      "type": "object",
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
+    },
+    "Condition": {
+      "properties": {
+        "numericValue": {
+          "type": "number",
+          "format": "float",
+          "description": "The numeric value to filter the metadata on."
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "OPERATOR_UNSPECIFIED",
+            "LESS",
+            "LESS_EQUAL",
+            "EQUAL",
+            "GREATER_EQUAL",
+            "GREATER",
+            "NOT_EQUAL",
+            "INCLUDES",
+            "EXCLUDES"
+          ],
+          "enumDescriptions": [
+            "The default value. This value is unused.",
+            "Supported by numeric.",
+            "Supported by numeric.",
+            "Supported by numeric & string.",
+            "Supported by numeric.",
+            "Supported by numeric.",
+            "Supported by numeric & string.",
+            "Supported by string only when `CustomMetadata` value type for the given key has a `string_list_value`.",
+            "Supported by string only when `CustomMetadata` value type for the given key has a `string_list_value`."
+          ],
+          "description": "Required. Operator applied to the given key-value pair to trigger the condition."
+        },
+        "stringValue": {
+          "type": "string",
+          "description": "The string value to filter the metadata on."
+        }
+      },
+      "description": "Filter condition applicable to a single key.",
+      "type": "object",
+      "id": "Condition"
+    },
+    "ChunkData": {
+      "properties": {
+        "stringValue": {
+          "type": "string",
+          "description": "The `Chunk` content as a string. The maximum number of tokens per chunk is 2043."
+        }
+      },
+      "id": "ChunkData",
+      "type": "object",
+      "description": "Extracted data that represents the `Chunk` content."
+    },
+    "CountTextTokensRequest": {
+      "id": "CountTextTokensRequest",
+      "properties": {
+        "prompt": {
+          "description": "Required. The free-form input text given to the model as a prompt.",
+          "$ref": "TextPrompt"
+        }
+      },
+      "description": "Counts the number of tokens in the `prompt` sent to a model. Models may tokenize text differently, so each model may return a different `token_count`.",
+      "type": "object"
+    },
+    "TunedModelSource": {
+      "properties": {
+        "tunedModel": {
+          "type": "string",
+          "description": "Immutable. The name of the `TunedModel` to use as the starting point for training the new model. Example: `tunedModels/my-tuned-model`"
+        },
+        "baseModel": {
+          "type": "string",
+          "description": "Output only. The name of the base `Model` this `TunedModel` was tuned from. Example: `models/text-bison-001`",
+          "readOnly": true
+        }
+      },
+      "id": "TunedModelSource",
+      "type": "object",
+      "description": "Tuned model as a source for training a new model."
+    },
+    "Dataset": {
+      "type": "object",
+      "id": "Dataset",
+      "description": "Dataset for training or validation.",
+      "properties": {
+        "examples": {
+          "description": "Optional. Inline examples.",
+          "$ref": "TuningExamples"
+        }
+      }
+    },
+    "CountMessageTokensRequest": {
+      "type": "object",
+      "id": "CountMessageTokensRequest",
+      "description": "Counts the number of tokens in the `prompt` sent to a model. Models may tokenize text differently, so each model may return a different `token_count`.",
+      "properties": {
+        "prompt": {
+          "$ref": "MessagePrompt",
+          "description": "Required. The prompt, whose token count is to be returned."
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Required. The text content of the structured `Message`."
+        },
+        "author": {
+          "type": "string",
+          "description": "Optional. The author of this Message. This serves as a key for tagging the content of this Message when it is fed to the model as text. The author can be any alphanumeric string."
+        },
+        "citationMetadata": {
+          "description": "Output only. Citation information for model-generated `content` in this `Message`. If this `Message` was generated as output from the model, this field may be populated with attribution information for any text included in the `content`. This field is used only on output.",
+          "$ref": "CitationMetadata",
+          "readOnly": true
+        }
+      },
+      "id": "Message",
+      "description": "The base unit of structured text. A `Message` includes an `author` and the `content` of the `Message`. The `author` is used to tag messages when they are fed to the model as text."
+    },
+    "PromptFeedback": {
+      "id": "PromptFeedback",
+      "type": "object",
+      "properties": {
+        "safetyRatings": {
+          "items": {
+            "$ref": "SafetyRating"
+          },
+          "description": "Ratings for safety of the prompt. There is at most one rating per category.",
+          "type": "array"
+        },
+        "blockReason": {
+          "enumDescriptions": [
+            "Default value. This value is unused.",
+            "Prompt was blocked due to safety reasons. You can inspect `safety_ratings` to understand which safety category blocked it.",
+            "Prompt was blocked due to unknown reaasons."
+          ],
+          "description": "Optional. If set, the prompt was blocked and no candidates are returned. Rephrase your prompt.",
+          "enum": [
+            "BLOCK_REASON_UNSPECIFIED",
+            "SAFETY",
+            "OTHER"
+          ],
+          "type": "string"
+        }
+      },
+      "description": "A set of the feedback metadata the prompt specified in `GenerateContentRequest.content`."
+    },
+    "ToolConfig": {
+      "type": "object",
+      "description": "The Tool configuration containing parameters for specifying `Tool` use in the request.",
+      "id": "ToolConfig",
+      "properties": {
+        "functionCallingConfig": {
+          "$ref": "FunctionCallingConfig",
+          "description": "Optional. Function calling config."
+        }
+      }
+    },
+    "Operation": {
+      "type": "object",
+      "description": "This resource represents a long-running operation that is the result of a network API call.",
+      "id": "Operation",
+      "properties": {
+        "response": {
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          },
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+          "type": "object"
+        },
+        "done": {
+          "type": "boolean",
+          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any."
+        },
+        "name": {
+          "type": "string",
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
+        },
+        "error": {
+          "$ref": "Status",
+          "description": "The error result of the operation in case of failure or cancellation."
+        }
+      }
+    },
+    "FileData": {
+      "id": "FileData",
+      "description": "URI based data.",
+      "properties": {
+        "fileUri": {
+          "type": "string",
+          "description": "Required. URI."
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "Optional. The IANA standard MIME type of the source data."
+        }
+      },
+      "type": "object"
+    }
+  },
+  "fullyEncodeReservedExpansion": true,
+  "resources": {
+    "tunedModels": {
+      "resources": {
+        "permissions": {
+          "methods": {
+            "create": {
+              "parameterOrder": [
+                "parent"
+              ],
+              "request": {
+                "$ref": "Permission"
+              },
+              "flatPath": "v1beta/tunedModels/{tunedModelsId}/permissions",
+              "path": "v1beta/{+parent}/permissions",
+              "description": "Create a permission to a specific resource.",
+              "httpMethod": "POST",
+              "id": "generativelanguage.tunedModels.permissions.create",
+              "response": {
+                "$ref": "Permission"
+              },
+              "parameters": {
+                "parent": {
+                  "description": "Required. The parent resource of the `Permission`. Formats: `tunedModels/{tuned_model}` `corpora/{corpus}`",
+                  "type": "string",
+                  "required": true,
+                  "location": "path",
+                  "pattern": "^tunedModels/[^/]+$"
+                }
+              }
+            },
+            "list": {
+              "parameters": {
+                "pageToken": {
+                  "description": "Optional. A page token, received from a previous `ListPermissions` call. Provide the `page_token` returned by one request as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListPermissions` must match the call that provided the page token.",
+                  "location": "query",
+                  "type": "string"
+                },
+                "pageSize": {
+                  "description": "Optional. The maximum number of `Permission`s to return (per page). The service may return fewer permissions. If unspecified, at most 10 permissions will be returned. This method returns at most 1000 permissions per page, even if you pass larger page_size.",
+                  "location": "query",
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "parent": {
+                  "pattern": "^tunedModels/[^/]+$",
+                  "location": "path",
+                  "description": "Required. The parent resource of the permissions. Formats: `tunedModels/{tuned_model}` `corpora/{corpus}`",
+                  "type": "string",
+                  "required": true
+                }
+              },
+              "flatPath": "v1beta/tunedModels/{tunedModelsId}/permissions",
+              "response": {
+                "$ref": "ListPermissionsResponse"
+              },
+              "parameterOrder": [
+                "parent"
+              ],
+              "description": "Lists permissions for the specific resource.",
+              "httpMethod": "GET",
+              "id": "generativelanguage.tunedModels.permissions.list",
+              "path": "v1beta/{+parent}/permissions"
+            },
+            "delete": {
+              "flatPath": "v1beta/tunedModels/{tunedModelsId}/permissions/{permissionsId}",
+              "description": "Deletes the permission.",
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "location": "path",
+                  "description": "Required. The resource name of the permission. Formats: `tunedModels/{tuned_model}/permissions/{permission}` `corpora/{corpus}/permissions/{permission}`",
+                  "pattern": "^tunedModels/[^/]+/permissions/[^/]+$",
+                  "required": true
+                }
+              },
+              "httpMethod": "DELETE",
+              "id": "generativelanguage.tunedModels.permissions.delete",
+              "parameterOrder": [
+                "name"
+              ],
+              "path": "v1beta/{+name}",
+              "response": {
+                "$ref": "Empty"
+              }
+            },
+            "get": {
+              "httpMethod": "GET",
+              "path": "v1beta/{+name}",
+              "description": "Gets information about a specific Permission.",
+              "id": "generativelanguage.tunedModels.permissions.get",
+              "parameterOrder": [
+                "name"
+              ],
+              "response": {
+                "$ref": "Permission"
+              },
+              "parameters": {
+                "name": {
+                  "pattern": "^tunedModels/[^/]+/permissions/[^/]+$",
+                  "location": "path",
+                  "required": true,
+                  "type": "string",
+                  "description": "Required. The resource name of the permission. Formats: `tunedModels/{tuned_model}/permissions/{permission}` `corpora/{corpus}/permissions/{permission}`"
+                }
+              },
+              "flatPath": "v1beta/tunedModels/{tunedModelsId}/permissions/{permissionsId}"
+            },
+            "patch": {
+              "description": "Updates the permission.",
+              "flatPath": "v1beta/tunedModels/{tunedModelsId}/permissions/{permissionsId}",
+              "parameters": {
+                "updateMask": {
+                  "type": "string",
+                  "description": "Required. The list of fields to update. Accepted ones: - role (`Permission.role` field)",
+                  "location": "query",
+                  "format": "google-fieldmask"
+                },
+                "name": {
+                  "location": "path",
+                  "required": true,
+                  "type": "string",
+                  "pattern": "^tunedModels/[^/]+/permissions/[^/]+$",
+                  "description": "Output only. Identifier. The permission name. A unique name will be generated on create. Examples: tunedModels/{tuned_model}/permissions/{permission} corpora/{corpus}/permissions/{permission} Output only."
+                }
+              },
+              "id": "generativelanguage.tunedModels.permissions.patch",
+              "parameterOrder": [
+                "name"
+              ],
+              "request": {
+                "$ref": "Permission"
+              },
+              "path": "v1beta/{+name}",
+              "response": {
+                "$ref": "Permission"
+              },
+              "httpMethod": "PATCH"
+            }
+          }
+        }
+      },
+      "methods": {
+        "delete": {
+          "id": "generativelanguage.tunedModels.delete",
+          "description": "Deletes a tuned model.",
+          "httpMethod": "DELETE",
+          "response": {
+            "$ref": "Empty"
+          },
+          "parameters": {
+            "name": {
+              "location": "path",
+              "pattern": "^tunedModels/[^/]+$",
+              "required": true,
+              "type": "string",
+              "description": "Required. The resource name of the model. Format: `tunedModels/my-model-id`"
+            }
+          },
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}",
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}"
+        },
+        "generateContent": {
+          "description": "Generates a response from the model given an input `GenerateContentRequest`.",
+          "httpMethod": "POST",
+          "id": "generativelanguage.tunedModels.generateContent",
+          "response": {
+            "$ref": "GenerateContentResponse"
+          },
+          "path": "v1beta/{+model}:generateContent",
+          "request": {
+            "$ref": "GenerateContentRequest"
+          },
+          "parameters": {
+            "model": {
+              "pattern": "^tunedModels/[^/]+$",
+              "location": "path",
+              "description": "Required. The name of the `Model` to use for generating the completion. Format: `name=models/{model}`.",
+              "required": true,
+              "type": "string"
+            }
+          },
+          "parameterOrder": [
+            "model"
+          ],
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}:generateContent"
+        },
+        "patch": {
+          "id": "generativelanguage.tunedModels.patch",
+          "parameters": {
+            "updateMask": {
+              "type": "string",
+              "location": "query",
+              "description": "Required. The list of fields to update.",
+              "format": "google-fieldmask"
+            },
+            "name": {
+              "required": true,
+              "location": "path",
+              "pattern": "^tunedModels/[^/]+$",
+              "type": "string",
+              "description": "Output only. The tuned model name. A unique name will be generated on create. Example: `tunedModels/az2mb0bpw6i` If display_name is set on create, the id portion of the name will be set by concatenating the words of the display_name with hyphens and adding a random portion for uniqueness. Example: display_name = \"Sentence Translator\" name = \"tunedModels/sentence-translator-u3b7m\""
+            }
+          },
+          "response": {
+            "$ref": "TunedModel"
+          },
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}",
+          "request": {
+            "$ref": "TunedModel"
+          },
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}",
+          "description": "Updates a tuned model.",
+          "httpMethod": "PATCH"
+        },
+        "list": {
+          "flatPath": "v1beta/tunedModels",
+          "response": {
+            "$ref": "ListTunedModelsResponse"
+          },
+          "httpMethod": "GET",
+          "parameters": {
+            "filter": {
+              "description": "Optional. A filter is a full text search over the tuned model's description and display name. By default, results will not include tuned models shared with everyone. Additional operators: - owner:me - writers:me - readers:me - readers:everyone Examples: \"owner:me\" returns all tuned models to which caller has owner role \"readers:me\" returns all tuned models to which caller has reader role \"readers:everyone\" returns all tuned models that are shared with everyone",
+              "type": "string",
+              "location": "query"
+            },
+            "pageToken": {
+              "description": "Optional. A page token, received from a previous `ListTunedModels` call. Provide the `page_token` returned by one request as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListTunedModels` must match the call that provided the page token.",
+              "type": "string",
+              "location": "query"
+            },
+            "pageSize": {
+              "description": "Optional. The maximum number of `TunedModels` to return (per page). The service may return fewer tuned models. If unspecified, at most 10 tuned models will be returned. This method returns at most 1000 models per page, even if you pass a larger page_size.",
+              "location": "query",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "description": "Lists tuned models owned by the user.",
+          "parameterOrder": [],
+          "path": "v1beta/tunedModels",
+          "id": "generativelanguage.tunedModels.list"
+        },
+        "get": {
+          "path": "v1beta/{+name}",
+          "httpMethod": "GET",
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}",
+          "parameters": {
+            "name": {
+              "required": true,
+              "description": "Required. The resource name of the model. Format: `tunedModels/my-model-id`",
+              "type": "string",
+              "location": "path",
+              "pattern": "^tunedModels/[^/]+$"
+            }
+          },
+          "description": "Gets information about a specific TunedModel.",
+          "parameterOrder": [
+            "name"
+          ],
+          "id": "generativelanguage.tunedModels.get",
+          "response": {
+            "$ref": "TunedModel"
+          }
+        },
+        "create": {
+          "id": "generativelanguage.tunedModels.create",
+          "httpMethod": "POST",
+          "parameterOrder": [],
+          "path": "v1beta/tunedModels",
+          "response": {
+            "$ref": "Operation"
+          },
+          "flatPath": "v1beta/tunedModels",
+          "parameters": {
+            "tunedModelId": {
+              "description": "Optional. The unique id for the tuned model if specified. This value should be up to 40 characters, the first character must be a letter, the last could be a letter or a number. The id must match the regular expression: [a-z]([a-z0-9-]{0,38}[a-z0-9])?.",
+              "type": "string",
+              "location": "query"
+            }
+          },
+          "description": "Creates a tuned model. Intermediate tuning progress (if any) is accessed through the [google.longrunning.Operations] service. Status and results can be accessed through the Operations service. Example: GET /v1/tunedModels/az2mb0bpw6i/operations/000-111-222",
+          "request": {
+            "$ref": "TunedModel"
+          }
+        },
+        "generateText": {
+          "description": "Generates a response from the model given an input message.",
+          "response": {
+            "$ref": "GenerateTextResponse"
+          },
+          "request": {
+            "$ref": "GenerateTextRequest"
+          },
+          "id": "generativelanguage.tunedModels.generateText",
+          "httpMethod": "POST",
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}:generateText",
+          "path": "v1beta/{+model}:generateText",
+          "parameterOrder": [
+            "model"
+          ],
+          "parameters": {
+            "model": {
+              "type": "string",
+              "required": true,
+              "location": "path",
+              "description": "Required. The name of the `Model` or `TunedModel` to use for generating the completion. Examples: models/text-bison-001 tunedModels/sentence-translator-u3b7m",
+              "pattern": "^tunedModels/[^/]+$"
+            }
+          }
+        },
+        "transferOwnership": {
+          "response": {
+            "$ref": "TransferOwnershipResponse"
+          },
+          "description": "Transfers ownership of the tuned model. This is the only way to change ownership of the tuned model. The current owner will be downgraded to writer role.",
+          "httpMethod": "POST",
+          "request": {
+            "$ref": "TransferOwnershipRequest"
+          },
+          "parameters": {
+            "name": {
+              "pattern": "^tunedModels/[^/]+$",
+              "description": "Required. The resource name of the tuned model to transfer ownership. Format: `tunedModels/my-model-id`",
+              "location": "path",
+              "required": true,
+              "type": "string"
+            }
+          },
+          "id": "generativelanguage.tunedModels.transferOwnership",
+          "flatPath": "v1beta/tunedModels/{tunedModelsId}:transferOwnership",
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}:transferOwnership"
+        }
+      }
+    },
+    "corpora": {
+      "resources": {
+        "documents": {
+          "methods": {
+            "delete": {
+              "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}",
+              "id": "generativelanguage.corpora.documents.delete",
+              "description": "Deletes a `Document`.",
+              "path": "v1beta/{+name}",
+              "httpMethod": "DELETE",
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "required": true,
+                  "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                  "type": "string",
+                  "description": "Required. The resource name of the `Document` to delete. Example: `corpora/my-corpus-123/documents/the-doc-abc`"
+                },
+                "force": {
+                  "description": "Optional. If set to true, any `Chunk`s and objects related to this `Document` will also be deleted. If false (the default), a `FAILED_PRECONDITION` error will be returned if `Document` contains any `Chunk`s.",
+                  "location": "query",
+                  "type": "boolean"
+                }
+              },
+              "parameterOrder": [
+                "name"
+              ],
+              "response": {
+                "$ref": "Empty"
+              }
+            },
+            "query": {
+              "parameterOrder": [
+                "name"
+              ],
+              "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}:query",
+              "httpMethod": "POST",
+              "response": {
+                "$ref": "QueryDocumentResponse"
+              },
+              "request": {
+                "$ref": "QueryDocumentRequest"
+              },
+              "description": "Performs semantic search over a `Document`.",
+              "path": "v1beta/{+name}:query",
+              "id": "generativelanguage.corpora.documents.query",
+              "parameters": {
+                "name": {
+                  "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                  "location": "path",
+                  "description": "Required. The name of the `Document` to query. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                  "required": true,
+                  "type": "string"
+                }
+              }
+            },
+            "get": {
+              "parameters": {
+                "name": {
+                  "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                  "location": "path",
+                  "type": "string",
+                  "description": "Required. The name of the `Document` to retrieve. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                  "required": true
+                }
+              },
+              "path": "v1beta/{+name}",
+              "parameterOrder": [
+                "name"
+              ],
+              "description": "Gets information about a specific `Document`.",
+              "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}",
+              "response": {
+                "$ref": "Document"
+              },
+              "httpMethod": "GET",
+              "id": "generativelanguage.corpora.documents.get"
+            },
+            "patch": {
+              "id": "generativelanguage.corpora.documents.patch",
+              "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}",
+              "httpMethod": "PATCH",
+              "response": {
+                "$ref": "Document"
+              },
+              "parameterOrder": [
+                "name"
+              ],
+              "request": {
+                "$ref": "Document"
+              },
+              "path": "v1beta/{+name}",
+              "parameters": {
+                "updateMask": {
+                  "location": "query",
+                  "format": "google-fieldmask",
+                  "description": "Required. The list of fields to update. Currently, this only supports updating `display_name` and `custom_metadata`.",
+                  "type": "string"
+                },
+                "name": {
+                  "location": "path",
+                  "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                  "description": "Immutable. Identifier. The `Document` resource name. The ID (name excluding the \"corpora/*/documents/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a unique name will be derived from `display_name` along with a 12 character random suffix. Example: `corpora/{corpus_id}/documents/my-awesome-doc-123a456b789c`",
+                  "required": true,
+                  "type": "string"
+                }
+              },
+              "description": "Updates a `Document`."
+            },
+            "create": {
+              "parameterOrder": [
+                "parent"
+              ],
+              "flatPath": "v1beta/corpora/{corporaId}/documents",
+              "path": "v1beta/{+parent}/documents",
+              "response": {
+                "$ref": "Document"
+              },
+              "description": "Creates an empty `Document`.",
+              "httpMethod": "POST",
+              "id": "generativelanguage.corpora.documents.create",
+              "request": {
+                "$ref": "Document"
+              },
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "description": "Required. The name of the `Corpus` where this `Document` will be created. Example: `corpora/my-corpus-123`",
+                  "required": true,
+                  "location": "path",
+                  "pattern": "^corpora/[^/]+$"
+                }
+              }
+            },
+            "list": {
+              "response": {
+                "$ref": "ListDocumentsResponse"
+              },
+              "parameters": {
+                "pageToken": {
+                  "description": "Optional. A page token, received from a previous `ListDocuments` call. Provide the `next_page_token` returned in the response as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListDocuments` must match the call that provided the page token.",
+                  "type": "string",
+                  "location": "query"
+                },
+                "pageSize": {
+                  "format": "int32",
+                  "type": "integer",
+                  "location": "query",
+                  "description": "Optional. The maximum number of `Document`s to return (per page). The service may return fewer `Document`s. If unspecified, at most 10 `Document`s will be returned. The maximum size limit is 20 `Document`s per page."
+                },
+                "parent": {
+                  "required": true,
+                  "type": "string",
+                  "description": "Required. The name of the `Corpus` containing `Document`s. Example: `corpora/my-corpus-123`",
+                  "pattern": "^corpora/[^/]+$",
+                  "location": "path"
+                }
+              },
+              "parameterOrder": [
+                "parent"
+              ],
+              "httpMethod": "GET",
+              "id": "generativelanguage.corpora.documents.list",
+              "path": "v1beta/{+parent}/documents",
+              "description": "Lists all `Document`s in a `Corpus`.",
+              "flatPath": "v1beta/corpora/{corporaId}/documents"
+            }
+          },
+          "resources": {
+            "chunks": {
+              "methods": {
+                "patch": {
+                  "httpMethod": "PATCH",
+                  "id": "generativelanguage.corpora.documents.chunks.patch",
+                  "path": "v1beta/{+name}",
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks/{chunksId}",
+                  "description": "Updates a `Chunk`.",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "response": {
+                    "$ref": "Chunk"
+                  },
+                  "parameters": {
+                    "updateMask": {
+                      "description": "Required. The list of fields to update. Currently, this only supports updating `custom_metadata` and `data`.",
+                      "format": "google-fieldmask",
+                      "type": "string",
+                      "location": "query"
+                    },
+                    "name": {
+                      "location": "path",
+                      "description": "Immutable. Identifier. The `Chunk` resource name. The ID (name excluding the \"corpora/*/documents/*/chunks/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a random 12-character unique ID will be generated. Example: `corpora/{corpus_id}/documents/{document_id}/chunks/123a456b789c`",
+                      "pattern": "^corpora/[^/]+/documents/[^/]+/chunks/[^/]+$",
+                      "type": "string",
+                      "required": true
+                    }
+                  },
+                  "request": {
+                    "$ref": "Chunk"
+                  }
+                },
+                "batchUpdate": {
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "httpMethod": "POST",
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks:batchUpdate",
+                  "parameters": {
+                    "parent": {
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                      "description": "Optional. The name of the `Document` containing the `Chunk`s to update. The parent field in every `UpdateChunkRequest` must match this value. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                      "location": "path"
+                    }
+                  },
+                  "request": {
+                    "$ref": "BatchUpdateChunksRequest"
+                  },
+                  "description": "Batch update `Chunk`s.",
+                  "path": "v1beta/{+parent}/chunks:batchUpdate",
+                  "response": {
+                    "$ref": "BatchUpdateChunksResponse"
+                  },
+                  "id": "generativelanguage.corpora.documents.chunks.batchUpdate"
+                },
+                "delete": {
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks/{chunksId}",
+                  "parameters": {
+                    "name": {
+                      "pattern": "^corpora/[^/]+/documents/[^/]+/chunks/[^/]+$",
+                      "description": "Required. The resource name of the `Chunk` to delete. Example: `corpora/my-corpus-123/documents/the-doc-abc/chunks/some-chunk`",
+                      "type": "string",
+                      "required": true,
+                      "location": "path"
+                    }
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "description": "Deletes a `Chunk`.",
+                  "path": "v1beta/{+name}",
+                  "httpMethod": "DELETE",
+                  "id": "generativelanguage.corpora.documents.chunks.delete"
+                },
+                "batchDelete": {
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "id": "generativelanguage.corpora.documents.chunks.batchDelete",
+                  "request": {
+                    "$ref": "BatchDeleteChunksRequest"
+                  },
+                  "parameters": {
+                    "parent": {
+                      "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                      "type": "string",
+                      "required": true,
+                      "description": "Optional. The name of the `Document` containing the `Chunk`s to delete. The parent field in every `DeleteChunkRequest` must match this value. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                      "location": "path"
+                    }
+                  },
+                  "description": "Batch delete `Chunk`s.",
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "httpMethod": "POST",
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks:batchDelete",
+                  "path": "v1beta/{+parent}/chunks:batchDelete"
+                },
+                "batchCreate": {
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "description": "Batch create `Chunk`s.",
+                  "parameters": {
+                    "parent": {
+                      "type": "string",
+                      "description": "Optional. The name of the `Document` where this batch of `Chunk`s will be created. The parent field in every `CreateChunkRequest` must match this value. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                      "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                      "location": "path",
+                      "required": true
+                    }
+                  },
+                  "path": "v1beta/{+parent}/chunks:batchCreate",
+                  "request": {
+                    "$ref": "BatchCreateChunksRequest"
+                  },
+                  "httpMethod": "POST",
+                  "response": {
+                    "$ref": "BatchCreateChunksResponse"
+                  },
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks:batchCreate",
+                  "id": "generativelanguage.corpora.documents.chunks.batchCreate"
+                },
+                "create": {
+                  "httpMethod": "POST",
+                  "request": {
+                    "$ref": "Chunk"
+                  },
+                  "parameters": {
+                    "parent": {
+                      "pattern": "^corpora/[^/]+/documents/[^/]+$",
+                      "required": true,
+                      "location": "path",
+                      "description": "Required. The name of the `Document` where this `Chunk` will be created. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                      "type": "string"
+                    }
+                  },
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks",
+                  "path": "v1beta/{+parent}/chunks",
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "description": "Creates a `Chunk`.",
+                  "id": "generativelanguage.corpora.documents.chunks.create",
+                  "response": {
+                    "$ref": "Chunk"
+                  }
+                },
+                "get": {
+                  "httpMethod": "GET",
+                  "description": "Gets information about a specific `Chunk`.",
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "required": true,
+                      "location": "path",
+                      "pattern": "^corpora/[^/]+/documents/[^/]+/chunks/[^/]+$",
+                      "description": "Required. The name of the `Chunk` to retrieve. Example: `corpora/my-corpus-123/documents/the-doc-abc/chunks/some-chunk`"
+                    }
+                  },
+                  "response": {
+                    "$ref": "Chunk"
+                  },
+                  "path": "v1beta/{+name}",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks/{chunksId}",
+                  "id": "generativelanguage.corpora.documents.chunks.get"
+                },
+                "list": {
+                  "description": "Lists all `Chunk`s in a `Document`.",
+                  "id": "generativelanguage.corpora.documents.chunks.list",
+                  "response": {
+                    "$ref": "ListChunksResponse"
+                  },
+                  "parameters": {
+                    "parent": {
+                      "location": "path",
+                      "type": "string",
+                      "required": true,
+                      "description": "Required. The name of the `Document` containing `Chunk`s. Example: `corpora/my-corpus-123/documents/the-doc-abc`",
+                      "pattern": "^corpora/[^/]+/documents/[^/]+$"
+                    },
+                    "pageSize": {
+                      "location": "query",
+                      "type": "integer",
+                      "description": "Optional. The maximum number of `Chunk`s to return (per page). The service may return fewer `Chunk`s. If unspecified, at most 10 `Chunk`s will be returned. The maximum size limit is 100 `Chunk`s per page.",
+                      "format": "int32"
+                    },
+                    "pageToken": {
+                      "location": "query",
+                      "type": "string",
+                      "description": "Optional. A page token, received from a previous `ListChunks` call. Provide the `next_page_token` returned in the response as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListChunks` must match the call that provided the page token."
+                    }
+                  },
+                  "httpMethod": "GET",
+                  "path": "v1beta/{+parent}/chunks",
+                  "flatPath": "v1beta/corpora/{corporaId}/documents/{documentsId}/chunks",
+                  "parameterOrder": [
+                    "parent"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "permissions": {
+          "methods": {
+            "delete": {
+              "response": {
+                "$ref": "Empty"
+              },
+              "httpMethod": "DELETE",
+              "parameterOrder": [
+                "name"
+              ],
+              "id": "generativelanguage.corpora.permissions.delete",
+              "parameters": {
+                "name": {
+                  "description": "Required. The resource name of the permission. Formats: `tunedModels/{tuned_model}/permissions/{permission}` `corpora/{corpus}/permissions/{permission}`",
+                  "type": "string",
+                  "pattern": "^corpora/[^/]+/permissions/[^/]+$",
+                  "required": true,
+                  "location": "path"
+                }
+              },
+              "path": "v1beta/{+name}",
+              "description": "Deletes the permission.",
+              "flatPath": "v1beta/corpora/{corporaId}/permissions/{permissionsId}"
+            },
+            "create": {
+              "flatPath": "v1beta/corpora/{corporaId}/permissions",
+              "response": {
+                "$ref": "Permission"
+              },
+              "parameterOrder": [
+                "parent"
+              ],
+              "request": {
+                "$ref": "Permission"
+              },
+              "parameters": {
+                "parent": {
+                  "pattern": "^corpora/[^/]+$",
+                  "location": "path",
+                  "type": "string",
+                  "required": true,
+                  "description": "Required. The parent resource of the `Permission`. Formats: `tunedModels/{tuned_model}` `corpora/{corpus}`"
+                }
+              },
+              "description": "Create a permission to a specific resource.",
+              "httpMethod": "POST",
+              "path": "v1beta/{+parent}/permissions",
+              "id": "generativelanguage.corpora.permissions.create"
+            },
+            "patch": {
+              "path": "v1beta/{+name}",
+              "request": {
+                "$ref": "Permission"
+              },
+              "id": "generativelanguage.corpora.permissions.patch",
+              "httpMethod": "PATCH",
+              "flatPath": "v1beta/corpora/{corporaId}/permissions/{permissionsId}",
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "updateMask": {
+                  "type": "string",
+                  "format": "google-fieldmask",
+                  "location": "query",
+                  "description": "Required. The list of fields to update. Accepted ones: - role (`Permission.role` field)"
+                },
+                "name": {
+                  "description": "Output only. Identifier. The permission name. A unique name will be generated on create. Examples: tunedModels/{tuned_model}/permissions/{permission} corpora/{corpus}/permissions/{permission} Output only.",
+                  "pattern": "^corpora/[^/]+/permissions/[^/]+$",
+                  "location": "path",
+                  "type": "string",
+                  "required": true
+                }
+              },
+              "response": {
+                "$ref": "Permission"
+              },
+              "description": "Updates the permission."
+            },
+            "list": {
+              "path": "v1beta/{+parent}/permissions",
+              "parameterOrder": [
+                "parent"
+              ],
+              "description": "Lists permissions for the specific resource.",
+              "parameters": {
+                "pageSize": {
+                  "location": "query",
+                  "description": "Optional. The maximum number of `Permission`s to return (per page). The service may return fewer permissions. If unspecified, at most 10 permissions will be returned. This method returns at most 1000 permissions per page, even if you pass larger page_size.",
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "parent": {
+                  "pattern": "^corpora/[^/]+$",
+                  "description": "Required. The parent resource of the permissions. Formats: `tunedModels/{tuned_model}` `corpora/{corpus}`",
+                  "required": true,
+                  "type": "string",
+                  "location": "path"
+                },
+                "pageToken": {
+                  "type": "string",
+                  "location": "query",
+                  "description": "Optional. A page token, received from a previous `ListPermissions` call. Provide the `page_token` returned by one request as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListPermissions` must match the call that provided the page token."
+                }
+              },
+              "response": {
+                "$ref": "ListPermissionsResponse"
+              },
+              "id": "generativelanguage.corpora.permissions.list",
+              "flatPath": "v1beta/corpora/{corporaId}/permissions",
+              "httpMethod": "GET"
+            },
+            "get": {
+              "description": "Gets information about a specific Permission.",
+              "parameterOrder": [
+                "name"
+              ],
+              "flatPath": "v1beta/corpora/{corporaId}/permissions/{permissionsId}",
+              "parameters": {
+                "name": {
+                  "required": true,
+                  "type": "string",
+                  "description": "Required. The resource name of the permission. Formats: `tunedModels/{tuned_model}/permissions/{permission}` `corpora/{corpus}/permissions/{permission}`",
+                  "location": "path",
+                  "pattern": "^corpora/[^/]+/permissions/[^/]+$"
+                }
+              },
+              "response": {
+                "$ref": "Permission"
+              },
+              "path": "v1beta/{+name}",
+              "id": "generativelanguage.corpora.permissions.get",
+              "httpMethod": "GET"
+            }
+          }
+        }
+      },
+      "methods": {
+        "list": {
+          "httpMethod": "GET",
+          "flatPath": "v1beta/corpora",
+          "path": "v1beta/corpora",
+          "description": "Lists all `Corpora` owned by the user.",
+          "parameterOrder": [],
+          "id": "generativelanguage.corpora.list",
+          "response": {
+            "$ref": "ListCorporaResponse"
+          },
+          "parameters": {
+            "pageToken": {
+              "location": "query",
+              "description": "Optional. A page token, received from a previous `ListCorpora` call. Provide the `next_page_token` returned in the response as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListCorpora` must match the call that provided the page token.",
+              "type": "string"
+            },
+            "pageSize": {
+              "description": "Optional. The maximum number of `Corpora` to return (per page). The service may return fewer `Corpora`. If unspecified, at most 10 `Corpora` will be returned. The maximum size limit is 20 `Corpora` per page.",
+              "format": "int32",
+              "location": "query",
+              "type": "integer"
+            }
+          }
+        },
+        "get": {
+          "response": {
+            "$ref": "Corpus"
+          },
+          "flatPath": "v1beta/corpora/{corporaId}",
+          "id": "generativelanguage.corpora.get",
+          "parameters": {
+            "name": {
+              "description": "Required. The name of the `Corpus`. Example: `corpora/my-corpus-123`",
+              "location": "path",
+              "type": "string",
+              "required": true,
+              "pattern": "^corpora/[^/]+$"
+            }
+          },
+          "description": "Gets information about a specific `Corpus`.",
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}",
+          "httpMethod": "GET"
+        },
+        "delete": {
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}",
+          "id": "generativelanguage.corpora.delete",
+          "parameters": {
+            "force": {
+              "location": "query",
+              "type": "boolean",
+              "description": "Optional. If set to true, any `Document`s and objects related to this `Corpus` will also be deleted. If false (the default), a `FAILED_PRECONDITION` error will be returned if `Corpus` contains any `Document`s."
+            },
+            "name": {
+              "description": "Required. The resource name of the `Corpus`. Example: `corpora/my-corpus-123`",
+              "required": true,
+              "pattern": "^corpora/[^/]+$",
+              "type": "string",
+              "location": "path"
+            }
+          },
+          "flatPath": "v1beta/corpora/{corporaId}",
+          "description": "Deletes a `Corpus`.",
+          "httpMethod": "DELETE",
+          "response": {
+            "$ref": "Empty"
+          }
+        },
+        "query": {
+          "parameters": {
+            "name": {
+              "pattern": "^corpora/[^/]+$",
+              "description": "Required. The name of the `Corpus` to query. Example: `corpora/my-corpus-123`",
+              "location": "path",
+              "type": "string",
+              "required": true
+            }
+          },
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}:query",
+          "response": {
+            "$ref": "QueryCorpusResponse"
+          },
+          "httpMethod": "POST",
+          "request": {
+            "$ref": "QueryCorpusRequest"
+          },
+          "id": "generativelanguage.corpora.query",
+          "flatPath": "v1beta/corpora/{corporaId}:query",
+          "description": "Performs semantic search over a `Corpus`."
+        },
+        "create": {
+          "flatPath": "v1beta/corpora",
+          "path": "v1beta/corpora",
+          "id": "generativelanguage.corpora.create",
+          "parameters": {},
+          "parameterOrder": [],
+          "description": "Creates an empty `Corpus`.",
+          "request": {
+            "$ref": "Corpus"
+          },
+          "httpMethod": "POST",
+          "response": {
+            "$ref": "Corpus"
+          }
+        },
+        "patch": {
+          "id": "generativelanguage.corpora.patch",
+          "description": "Updates a `Corpus`.",
+          "request": {
+            "$ref": "Corpus"
+          },
+          "parameterOrder": [
+            "name"
+          ],
+          "path": "v1beta/{+name}",
+          "response": {
+            "$ref": "Corpus"
+          },
+          "parameters": {
+            "updateMask": {
+              "type": "string",
+              "location": "query",
+              "format": "google-fieldmask",
+              "description": "Required. The list of fields to update. Currently, this only supports updating `display_name`."
+            },
+            "name": {
+              "type": "string",
+              "pattern": "^corpora/[^/]+$",
+              "required": true,
+              "description": "Immutable. Identifier. The `Corpus` resource name. The ID (name excluding the \"corpora/\" prefix) can contain up to 40 characters that are lowercase alphanumeric or dashes (-). The ID cannot start or end with a dash. If the name is empty on create, a unique name will be derived from `display_name` along with a 12 character random suffix. Example: `corpora/my-awesome-corpora-123a456b789c`",
+              "location": "path"
+            }
+          },
+          "httpMethod": "PATCH",
+          "flatPath": "v1beta/corpora/{corporaId}"
+        }
+      }
+    },
+    "models": {
+      "methods": {
+        "streamGenerateContent": {
+          "parameterOrder": [
+            "model"
+          ],
+          "path": "v1beta/{+model}:streamGenerateContent",
+          "description": "Generates a streamed response from the model given an input `GenerateContentRequest`.",
+          "httpMethod": "POST",
+          "flatPath": "v1beta/models/{modelsId}:streamGenerateContent",
+          "response": {
+            "$ref": "GenerateContentResponse"
+          },
+          "parameters": {
+            "model": {
+              "location": "path",
+              "pattern": "^models/[^/]+$",
+              "description": "Required. The name of the `Model` to use for generating the completion. Format: `name=models/{model}`.",
+              "type": "string",
+              "required": true
+            }
+          },
+          "request": {
+            "$ref": "GenerateContentRequest"
+          },
+          "id": "generativelanguage.models.streamGenerateContent"
+        },
+        "countMessageTokens": {
+          "flatPath": "v1beta/models/{modelsId}:countMessageTokens",
+          "httpMethod": "POST",
+          "parameters": {
+            "model": {
+              "pattern": "^models/[^/]+$",
+              "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+              "location": "path",
+              "type": "string",
+              "required": true
+            }
+          },
+          "id": "generativelanguage.models.countMessageTokens",
+          "request": {
+            "$ref": "CountMessageTokensRequest"
+          },
+          "description": "Runs a model's tokenizer on a string and returns the token count.",
+          "response": {
+            "$ref": "CountMessageTokensResponse"
+          },
+          "path": "v1beta/{+model}:countMessageTokens",
+          "parameterOrder": [
+            "model"
+          ]
+        },
+        "list": {
+          "flatPath": "v1beta/models",
+          "id": "generativelanguage.models.list",
+          "parameters": {
+            "pageToken": {
+              "description": "A page token, received from a previous `ListModels` call. Provide the `page_token` returned by one request as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to `ListModels` must match the call that provided the page token.",
+              "type": "string",
+              "location": "query"
+            },
+            "pageSize": {
+              "description": "The maximum number of `Models` to return (per page). The service may return fewer models. If unspecified, at most 50 models will be returned per page. This method returns at most 1000 models per page, even if you pass a larger page_size.",
+              "type": "integer",
+              "location": "query",
+              "format": "int32"
+            }
+          },
+          "parameterOrder": [],
+          "description": "Lists models available through the API.",
+          "response": {
+            "$ref": "ListModelsResponse"
+          },
+          "path": "v1beta/models",
+          "httpMethod": "GET"
+        },
+        "batchEmbedContents": {
+          "request": {
+            "$ref": "BatchEmbedContentsRequest"
+          },
+          "parameterOrder": [
+            "model"
+          ],
+          "flatPath": "v1beta/models/{modelsId}:batchEmbedContents",
+          "path": "v1beta/{+model}:batchEmbedContents",
+          "httpMethod": "POST",
+          "parameters": {
+            "model": {
+              "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+              "pattern": "^models/[^/]+$",
+              "required": true,
+              "type": "string",
+              "location": "path"
+            }
+          },
+          "response": {
+            "$ref": "BatchEmbedContentsResponse"
+          },
+          "id": "generativelanguage.models.batchEmbedContents",
+          "description": "Generates multiple embeddings from the model given input text in a synchronous call."
+        },
+        "countTokens": {
+          "flatPath": "v1beta/models/{modelsId}:countTokens",
+          "httpMethod": "POST",
+          "path": "v1beta/{+model}:countTokens",
+          "request": {
+            "$ref": "CountTokensRequest"
+          },
+          "id": "generativelanguage.models.countTokens",
+          "parameterOrder": [
+            "model"
+          ],
+          "parameters": {
+            "model": {
+              "pattern": "^models/[^/]+$",
+              "type": "string",
+              "required": true,
+              "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+              "location": "path"
+            }
+          },
+          "description": "Runs a model's tokenizer on input content and returns the token count.",
+          "response": {
+            "$ref": "CountTokensResponse"
+          }
+        },
+        "generateContent": {
+          "description": "Generates a response from the model given an input `GenerateContentRequest`.",
+          "parameters": {
+            "model": {
+              "description": "Required. The name of the `Model` to use for generating the completion. Format: `name=models/{model}`.",
+              "required": true,
+              "pattern": "^models/[^/]+$",
+              "type": "string",
+              "location": "path"
+            }
+          },
+          "id": "generativelanguage.models.generateContent",
+          "httpMethod": "POST",
+          "parameterOrder": [
+            "model"
+          ],
+          "request": {
+            "$ref": "GenerateContentRequest"
+          },
+          "path": "v1beta/{+model}:generateContent",
+          "flatPath": "v1beta/models/{modelsId}:generateContent",
+          "response": {
+            "$ref": "GenerateContentResponse"
+          }
+        },
+        "get": {
+          "parameterOrder": [
+            "name"
+          ],
+          "parameters": {
+            "name": {
+              "pattern": "^models/[^/]+$",
+              "location": "path",
+              "type": "string",
+              "required": true,
+              "description": "Required. The resource name of the model. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`"
+            }
+          },
+          "httpMethod": "GET",
+          "flatPath": "v1beta/models/{modelsId}",
+          "id": "generativelanguage.models.get",
+          "response": {
+            "$ref": "Model"
+          },
+          "description": "Gets information about a specific Model.",
+          "path": "v1beta/{+name}"
+        },
+        "generateText": {
+          "parameters": {
+            "model": {
+              "location": "path",
+              "type": "string",
+              "description": "Required. The name of the `Model` or `TunedModel` to use for generating the completion. Examples: models/text-bison-001 tunedModels/sentence-translator-u3b7m",
+              "required": true,
+              "pattern": "^models/[^/]+$"
+            }
+          },
+          "parameterOrder": [
+            "model"
+          ],
+          "description": "Generates a response from the model given an input message.",
+          "httpMethod": "POST",
+          "path": "v1beta/{+model}:generateText",
+          "response": {
+            "$ref": "GenerateTextResponse"
+          },
+          "flatPath": "v1beta/models/{modelsId}:generateText",
+          "request": {
+            "$ref": "GenerateTextRequest"
+          },
+          "id": "generativelanguage.models.generateText"
+        },
+        "embedText": {
+          "parameters": {
+            "model": {
+              "type": "string",
+              "pattern": "^models/[^/]+$",
+              "description": "Required. The model name to use with the format model=models/{model}.",
+              "location": "path",
+              "required": true
+            }
+          },
+          "description": "Generates an embedding from the model given an input message.",
+          "parameterOrder": [
+            "model"
+          ],
+          "request": {
+            "$ref": "EmbedTextRequest"
+          },
+          "httpMethod": "POST",
+          "path": "v1beta/{+model}:embedText",
+          "flatPath": "v1beta/models/{modelsId}:embedText",
+          "response": {
+            "$ref": "EmbedTextResponse"
+          },
+          "id": "generativelanguage.models.embedText"
+        },
+        "generateAnswer": {
+          "flatPath": "v1beta/models/{modelsId}:generateAnswer",
+          "httpMethod": "POST",
+          "id": "generativelanguage.models.generateAnswer",
+          "response": {
+            "$ref": "GenerateAnswerResponse"
+          },
+          "parameterOrder": [
+            "model"
+          ],
+          "description": "Generates a grounded answer from the model given an input `GenerateAnswerRequest`.",
+          "parameters": {
+            "model": {
+              "required": true,
+              "type": "string",
+              "description": "Required. The name of the `Model` to use for generating the grounded response. Format: `model=models/{model}`.",
+              "pattern": "^models/[^/]+$",
+              "location": "path"
+            }
+          },
+          "request": {
+            "$ref": "GenerateAnswerRequest"
+          },
+          "path": "v1beta/{+model}:generateAnswer"
+        },
+        "batchEmbedText": {
+          "parameters": {
+            "model": {
+              "description": "Required. The name of the `Model` to use for generating the embedding. Examples: models/embedding-gecko-001",
+              "location": "path",
+              "type": "string",
+              "required": true,
+              "pattern": "^models/[^/]+$"
+            }
+          },
+          "description": "Generates multiple embeddings from the model given input text in a synchronous call.",
+          "request": {
+            "$ref": "BatchEmbedTextRequest"
+          },
+          "parameterOrder": [
+            "model"
+          ],
+          "path": "v1beta/{+model}:batchEmbedText",
+          "id": "generativelanguage.models.batchEmbedText",
+          "httpMethod": "POST",
+          "response": {
+            "$ref": "BatchEmbedTextResponse"
+          },
+          "flatPath": "v1beta/models/{modelsId}:batchEmbedText"
+        },
+        "generateMessage": {
+          "parameterOrder": [
+            "model"
+          ],
+          "parameters": {
+            "model": {
+              "location": "path",
+              "required": true,
+              "type": "string",
+              "pattern": "^models/[^/]+$",
+              "description": "Required. The name of the model to use. Format: `name=models/{model}`."
+            }
+          },
+          "path": "v1beta/{+model}:generateMessage",
+          "flatPath": "v1beta/models/{modelsId}:generateMessage",
+          "request": {
+            "$ref": "GenerateMessageRequest"
+          },
+          "response": {
+            "$ref": "GenerateMessageResponse"
+          },
+          "id": "generativelanguage.models.generateMessage",
+          "description": "Generates a response from the model given an input `MessagePrompt`.",
+          "httpMethod": "POST"
+        },
+        "countTextTokens": {
+          "parameters": {
+            "model": {
+              "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+              "location": "path",
+              "required": true,
+              "pattern": "^models/[^/]+$",
+              "type": "string"
+            }
+          },
+          "description": "Runs a model's tokenizer on a text and returns the token count.",
+          "flatPath": "v1beta/models/{modelsId}:countTextTokens",
+          "parameterOrder": [
+            "model"
+          ],
+          "id": "generativelanguage.models.countTextTokens",
+          "httpMethod": "POST",
+          "response": {
+            "$ref": "CountTextTokensResponse"
+          },
+          "request": {
+            "$ref": "CountTextTokensRequest"
+          },
+          "path": "v1beta/{+model}:countTextTokens"
+        },
+        "embedContent": {
+          "parameters": {
+            "model": {
+              "pattern": "^models/[^/]+$",
+              "required": true,
+              "type": "string",
+              "description": "Required. The model's resource name. This serves as an ID for the Model to use. This name should match a model name returned by the `ListModels` method. Format: `models/{model}`",
+              "location": "path"
+            }
+          },
+          "httpMethod": "POST",
+          "request": {
+            "$ref": "EmbedContentRequest"
+          },
+          "response": {
+            "$ref": "EmbedContentResponse"
+          },
+          "id": "generativelanguage.models.embedContent",
+          "flatPath": "v1beta/models/{modelsId}:embedContent",
+          "path": "v1beta/{+model}:embedContent",
+          "parameterOrder": [
+            "model"
+          ],
+          "description": "Generates an embedding from the model given an input `Content`."
+        }
+      }
+    },
+    "media": {
+      "methods": {
+        "upload": {
+          "id": "generativelanguage.media.upload",
+          "parameterOrder": [],
+          "supportsMediaUpload": true,
+          "flatPath": "v1beta/files",
+          "request": {
+            "$ref": "CreateFileRequest"
+          },
+          "parameters": {},
+          "mediaUpload": {
+            "maxSize": "2147483648",
+            "accept": [
+              "*/*"
+            ],
+            "protocols": {
+              "simple": {
+                "path": "/upload/v1beta/files",
+                "multipart": true
+              },
+              "resumable": {
+                "path": "/resumable/upload/v1beta/files",
+                "multipart": true
+              }
+            }
+          },
+          "response": {
+            "$ref": "CreateFileResponse"
+          },
+          "httpMethod": "POST",
+          "description": "Creates a `File`.",
+          "path": "v1beta/files"
+        }
+      }
+    },
+    "files": {
+      "methods": {
+        "delete": {
+          "httpMethod": "DELETE",
+          "description": "Deletes the `File`.",
+          "parameters": {
+            "name": {
+              "required": true,
+              "pattern": "^files/[^/]+$",
+              "location": "path",
+              "type": "string",
+              "description": "Required. The name of the `File` to delete. Example: `files/abc-123`"
+            }
+          },
+          "flatPath": "v1beta/files/{filesId}",
+          "parameterOrder": [
+            "name"
+          ],
+          "response": {
+            "$ref": "Empty"
+          },
+          "id": "generativelanguage.files.delete",
+          "path": "v1beta/{+name}"
+        },
+        "list": {
+          "parameters": {
+            "pageToken": {
+              "type": "string",
+              "location": "query",
+              "description": "Optional. A page token from a previous `ListFiles` call."
+            },
+            "pageSize": {
+              "type": "integer",
+              "description": "Optional. Maximum number of `File`s to return per page. If unspecified, defaults to 10. Maximum `page_size` is 100.",
+              "location": "query",
+              "format": "int32"
+            }
+          },
+          "flatPath": "v1beta/files",
+          "path": "v1beta/files",
+          "parameterOrder": [],
+          "id": "generativelanguage.files.list",
+          "response": {
+            "$ref": "ListFilesResponse"
+          },
+          "description": "Lists the metadata for `File`s owned by the requesting project.",
+          "httpMethod": "GET"
+        },
+        "get": {
+          "path": "v1beta/{+name}",
+          "parameterOrder": [
+            "name"
+          ],
+          "description": "Gets the metadata for the given `File`.",
+          "httpMethod": "GET",
+          "flatPath": "v1beta/files/{filesId}",
+          "response": {
+            "$ref": "File"
+          },
+          "parameters": {
+            "name": {
+              "required": true,
+              "pattern": "^files/[^/]+$",
+              "type": "string",
+              "location": "path",
+              "description": "Required. The name of the `File` to get. Example: `files/abc-123`"
+            }
+          },
+          "id": "generativelanguage.files.get"
+        }
+      }
+    }
+  },
+  "basePath": "",
+  "mtlsRootUrl": "https://generativelanguage.mtls.googleapis.com/",
+  "baseUrl": "https://generativelanguage.googleapis.com/",
+  "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information. including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
+  "protocol": "rest",
+  "discoveryVersion": "v1",
+  "version": "v1beta",
+  "parameters": {
+    "uploadType": {
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "location": "query"
+    },
+    "quotaUser": {
+      "type": "string",
+      "location": "query",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "alt": {
+      "description": "Data format for response.",
+      "location": "query",
+      "default": "json",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "type": "string",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ]
+    },
+    "oauth_token": {
+      "type": "string",
+      "description": "OAuth 2.0 token for the current user.",
+      "location": "query"
+    },
+    "upload_protocol": {
+      "type": "string",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "location": "query"
+    },
+    "prettyPrint": {
+      "location": "query",
+      "default": "true",
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean"
+    },
+    "fields": {
+      "location": "query",
+      "type": "string",
+      "description": "Selector specifying which fields to include in a partial response."
+    },
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "type": "string",
+      "location": "query"
+    },
+    "$.xgafv": {
+      "type": "string",
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ],
+      "location": "query",
+      "description": "V1 error format."
+    },
+    "callback": {
+      "type": "string",
+      "location": "query",
+      "description": "JSONP"
+    },
+    "access_token": {
+      "type": "string",
+      "description": "OAuth access token.",
+      "location": "query"
+    }
+  },
+  "icons": {
+    "x32": "http://www.google.com/images/icons/product/search-32.gif",
+    "x16": "http://www.google.com/images/icons/product/search-16.gif"
+  },
+  "id": "generativelanguage:v1beta",
+  "version_module": true,
+  "kind": "discovery#restDescription"
+}

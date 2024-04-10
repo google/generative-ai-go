@@ -101,6 +101,14 @@ func (f FunctionResponse) toPart() *pb.Part {
 	}
 }
 
+func (fd FileData) toPart() *pb.Part {
+	return &pb.Part{
+		Data: &pb.Part_FileData{
+			FileData: fd.toProto(),
+		},
+	}
+}
+
 // Ptr returns a pointer to its argument.
 // It can be used to initialize pointer fields:
 //

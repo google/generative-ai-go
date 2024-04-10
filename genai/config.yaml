@@ -62,6 +62,15 @@ types:
       docVerb: contains
       removeOtherDoc: true
 
+    FileData:
+      fields:
+        MimeType:
+          name: MIMEType
+        FileUri:
+          name: URI
+          # TODO(jba): support field doc in protoveneer
+          # doc: 'The URI returned from UploadFile or GetFile.'
+
     GenerationConfig:
 
     SafetySetting:
@@ -137,6 +146,22 @@ types:
       valueNames:
         FunctionCallingConfig_MODE_UNSPECIFIED: FunctionCallingUnspecified
 
+    File:
+      fields:
+        CreateTime:
+          # TODO(jba): support time in protoveneer
+          omit: true
+          # type: time.Time
+        UpdateTime:
+          omit: true
+          # type: time.Time
+        ExpirationTime:
+          omit: true
+          # type: time.Time
+        Uri:
+          name: URI
+        MimeType:
+          name: MIMEType
 
 
 # Omit everything not explicitly configured.

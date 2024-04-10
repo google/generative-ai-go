@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file is solely to support the discovery client, used for file
-// upload. See files.go.
+package genai
 
-package internal
+// import (
+// 	"context"
+// 	"fmt"
+// 	"strings"
+// 	"testing"
 
-const Version = "0.0.0-generative-ai-go"
+// import  gl "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta"
+
+// 	gl "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta"
+// 	"google.golang.org/api/option"
+// )

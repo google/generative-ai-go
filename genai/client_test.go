@@ -371,6 +371,63 @@ func TestLive(t *testing.T) {
 			weatherChat(t, schema, FunctionCallingNone)
 		})
 	})
+	t.Run("files", func(t *testing.T) {
+		const validModel = "gemini-1.5-pro-eval"
+		if *modelName != validModel {
+			t.Skipf("need model %q", validModel)
+		}
+		f, err := os.Open(filepath.Join("testdata", imageFile))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		// Upload a file. Using the empty string as a name will generate a unique name.
+		file, err := client.UploadFile(ctx, "", f, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("uploaded %s, MIME type %q", file.Name, file.MIMEType)
+		defer func() {
+			// Delete the file when the test is done.
+			if err := client.DeleteFile(ctx, file.Name); err != nil {
+				t.Fatal(err)
+			}
+		}()
+		// Sanity checks on the returned file.
+		if !strings.HasPrefix(file.Name, "files/") {
+			t.Fatalf("got %q, want file name beginning 'files/'", file.Name)
+		}
+		if got, want := file.SizeBytes, int64(9218); got != want {
+			t.Errorf("got file size %d, want %d", got, want)
+		}
+		// Don't test GetFile, because UploadFile already calls GetFile.
+		// ListFiles should return the file we just uploaded, and maybe other files too.
+		iter := client.ListFiles(ctx)
+		found := false
+		for {
+			ifile, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if ifile.Name == file.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("ListFiles did not return the uploaded file %s", file.Name)
+		}
+
+		// Use the uploaded file to generate content.
+		resp, err := model.GenerateContent(ctx, FileData{URI: file.URI})
+		if err != nil {
+			t.Fatal(err)
+		}
+		checkMatch(t, responseString(resp), "picture|image", "person", "computer|laptop")
+	})
 }
 
 func TestJoinResponses(t *testing.T) {
