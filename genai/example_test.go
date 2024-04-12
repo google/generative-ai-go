@@ -394,6 +394,40 @@ func ExampleTool() {
 	printResponse(res)
 }
 
+func ExampleToolConifg() {
+	// This example shows how to affect how the model uses the tools provided to it.
+	// By setting the ToolConfig, you can disable function calling.
+
+	// Assume we have created a Model and have set its Tools field with some functions.
+	// See the Example for Tool for details.
+	var model *genai.GenerativeModel
+
+	// By default, the model will use the functions in its responses if it thinks they are
+	// relevant, by returning FunctionCall parts.
+	// Here we set the model's ToolConfig to disable function calling completely.
+	model.ToolConfig = &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode: genai.FunctionCallingNone,
+		},
+	}
+
+	// Subsequent calls to ChatSession.SendMessage will not result in FunctionCall responses.
+	session := model.StartChat()
+	res, err := session.SendMessage(context.Background(), genai.Text("What is the weather like in New York?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, part := range res.Candidates[0].Content.Parts {
+		if _, ok := part.(genai.FunctionCall); ok {
+			log.Fatal("did not expect FunctionCall")
+		}
+	}
+
+	// It is also possible to force a function call by using FunctionCallingAny
+	// instead of FunctionCallingNone. See the documentation for FunctionCallingMode
+	// for details.
+}
+
 func printResponse(resp *genai.GenerateContentResponse) {
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {

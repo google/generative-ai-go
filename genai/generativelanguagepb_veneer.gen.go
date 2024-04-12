@@ -400,6 +400,74 @@ func (FunctionCall) fromProto(p *pb.FunctionCall) *FunctionCall {
 	}
 }
 
+// FunctionCallingConfig holds configuration for function calling.
+type FunctionCallingConfig struct {
+	// Optional. Specifies the mode in which function calling should execute. If
+	// unspecified, the default value will be set to AUTO.
+	Mode FunctionCallingMode
+	// Optional. A set of function names that, when provided, limits the functions
+	// the model will call.
+	//
+	// This should only be set when the Mode is ANY. Function names
+	// should match [FunctionDeclaration.name]. With mode set to ANY, model will
+	// predict a function call from the set of function names provided.
+	AllowedFunctionNames []string
+}
+
+func (v *FunctionCallingConfig) toProto() *pb.FunctionCallingConfig {
+	if v == nil {
+		return nil
+	}
+	return &pb.FunctionCallingConfig{
+		Mode:                 pb.FunctionCallingConfig_Mode(v.Mode),
+		AllowedFunctionNames: v.AllowedFunctionNames,
+	}
+}
+
+func (FunctionCallingConfig) fromProto(p *pb.FunctionCallingConfig) *FunctionCallingConfig {
+	if p == nil {
+		return nil
+	}
+	return &FunctionCallingConfig{
+		Mode:                 FunctionCallingMode(p.Mode),
+		AllowedFunctionNames: p.AllowedFunctionNames,
+	}
+}
+
+// FunctionCallingMode is defines the execution behavior for function calling by defining the
+// execution mode.
+type FunctionCallingMode int32
+
+const (
+	// FunctionCallingUnspecified means unspecified function calling mode. This value should not be used.
+	FunctionCallingUnspecified FunctionCallingMode = 0
+	// FunctionCallingAuto means default model behavior, model decides to predict either a function call
+	// or a natural language repspose.
+	FunctionCallingAuto FunctionCallingMode = 1
+	// FunctionCallingAny means model is constrained to always predicting a function call only.
+	// If "allowed_function_names" are set, the predicted function call will be
+	// limited to any one of "allowed_function_names", else the predicted
+	// function call will be any one of the provided "function_declarations".
+	FunctionCallingAny FunctionCallingMode = 2
+	// FunctionCallingNone means model will not predict any function call. Model behavior is same as when
+	// not passing any function declarations.
+	FunctionCallingNone FunctionCallingMode = 3
+)
+
+var namesForFunctionCallingMode = map[FunctionCallingMode]string{
+	FunctionCallingUnspecified: "FunctionCallingUnspecified",
+	FunctionCallingAuto:        "FunctionCallingAuto",
+	FunctionCallingAny:         "FunctionCallingAny",
+	FunctionCallingNone:        "FunctionCallingNone",
+}
+
+func (v FunctionCallingMode) String() string {
+	if n, ok := namesForFunctionCallingMode[v]; ok {
+		return n
+	}
+	return fmt.Sprintf("FunctionCallingMode(%d)", v)
+}
+
 // FunctionDeclaration is structured representation of a function declaration as defined by the
 // [OpenAPI 3.03 specification](https://spec.openapis.org/oas/v3.0.3). Included
 // in this declaration are the function name and parameters. This
@@ -517,7 +585,7 @@ func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *Generat
 type GenerationConfig struct {
 	// Optional. Number of generated responses to return.
 	//
-	// This value must be between [1, 8], inclusive. If unset, this will default
+	// Currently, this value can only be set to 1. If unset, this will default
 	// to 1.
 	CandidateCount *int32
 	// Optional. The set of character sequences (up to 5) that will stop output
@@ -527,17 +595,15 @@ type GenerationConfig struct {
 	StopSequences []string
 	// Optional. The maximum number of tokens to include in a candidate.
 	//
-	// If unset, this will default to output_token_limit specified in the `Model`
-	// specification.
+	// Note: The default value varies by model, see the `Model.output_token_limit`
+	// attribute of the `Model` returned from the `getModel` function.
 	MaxOutputTokens *int32
 	// Optional. Controls the randomness of the output.
-	// Note: The default value varies by model, see the `Model.temperature`
-	// attribute of the `Model` returned the `getModel` function.
 	//
-	// Values can range from [0.0,1.0],
-	// inclusive. A value closer to 1.0 will produce responses that are more
-	// varied and creative, while a value closer to 0.0 will typically result in
-	// more straightforward responses from the model.
+	// Note: The default value varies by model, see the `Model.temperature`
+	// attribute of the `Model` returned from the `getModel` function.
+	//
+	// Values can range from [0.0, infinity).
 	Temperature *float32
 	// Optional. The maximum cumulative probability of tokens to consider when
 	// sampling.
@@ -550,17 +616,16 @@ type GenerationConfig struct {
 	// of tokens based on the cumulative probability.
 	//
 	// Note: The default value varies by model, see the `Model.top_p`
-	// attribute of the `Model` returned the `getModel` function.
+	// attribute of the `Model` returned from the `getModel` function.
 	TopP *float32
 	// Optional. The maximum number of tokens to consider when sampling.
 	//
 	// The model uses combined Top-k and nucleus sampling.
 	//
 	// Top-k sampling considers the set of `top_k` most probable tokens.
-	// Defaults to 40.
 	//
 	// Note: The default value varies by model, see the `Model.top_k`
-	// attribute of the `Model` returned the `getModel` function.
+	// attribute of the `Model` returned from the `getModel` function.
 	TopK *int32
 }
 
@@ -634,9 +699,9 @@ const (
 	HarmCategoryUnspecified HarmCategory = 0
 	// HarmCategoryDerogatory means negative or harmful comments targeting identity and/or protected attribute.
 	HarmCategoryDerogatory HarmCategory = 1
-	// HarmCategoryToxicity means content that is rude, disrepspectful, or profane.
+	// HarmCategoryToxicity means content that is rude, disrespectful, or profane.
 	HarmCategoryToxicity HarmCategory = 2
-	// HarmCategoryViolence means describes scenarios depictng violence against an individual or group, or
+	// HarmCategoryViolence means describes scenarios depicting violence against an individual or group, or
 	// general descriptions of gore.
 	HarmCategoryViolence HarmCategory = 3
 	// HarmCategorySexual means contains references to sexual acts or other lewd content.
@@ -1041,6 +1106,31 @@ func (Tool) fromProto(p *pb.Tool) *Tool {
 	}
 	return &Tool{
 		FunctionDeclarations: support.TransformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
+	}
+}
+
+// ToolConfig is the Tool configuration containing parameters for specifying `Tool` use
+// in the request.
+type ToolConfig struct {
+	// Optional. Function calling config.
+	FunctionCallingConfig *FunctionCallingConfig
+}
+
+func (v *ToolConfig) toProto() *pb.ToolConfig {
+	if v == nil {
+		return nil
+	}
+	return &pb.ToolConfig{
+		FunctionCallingConfig: v.FunctionCallingConfig.toProto(),
+	}
+}
+
+func (ToolConfig) fromProto(p *pb.ToolConfig) *ToolConfig {
+	if p == nil {
+		return nil
+	}
+	return &ToolConfig{
+		FunctionCallingConfig: (FunctionCallingConfig{}).fromProto(p.FunctionCallingConfig),
 	}
 }
 
