@@ -29,15 +29,13 @@ import (
 
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	"github.com/google/generative-ai-go/genai/internal"
 	gld "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
 
 	"github.com/google/generative-ai-go/internal/support"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
-
-// version is the current tagged release of this package.
-const version = "v0.11.0"
 
 // A Client is a Google generative AI client.
 type Client struct {
@@ -79,7 +77,7 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, err
 	}
-	c.SetGoogleClientInfo("gccl", version)
+	c.SetGoogleClientInfo("gccl", "v"+internal.Version)
 	return &Client{c, mc, fc, ds}, nil
 }
 
