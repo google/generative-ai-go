@@ -29,17 +29,22 @@ import (
 
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
+	gld "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
 
-	"github.com/google/generative-ai-go/internal"
 	"github.com/google/generative-ai-go/internal/support"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
+// version is the current tagged release of this package.
+const version = "v0.11.0"
+
 // A Client is a Google generative AI client.
 type Client struct {
 	c  *gl.GenerativeClient
 	mc *gl.ModelClient
+	fc *gl.FileClient
+	ds *gld.Service
 }
 
 // NewClient creates a new Google generative AI client.
@@ -66,8 +71,16 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, err
 	}
-	c.SetGoogleClientInfo("gccl", internal.Version)
-	return &Client{c: c, mc: mc}, nil
+	fc, err := gl.NewFileRESTClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	ds, err := gld.NewService(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	c.SetGoogleClientInfo("gccl", version)
+	return &Client{c, mc, fc, ds}, nil
 }
 
 // hasAPIKey reports whether the options imply that there is an API key.
@@ -92,7 +105,7 @@ func hasAPIKey(opts []option.ClientOption) bool {
 
 // Close closes the client.
 func (c *Client) Close() error {
-	return c.c.Close()
+	return errors.Join(c.c.Close(), c.mc.Close(), c.fc.Close())
 }
 
 // GenerativeModel is a model that can generate text.

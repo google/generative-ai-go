@@ -12,7 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package internal
+package genai
 
-// Version is the current tagged release of the library.
-const Version = "0.8.0"
+// import (
+// 	"context"
+// 	"fmt"
+// 	"strings"
+// 	"testing"
+
+// import  gl "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta"
+
+// 	gl "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta"
+// 	"google.golang.org/api/option"
+// )

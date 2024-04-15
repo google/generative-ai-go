@@ -334,6 +334,84 @@ func (EmbedContentResponse) fromProto(p *pb.EmbedContentResponse) *EmbedContentR
 	}
 }
 
+// File is a file uploaded to the API.
+type File struct {
+	// Immutable. Identifier. The `File` resource name. The ID (name excluding the
+	// "files/" prefix) can contain up to 40 characters that are lowercase
+	// alphanumeric or dashes (-). The ID cannot start or end with a dash. If the
+	// name is empty on create, a unique name will be generated. Example:
+	// `files/123-456`
+	Name string
+	// Optional. The human-readable display name for the `File`. The display name
+	// must be no more than 512 characters in length, including spaces. Example:
+	// "Welcome Image"
+	DisplayName string
+	// Output only. MIME type of the file.
+	MIMEType string
+	// Output only. Size of the file in bytes.
+	SizeBytes int64
+	// Output only. SHA-256 hash of the uploaded bytes.
+	Sha256Hash []byte
+	// Output only. The uri of the `File`.
+	URI string
+}
+
+func (v *File) toProto() *pb.File {
+	if v == nil {
+		return nil
+	}
+	return &pb.File{
+		Name:        v.Name,
+		DisplayName: v.DisplayName,
+		MimeType:    v.MIMEType,
+		SizeBytes:   v.SizeBytes,
+		Sha256Hash:  v.Sha256Hash,
+		Uri:         v.URI,
+	}
+}
+
+func (File) fromProto(p *pb.File) *File {
+	if p == nil {
+		return nil
+	}
+	return &File{
+		Name:        p.Name,
+		DisplayName: p.DisplayName,
+		MIMEType:    p.MimeType,
+		SizeBytes:   p.SizeBytes,
+		Sha256Hash:  p.Sha256Hash,
+		URI:         p.Uri,
+	}
+}
+
+// FileData is URI based data.
+type FileData struct {
+	// Optional. The IANA standard MIME type of the source data.
+	MIMEType string
+	// Required. URI.
+	URI string
+}
+
+func (v *FileData) toProto() *pb.FileData {
+	if v == nil {
+		return nil
+	}
+	return &pb.FileData{
+		MimeType: v.MIMEType,
+		FileUri:  v.URI,
+	}
+}
+
+func (FileData) fromProto(p *pb.FileData) *FileData {
+	if p == nil {
+		return nil
+	}
+	return &FileData{
+		MIMEType: p.MimeType,
+		URI:      p.FileUri,
+	}
+}
+
 // FinishReason is defines the reason why the model stopped generating tokens.
 type FinishReason int32
 
