@@ -59,6 +59,9 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	model.SetTopP(0.5)
 	model.SetTopK(20)
 	model.SetMaxOutputTokens(100)
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{genai.Text("You are Yoda from Star Wars.")},
+	}
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
