@@ -103,9 +103,11 @@ type GenerativeModel struct {
 	fullName string
 
 	GenerationConfig
-	SafetySettings    []*SafetySetting
-	Tools             []*Tool
-	ToolConfig        *ToolConfig
+	SafetySettings []*SafetySetting
+	Tools          []*Tool
+	ToolConfig     *ToolConfig // configuration for tools
+	// SystemInstruction (also known as "system prompt") is a more forceful prompt to the model.
+	// The model will adhere the instructions more strongly than if they appeared in a normal prompt.
 	SystemInstruction *Content
 }
 
