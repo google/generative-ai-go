@@ -18,6 +18,7 @@ package genai
 
 import (
 	"fmt"
+	"strings"
 
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 	"github.com/google/generative-ai-go/internal/support"
@@ -656,6 +657,35 @@ func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *Generat
 		Candidates:     support.TransformSlice(p.Candidates, (Candidate{}).fromProto),
 		PromptFeedback: (PromptFeedback{}).fromProto(p.PromptFeedback),
 	}
+}
+
+func (v *GenerateContentResponse) ToString() string {
+	return responseString(v)
+}
+
+func responseString(resp *GenerateContentResponse) string {
+	var b strings.Builder
+	for i, cand := range resp.Candidates {
+		if len(resp.Candidates) > 1 {
+			fmt.Fprintf(&b, "%d:", i+1)
+		}
+		b.WriteString(contentString(cand.Content))
+	}
+	return b.String()
+}
+
+func contentString(c *Content) string {
+	var b strings.Builder
+	if c == nil || c.Parts == nil {
+		return ""
+	}
+	for i, part := range c.Parts {
+		if i > 0 {
+			fmt.Fprintf(&b, ";")
+		}
+		fmt.Fprintf(&b, "%v", part)
+	}
+	return b.String()
 }
 
 // GenerationConfig is configuration options for model generation and outputs. Not all parameters
