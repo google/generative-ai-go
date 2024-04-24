@@ -54,7 +54,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro-latest")
 	model.SetTemperature(0.9)
 	model.SetTopP(0.5)
 	model.SetTopK(20)
