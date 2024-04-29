@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *B
 }
 
 // Blob contains raw media bytes.
+//
+// Text should not be sent as raw bytes, use the 'text' field.
 type Blob struct {
 	// The IANA standard MIME type of the source data.
 	// Accepted types include: "image/png", "image/jpeg", "image/heic",
@@ -681,7 +683,7 @@ type GenerationConfig struct {
 	// Note: The default value varies by model, see the `Model.temperature`
 	// attribute of the `Model` returned from the `getModel` function.
 	//
-	// Values can range from [0.0, infinity).
+	// Values can range from [0.0, 2.0].
 	Temperature *float32
 	// Optional. The maximum cumulative probability of tokens to consider when
 	// sampling.
@@ -698,13 +700,20 @@ type GenerationConfig struct {
 	TopP *float32
 	// Optional. The maximum number of tokens to consider when sampling.
 	//
-	// The model uses combined Top-k and nucleus sampling.
-	//
+	// Models use nucleus sampling or combined Top-k and nucleus sampling.
 	// Top-k sampling considers the set of `top_k` most probable tokens.
+	// Models running with nucleus sampling don't allow top_k setting.
 	//
 	// Note: The default value varies by model, see the `Model.top_k`
-	// attribute of the `Model` returned from the `getModel` function.
+	// attribute of the `Model` returned from the `getModel` function. Empty
+	// `top_k` field in `Model` indicates the model doesn't apply top-k sampling
+	// and doesn't allow setting `top_k` on requests.
 	TopK *int32
+	// Optional. Output response mimetype of the generated candidate text.
+	// Supported mimetype:
+	// `text/plain`: (default) Text output.
+	// `application/json`: JSON response in the candidates.
+	ResponseMIMEType string
 }
 
 func (v *GenerationConfig) toProto() *pb.GenerationConfig {
@@ -712,12 +721,13 @@ func (v *GenerationConfig) toProto() *pb.GenerationConfig {
 		return nil
 	}
 	return &pb.GenerationConfig{
-		CandidateCount:  v.CandidateCount,
-		StopSequences:   v.StopSequences,
-		MaxOutputTokens: v.MaxOutputTokens,
-		Temperature:     v.Temperature,
-		TopP:            v.TopP,
-		TopK:            v.TopK,
+		CandidateCount:   v.CandidateCount,
+		StopSequences:    v.StopSequences,
+		MaxOutputTokens:  v.MaxOutputTokens,
+		Temperature:      v.Temperature,
+		TopP:             v.TopP,
+		TopK:             v.TopK,
+		ResponseMimeType: v.ResponseMIMEType,
 	}
 }
 
@@ -726,12 +736,13 @@ func (GenerationConfig) fromProto(p *pb.GenerationConfig) *GenerationConfig {
 		return nil
 	}
 	return &GenerationConfig{
-		CandidateCount:  p.CandidateCount,
-		StopSequences:   p.StopSequences,
-		MaxOutputTokens: p.MaxOutputTokens,
-		Temperature:     p.Temperature,
-		TopP:            p.TopP,
-		TopK:            p.TopK,
+		CandidateCount:   p.CandidateCount,
+		StopSequences:    p.StopSequences,
+		MaxOutputTokens:  p.MaxOutputTokens,
+		Temperature:      p.Temperature,
+		TopP:             p.TopP,
+		TopK:             p.TopK,
+		ResponseMIMEType: p.ResponseMimeType,
 	}
 }
 
@@ -911,6 +922,8 @@ type ModelInfo struct {
 	// Top-k sampling considers the set of `top_k` most probable tokens.
 	// This value specifies default to be used by the backend while making the
 	// call to the model.
+	// If empty, indicates the model doesn't use top-k sampling, and `top_k` isn't
+	// allowed as a generation parameter.
 	TopK int32
 }
 
@@ -1130,6 +1143,10 @@ const (
 	TaskTypeClassification TaskType = 4
 	// TaskTypeClustering means specifies that the embeddings will be used for clustering.
 	TaskTypeClustering TaskType = 5
+	// TaskTypeQuestionAnswering means specifies that the given text will be used for question answering.
+	TaskTypeQuestionAnswering TaskType = 6
+	// TaskTypeFactVerification means specifies that the given text will be used for fact verification.
+	TaskTypeFactVerification TaskType = 7
 )
 
 var namesForTaskType = map[TaskType]string{
@@ -1139,6 +1156,8 @@ var namesForTaskType = map[TaskType]string{
 	TaskTypeSemanticSimilarity: "TaskTypeSemanticSimilarity",
 	TaskTypeClassification:     "TaskTypeClassification",
 	TaskTypeClustering:         "TaskTypeClustering",
+	TaskTypeQuestionAnswering:  "TaskTypeQuestionAnswering",
+	TaskTypeFactVerification:   "TaskTypeFactVerification",
 }
 
 func (v TaskType) String() string {

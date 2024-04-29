@@ -3,7 +3,7 @@ module github.com/google/generative-ai-go
 go 1.21
 
 require (
-	cloud.google.com/go/ai v0.3.5-0.20240409161017-ce55ad694f21
+	cloud.google.com/go/ai v0.4.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.12.3
