@@ -713,7 +713,7 @@ type GenerationConfig struct {
 	// Supported mimetype:
 	// `text/plain`: (default) Text output.
 	// `application/json`: JSON response in the candidates.
-	ResponseMimeType string
+	ResponseMIMEType string
 }
 
 func (v *GenerationConfig) toProto() *pb.GenerationConfig {
@@ -727,7 +727,7 @@ func (v *GenerationConfig) toProto() *pb.GenerationConfig {
 		Temperature:      v.Temperature,
 		TopP:             v.TopP,
 		TopK:             v.TopK,
-		ResponseMimeType: v.ResponseMimeType,
+		ResponseMimeType: v.ResponseMIMEType,
 	}
 }
 
@@ -742,7 +742,7 @@ func (GenerationConfig) fromProto(p *pb.GenerationConfig) *GenerationConfig {
 		Temperature:      p.Temperature,
 		TopP:             p.TopP,
 		TopK:             p.TopK,
-		ResponseMimeType: p.ResponseMimeType,
+		ResponseMIMEType: p.ResponseMimeType,
 	}
 }
 
