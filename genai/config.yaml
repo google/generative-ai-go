@@ -71,6 +71,9 @@ types:
           # doc: 'The URI returned from UploadFile or GetFile.'
 
     GenerationConfig:
+      fields:
+        ResponseMimeType:
+          name: ResponseMIMEType
 
     SafetySetting:
 
