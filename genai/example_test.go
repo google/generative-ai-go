@@ -463,7 +463,11 @@ func ExampleClient_UploadFile() {
 	_ = resp // Use resp as usual.
 }
 
-type ProxyRT struct {
+// ProxyRoundTripper is an implementation of http.RoundTripper that supports
+// setting a proxy server URL for genai clients. This type should be used with
+// a custom http.Client that's passed to WithHTTPClient. For such clients,
+// WithAPIKey doesn't apply so the key has to be explicitly set here.
+type ProxyRoundTripper struct {
 	// APIKey is the API Key to set on requests.
 	APIKey string
 
@@ -471,8 +475,7 @@ type ProxyRT struct {
 	ProxyURL string
 }
 
-func (t *ProxyRT) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Set Proxy on the transport, if t.ProxyURL was provided
+func (t *ProxyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 
 	if t.ProxyURL != "" {
@@ -483,7 +486,6 @@ func (t *ProxyRT) RoundTrip(req *http.Request) (*http.Response, error) {
 		transport.Proxy = http.ProxyURL(proxyURL)
 	}
 
-	// Set API key on the request we're sending
 	newReq := req.Clone(req.Context())
 	vals := newReq.URL.Query()
 	vals.Set("key", t.APIKey)
@@ -498,7 +500,7 @@ func (t *ProxyRT) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func ExampleClient_setProxy() {
-	c := &http.Client{Transport: &ProxyRT{
+	c := &http.Client{Transport: &ProxyRoundTripper{
 		APIKey:   os.Getenv("GEMINI_API_KEY"),
 		ProxyURL: "http://<proxy-url>",
 	}}
