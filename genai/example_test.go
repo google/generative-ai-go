@@ -19,6 +19,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/google/generative-ai-go/genai"
@@ -459,6 +461,65 @@ func ExampleClient_UploadFile() {
 		log.Fatal(err)
 	}
 	_ = resp // Use resp as usual.
+}
+
+// ProxyRoundTripper is an implementation of http.RoundTripper that supports
+// setting a proxy server URL for genai clients. This type should be used with
+// a custom http.Client that's passed to WithHTTPClient. For such clients,
+// WithAPIKey doesn't apply so the key has to be explicitly set here.
+type ProxyRoundTripper struct {
+	// APIKey is the API Key to set on requests.
+	APIKey string
+
+	// ProxyURL is the URL of the proxy server. If empty, no proxy is used.
+	ProxyURL string
+}
+
+func (t *ProxyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+
+	if t.ProxyURL != "" {
+		proxyURL, err := url.Parse(t.ProxyURL)
+		if err != nil {
+			return nil, err
+		}
+		transport.Proxy = http.ProxyURL(proxyURL)
+	}
+
+	newReq := req.Clone(req.Context())
+	vals := newReq.URL.Query()
+	vals.Set("key", t.APIKey)
+	newReq.URL.RawQuery = vals.Encode()
+
+	resp, err := transport.RoundTrip(newReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func ExampleClient_setProxy() {
+	c := &http.Client{Transport: &ProxyRoundTripper{
+		APIKey:   os.Getenv("GEMINI_API_KEY"),
+		ProxyURL: "http://<proxy-url>",
+	}}
+
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithHTTPClient(c))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.0-pro")
+	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
