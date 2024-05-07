@@ -77,7 +77,7 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, err
 	}
-	c.SetGoogleClientInfo("gccl", "v"+internal.Version)
+	c.SetGoogleClientInfo("gccl", "v"+internal.Version, "genai-go", internal.Version)
 	return &Client{c, mc, fc, ds}, nil
 }
 
