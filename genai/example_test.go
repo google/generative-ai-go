@@ -64,6 +64,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	model.SystemInstruction = &genai.Content{
 		Parts: []genai.Part{genai.Text("You are Yoda from Star Wars.")},
 	}
+	model.ResponseMIMEType = "application/json"
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
