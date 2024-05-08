@@ -16,6 +16,7 @@ package genai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -427,6 +428,21 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		checkMatch(t, responseString(resp), "picture|image", "person", "computer|laptop")
+	})
+	t.Run("JSON", func(t *testing.T) {
+		model := client.GenerativeModel("gemini-1.5-pro-latest")
+		model.SetTemperature(0)
+		model.ResponseMIMEType = "application/json"
+		res, err := model.GenerateContent(ctx, Text("List the primary colors."))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := responseString(res)
+		t.Logf("got %s", got)
+		var a any
+		if err := json.Unmarshal([]byte(got), &a); err != nil {
+			t.Fatal(err)
+		}
 	})
 }
 
