@@ -53,9 +53,9 @@ type Client struct {
 // You may configure the client by passing in options from the [google.golang.org/api/option]
 // package.
 func NewClient(ctx context.Context, opts ...option.ClientOption) (*Client, error) {
-	if !hasAPIKey(opts) {
-		return nil, errors.New(`You need an API key to use this client.
-Visit https://ai.google.dev to get one, put it in an environment variable like GEMINI_API_KEY,
+	if !hasAuthOption(opts) {
+		return nil, errors.New(`You need an auth option to use this client.
+for an API Key: Visit https://ai.google.dev to get one, put it in an environment variable like GEMINI_API_KEY,
 then pass it as an option:
     genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 (If you're doing that already, then maybe the environment variable is empty or unset.)
@@ -81,20 +81,23 @@ Import the option package as "google.golang.org/api/option".`)
 	return &Client{c, mc, fc, ds}, nil
 }
 
-// hasAPIKey reports whether the options imply that there is an API key.
-// That is the case if either the WithAPIKey or WithHTTPClient options is present.
-// (If the latter is present, we assume it handles auth).
+// hasAuthOption reports whether an authentication-related option was provided.
 //
 // There is no good way to make these checks, because the types of the options
 // are unexported, and the struct that they populates is in an internal package.
-func hasAPIKey(opts []option.ClientOption) bool {
+func hasAuthOption(opts []option.ClientOption) bool {
 	for _, opt := range opts {
 		v := reflect.ValueOf(opt)
 		ts := v.Type().String()
-		if ts == "option.withAPIKey" {
+
+		switch ts {
+		case "option.withAPIKEY":
 			return v.String() != ""
-		}
-		if ts == "option.withHTTPClient" {
+
+		case "option.withHttpClient",
+			"option.withTokenSource",
+			"option.withCredentialsFile",
+			"option.withCredentialsJSON":
 			return true
 		}
 	}
