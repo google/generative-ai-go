@@ -91,10 +91,15 @@ func hasAPIKey(opts []option.ClientOption) bool {
 	for _, opt := range opts {
 		v := reflect.ValueOf(opt)
 		ts := v.Type().String()
-		if ts == "option.withAPIKey" {
+
+		switch ts {
+		case "option.withAPIKEY":
 			return v.String() != ""
-		}
-		if ts == "option.withHTTPClient" {
+
+		case "option.withHttpClient",
+			"option.withTokenSource",
+			"option.withCredentialsFile",
+			"option.withCredentialsJSON":
 			return true
 		}
 	}
