@@ -164,7 +164,18 @@ types:
           name: URI
         MimeType:
           name: MIMEType
+        State:
+          omit: true
 
+    GenerateContentResponse_UsageMetadata:
+      name: UsageMetadata
+      fields:
+        PromptTokenCount:
+          type: int32
+        CandidatesTokenCount:
+          type: int32
+        TotalTokenCount:
+          type: int32
 
 # Omit everything not explicitly configured.
 omitTypes:

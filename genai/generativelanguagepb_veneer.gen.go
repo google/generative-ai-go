@@ -53,8 +53,13 @@ func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *B
 // Text should not be sent as raw bytes, use the 'text' field.
 type Blob struct {
 	// The IANA standard MIME type of the source data.
-	// Accepted types include: "image/png", "image/jpeg", "image/heic",
-	// "image/heif", "image/webp".
+	// Examples:
+	//   - image/png
+	//   - image/jpeg
+	//
+	// If an unsupported MIME type is provided, an error will be returned. For a
+	// complete list of supported types, see [Supported file
+	// formats](https://ai.google.dev/gemini-api/docs/prompting_with_media#supported_file_formats).
 	MIMEType string
 	// Raw bytes for media formats.
 	Data []byte
@@ -638,6 +643,8 @@ type GenerateContentResponse struct {
 	Candidates []*Candidate
 	// Returns the prompt's feedback related to the content filters.
 	PromptFeedback *PromptFeedback
+	// Output only. Metadata on the generation requests' token usage.
+	UsageMetadata *UsageMetadata
 }
 
 func (v *GenerateContentResponse) toProto() *pb.GenerateContentResponse {
@@ -647,6 +654,7 @@ func (v *GenerateContentResponse) toProto() *pb.GenerateContentResponse {
 	return &pb.GenerateContentResponse{
 		Candidates:     support.TransformSlice(v.Candidates, (*Candidate).toProto),
 		PromptFeedback: v.PromptFeedback.toProto(),
+		UsageMetadata:  v.UsageMetadata.toProto(),
 	}
 }
 
@@ -657,6 +665,7 @@ func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *Generat
 	return &GenerateContentResponse{
 		Candidates:     support.TransformSlice(p.Candidates, (Candidate{}).fromProto),
 		PromptFeedback: (PromptFeedback{}).fromProto(p.PromptFeedback),
+		UsageMetadata:  (UsageMetadata{}).fromProto(p.UsageMetadata),
 	}
 }
 
@@ -714,6 +723,15 @@ type GenerationConfig struct {
 	// `text/plain`: (default) Text output.
 	// `application/json`: JSON response in the candidates.
 	ResponseMIMEType string
+	// Optional. Output response schema of the generated candidate text when
+	// response mime type can have schema. Schema can be objects, primitives or
+	// arrays and is a subset of [OpenAPI
+	// schema](https://spec.openapis.org/oas/v3.0.3#schema).
+	//
+	// If set, a compatible response_mime_type must also be set.
+	// Compatible mimetypes:
+	// `application/json`: Schema for JSON response.
+	ResponseSchema *Schema
 }
 
 func (v *GenerationConfig) toProto() *pb.GenerationConfig {
@@ -728,6 +746,7 @@ func (v *GenerationConfig) toProto() *pb.GenerationConfig {
 		TopP:             v.TopP,
 		TopK:             v.TopK,
 		ResponseMimeType: v.ResponseMIMEType,
+		ResponseSchema:   v.ResponseSchema.toProto(),
 	}
 }
 
@@ -743,6 +762,7 @@ func (GenerationConfig) fromProto(p *pb.GenerationConfig) *GenerationConfig {
 		TopP:             p.TopP,
 		TopK:             p.TopK,
 		ResponseMIMEType: p.ResponseMimeType,
+		ResponseSchema:   (Schema{}).fromProto(p.ResponseSchema),
 	}
 }
 
@@ -1267,4 +1287,36 @@ func (v Type) String() string {
 		return n
 	}
 	return fmt.Sprintf("Type(%d)", v)
+}
+
+// UsageMetadata is metadata on the generation request's token usage.
+type UsageMetadata struct {
+	// Number of tokens in the prompt.
+	PromptTokenCount int32
+	// Total number of tokens across the generated candidates.
+	CandidatesTokenCount int32
+	// Total token count for the generation request (prompt + candidates).
+	TotalTokenCount int32
+}
+
+func (v *UsageMetadata) toProto() *pb.GenerateContentResponse_UsageMetadata {
+	if v == nil {
+		return nil
+	}
+	return &pb.GenerateContentResponse_UsageMetadata{
+		PromptTokenCount:     v.PromptTokenCount,
+		CandidatesTokenCount: v.CandidatesTokenCount,
+		TotalTokenCount:      v.TotalTokenCount,
+	}
+}
+
+func (UsageMetadata) fromProto(p *pb.GenerateContentResponse_UsageMetadata) *UsageMetadata {
+	if p == nil {
+		return nil
+	}
+	return &UsageMetadata{
+		PromptTokenCount:     p.PromptTokenCount,
+		CandidatesTokenCount: p.CandidatesTokenCount,
+		TotalTokenCount:      p.TotalTokenCount,
+	}
 }

@@ -217,6 +217,17 @@ func TestLive(t *testing.T) {
 		}
 	})
 
+	t.Run("ReadUsageMetadata", func(t *testing.T) {
+		resp, err := model.GenerateContent(ctx, Text("What is the average size of a swallow?"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		um := resp.UsageMetadata
+		if um.PromptTokenCount < 1 || um.CandidatesTokenCount < 1 || um.TotalTokenCount < 1 {
+			t.Errorf("got UsageMetadata=%v, want counts > 0", um)
+		}
+	})
+
 	t.Run("embed", func(t *testing.T) {
 		em := client.EmbeddingModel("embedding-001")
 		res, err := em.EmbedContent(ctx, Text("cheddar cheese"))
