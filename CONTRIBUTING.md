@@ -26,10 +26,8 @@ Guidelines](https://opensource.google/conduct/).
 ## Contribution process
 
 1. Clone this repo
-2. Run tests with `go test ./...`
-3. You may need to run "live" tests that talk to a real endpoint; to do so, run
-   `go test -v ./genai/...` passing it your API key with the `-apikey` flag
-   and a model name flag like `-model gemini-1.0-pro`
+2. Run tests with `go test ./...`; the "live" tests will be skipped
+   unless a valid API key is set with the `GEMINI_API_KEY` environment variable.
 
 ### Code Reviews
 
