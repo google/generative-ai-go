@@ -14,7 +14,7 @@
 
 package genai
 
-//go:generate ./generate_discovery_client.sh
+//go:generate ../devtools/generate_discovery_client.sh
 
 import (
 	"context"
