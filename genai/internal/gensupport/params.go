@@ -5,6 +5,7 @@
 package gensupport
 
 import (
+	"net/http"
 	"net/url"
 
 	"google.golang.org/api/googleapi"
@@ -54,4 +55,23 @@ func SetOptions(u URLParams, opts ...googleapi.CallOption) {
 		}
 		u.Set(o.Get())
 	}
+}
+
+// SetHeaders sets common headers for all requests. The keyvals header pairs
+// should have a corresponding value for every key provided. If there is an odd
+// number of keyvals this method will panic.
+func SetHeaders(userAgent, contentType string, userHeaders http.Header, keyvals ...string) http.Header {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/"+GoVersion()+" gdcl/"+"0.179.0")
+	for i := 0; i < len(keyvals); i = i + 2 {
+		reqHeaders.Set(keyvals[i], keyvals[i+1])
+	}
+	reqHeaders.Set("User-Agent", userAgent)
+	if contentType != "" {
+		reqHeaders.Set("Content-Type", contentType)
+	}
+	for k, v := range userHeaders {
+		reqHeaders[k] = v
+	}
+	return reqHeaders
 }

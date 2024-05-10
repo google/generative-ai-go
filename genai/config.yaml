@@ -164,9 +164,14 @@ types:
           name: URI
         MimeType:
           name: MIMEType
-        State:
-          omit: true
-
+    File_State:
+      name: FileState
+      docVerb: represents
+      protoPrefix: File
+      veneerPrefix: FileState
+      valueNames:
+        File_STATE_UNSPECIFIED: FileStateUnspecified
+      
     GenerateContentResponse_UsageMetadata:
       name: UsageMetadata
       fields:
