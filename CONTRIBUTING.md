@@ -26,8 +26,8 @@ Guidelines](https://opensource.google/conduct/).
 ## Contribution process
 
 1. Clone this repo
-2. Run tests with `go test ./...`; the "live" tests will fail unless a valid
-   API key is set with the `GEMINI_API_KEY` environment variable.
+2. Run tests with `go test ./...`; the "live" tests will be skipped
+   unless a valid API key is set with the `GEMINI_API_KEY` environment variable.
 
 ### Code Reviews
 
