@@ -14,7 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/generative-ai-go/genai/internal"
 	"github.com/google/uuid"
 )
 
@@ -83,7 +82,7 @@ func (rx *ResumableUpload) doUploadRequest(ctx context.Context, data io.Reader, 
 
 	// TODO(b/274504690): Consider dropping gccl-invocation-id key since it
 	// duplicates the X-Goog-Gcs-Idempotency-Token header (added in v0.115.0).
-	baseXGoogHeader := "gl-go/" + GoVersion() + " gdcl/" + internal.Version
+	baseXGoogHeader := "gl-go/" + GoVersion() + " gdcl/" + "0.179.0"
 	invocationHeader := fmt.Sprintf("gccl-invocation-id/%s gccl-attempt-count/%d", rx.invocationID, rx.attempts)
 	req.Header.Set("X-Goog-Api-Client", strings.Join([]string{baseXGoogHeader, invocationHeader}, " "))
 
