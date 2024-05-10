@@ -361,6 +361,8 @@ type File struct {
 	Sha256Hash []byte
 	// Output only. The uri of the `File`.
 	URI string
+	// Output only. Processing state of the File.
+	State FileState
 }
 
 func (v *File) toProto() *pb.File {
@@ -374,6 +376,7 @@ func (v *File) toProto() *pb.File {
 		SizeBytes:   v.SizeBytes,
 		Sha256Hash:  v.Sha256Hash,
 		Uri:         v.URI,
+		State:       pb.File_State(v.State),
 	}
 }
 
@@ -388,6 +391,7 @@ func (File) fromProto(p *pb.File) *File {
 		SizeBytes:   p.SizeBytes,
 		Sha256Hash:  p.Sha256Hash,
 		URI:         p.Uri,
+		State:       FileState(p.State),
 	}
 }
 
@@ -417,6 +421,34 @@ func (FileData) fromProto(p *pb.FileData) *FileData {
 		MIMEType: p.MimeType,
 		URI:      p.FileUri,
 	}
+}
+
+// FileState represents states for the lifecycle of a File.
+type FileState int32
+
+const (
+	// FileStateUnspecified means the default value. This value is used if the state is omitted.
+	FileStateUnspecified FileState = 0
+	// FileStateProcessing means file is being processed and cannot be used for inference yet.
+	FileStateProcessing FileState = 1
+	// FileStateActive means file is processed and available for inference.
+	FileStateActive FileState = 2
+	// FileStateFailed means file failed processing.
+	FileStateFailed FileState = 10
+)
+
+var namesForFileState = map[FileState]string{
+	FileStateUnspecified: "FileStateUnspecified",
+	FileStateProcessing:  "FileStateProcessing",
+	FileStateActive:      "FileStateActive",
+	FileStateFailed:      "FileStateFailed",
+}
+
+func (v FileState) String() string {
+	if n, ok := namesForFileState[v]; ok {
+		return n
+	}
+	return fmt.Sprintf("FileState(%d)", v)
 }
 
 // FinishReason is defines the reason why the model stopped generating tokens.
