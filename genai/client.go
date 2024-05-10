@@ -98,7 +98,7 @@ func hasAuthOption(opts []option.ClientOption) bool {
 		ts := v.Type().String()
 
 		switch ts {
-		case "option.withAPIKEY":
+		case "option.withAPIKey":
 			return v.String() != ""
 
 		case "option.withHttpClient",
