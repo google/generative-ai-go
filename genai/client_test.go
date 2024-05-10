@@ -38,6 +38,10 @@ const imageFile = "personWorkingOnComputer.jpg"
 
 func TestLive(t *testing.T) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
+	if testing.Short() {
+		t.Skip("skipping live test in -short mode")
+	}
+
 	if apiKey == "" {
 		t.Skip("set a GEMINI_API_KEY env var to run live tests")
 	}
