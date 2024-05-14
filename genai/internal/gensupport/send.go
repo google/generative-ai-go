@@ -133,7 +133,7 @@ func sendAndRetry(ctx context.Context, client *http.Client, req *http.Request, r
 		bo = backoff()
 	}
 
-	var errorFunc = retry.errorFunc()
+	errorFunc := retry.errorFunc()
 
 	for {
 		t := time.NewTimer(pause)

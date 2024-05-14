@@ -196,13 +196,13 @@ func ExampleChatSession_history() {
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
-		&genai.Content{
+		{
 			Parts: []genai.Part{
 				genai.Text("Hello, I have 2 dogs in my house."),
 			},
 			Role: "user",
 		},
-		&genai.Content{
+		{
 			Parts: []genai.Part{
 				genai.Text("Great to meet you. What would you like to know?"),
 			},
@@ -226,7 +226,6 @@ func ExampleEmbeddingModel_EmbedContent() {
 	defer client.Close()
 	em := client.EmbeddingModel("embedding-001")
 	res, err := em.EmbedContent(ctx, genai.Text("cheddar cheese"))
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -508,7 +507,6 @@ func ExampleClient_setProxy() {
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithHTTPClient(c))
-
 	if err != nil {
 		log.Fatal(err)
 	}
