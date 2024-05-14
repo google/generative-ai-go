@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support - Official Gemini API discussion forum
+    url: https://discuss.ai.google.dev/
+    about: >
+      For non-SDK issues like service downtime issues, account- or project-specific issues, or
+      questions (e.g. _How do I do XYZ?_) visit the official discussion forum. This is a great place
+      to interact with developers, and to learn, share, and support each other.
