@@ -511,6 +511,7 @@ func TestParseJSONTag(t *testing.T) {
 		}
 	}
 }
+
 func TestParseMalformedJSONTag(t *testing.T) {
 	for _, tag := range []string{
 		"",

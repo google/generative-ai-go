@@ -33,8 +33,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-const defaultModel = "gemini-1.0-pro"
-const imageFile = "personWorkingOnComputer.jpg"
+const (
+	defaultModel = "gemini-1.0-pro"
+	imageFile    = "personWorkingOnComputer.jpg"
+)
 
 func TestLive(t *testing.T) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
