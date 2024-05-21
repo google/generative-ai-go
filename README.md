@@ -26,6 +26,14 @@ Google documentation: https://ai.google.dev/docs
 
 For a list of the supported models and their capabilities, see https://ai.google.dev/models/gemini
 
+## Getting help
+
+For general Gemini API questions (not specific to the Go SDK), check out the
+[public discussion forum](https://discuss.ai.google.dev/).
+
+For questions specific to the Go SDK, create a new issue and tag it with
+a `question` label.
+
 ## Contributing
 
 See [Contributing](https://github.com/google/generative-ai-go/blob/main/CONTRIBUTING.md) for
