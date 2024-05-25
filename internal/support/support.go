@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,12 @@ package support
 
 import (
 	"fmt"
+	"time"
 
+	"cloud.google.com/go/civil"
+	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // TransformSlice applies f to each element of from and returns
@@ -67,6 +71,27 @@ func DerefOrZero[T any](x *T) T {
 	return *x
 }
 
+// CivilDateToProto converts a civil.Date to a date.Date.
+func CivilDateToProto(d civil.Date) *date.Date {
+	return &date.Date{
+		Year:  int32(d.Year),
+		Month: int32(d.Month),
+		Day:   int32(d.Day),
+	}
+}
+
+// CivilDateFromProto converts a date.Date to a civil.Date.
+func CivilDateFromProto(p *date.Date) civil.Date {
+	if p == nil {
+		return civil.Date{}
+	}
+	return civil.Date{
+		Year:  int(p.Year),
+		Month: time.Month(p.Month),
+		Day:   int(p.Day),
+	}
+}
+
 // MapToStructPB converts a map into a structpb.Struct.
 func MapToStructPB(m map[string]any) *structpb.Struct {
 	if m == nil {
@@ -85,4 +110,12 @@ func MapFromStructPB(p *structpb.Struct) map[string]any {
 		return nil
 	}
 	return p.AsMap()
+}
+
+// TimeFromProto converts a Timestamp into a time.Time.
+func TimeFromProto(ts *timestamppb.Timestamp) time.Time {
+	if ts == nil {
+		return time.Time{}
+	}
+	return ts.AsTime()
 }
