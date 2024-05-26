@@ -21,6 +21,8 @@ import (
 
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
 	"github.com/google/generative-ai-go/internal/support"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 // BatchEmbedContentsResponse is the response to a `BatchEmbedContentsRequest`.
@@ -357,6 +359,13 @@ type File struct {
 	MIMEType string
 	// Output only. Size of the file in bytes.
 	SizeBytes int64
+	// Output only. The timestamp of when the `File` was created.
+	CreateTime time.Time
+	// Output only. The timestamp of when the `File` was last updated.
+	UpdateTime time.Time
+	// Output only. The timestamp of when the `File` will be deleted. Only set if
+	// the `File` is scheduled to expire.
+	ExpirationTime time.Time
 	// Output only. SHA-256 hash of the uploaded bytes.
 	Sha256Hash []byte
 	// Output only. The uri of the `File`.
@@ -370,13 +379,16 @@ func (v *File) toProto() *pb.File {
 		return nil
 	}
 	return &pb.File{
-		Name:        v.Name,
-		DisplayName: v.DisplayName,
-		MimeType:    v.MIMEType,
-		SizeBytes:   v.SizeBytes,
-		Sha256Hash:  v.Sha256Hash,
-		Uri:         v.URI,
-		State:       pb.File_State(v.State),
+		Name:           v.Name,
+		DisplayName:    v.DisplayName,
+		MimeType:       v.MIMEType,
+		SizeBytes:      v.SizeBytes,
+		CreateTime:     timestamppb.New(v.CreateTime),
+		UpdateTime:     timestamppb.New(v.UpdateTime),
+		ExpirationTime: timestamppb.New(v.ExpirationTime),
+		Sha256Hash:     v.Sha256Hash,
+		Uri:            v.URI,
+		State:          pb.File_State(v.State),
 	}
 }
 
@@ -385,13 +397,16 @@ func (File) fromProto(p *pb.File) *File {
 		return nil
 	}
 	return &File{
-		Name:        p.Name,
-		DisplayName: p.DisplayName,
-		MIMEType:    p.MimeType,
-		SizeBytes:   p.SizeBytes,
-		Sha256Hash:  p.Sha256Hash,
-		URI:         p.Uri,
-		State:       FileState(p.State),
+		Name:           p.Name,
+		DisplayName:    p.DisplayName,
+		MIMEType:       p.MimeType,
+		SizeBytes:      p.SizeBytes,
+		CreateTime:     support.TimeFromProto(p.CreateTime),
+		UpdateTime:     support.TimeFromProto(p.UpdateTime),
+		ExpirationTime: support.TimeFromProto(p.ExpirationTime),
+		Sha256Hash:     p.Sha256Hash,
+		URI:            p.Uri,
+		State:          FileState(p.State),
 	}
 }
 
@@ -1088,7 +1103,7 @@ func (SafetyRating) fromProto(p *pb.SafetyRating) *SafetyRating {
 
 // SafetySetting is safety setting, affecting the safety-blocking behavior.
 //
-// Passing a safety setting for a category changes the allowed proability that
+// Passing a safety setting for a category changes the allowed probability that
 // content is blocked.
 type SafetySetting struct {
 	// Required. The category for this setting.

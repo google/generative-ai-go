@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
@@ -407,6 +408,11 @@ func TestLive(t *testing.T) {
 		}
 		if got, want := file.SizeBytes, int64(9218); got != want {
 			t.Errorf("got file size %d, want %d", got, want)
+		}
+		// The file should have just been created. Be generous, though.
+		now := time.Now()
+		if file.CreateTime.Before(now.Add(-time.Hour)) || file.CreateTime.After(now.Add(time.Hour)) {
+			t.Errorf("got file time %s, wanted around now (%s)", file.CreateTime, now)
 		}
 		// Don't test GetFile, because UploadFile already calls GetFile.
 		// ListFiles should return the file we just uploaded, and maybe other files too.

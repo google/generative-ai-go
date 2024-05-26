@@ -1003,7 +1003,8 @@ func (s *CountTextTokensResponse) MarshalJSON() ([]byte, error) {
 // model. Models may tokenize text differently, so each model may return a
 // different `token_count`.
 type CountTokensRequest struct {
-	// Contents: Optional. The input given to the model as a prompt.
+	// Contents: Optional. The input given to the model as a prompt. This field is
+	// ignored when `generate_content_request` is set.
 	Contents []*Content `json:"contents,omitempty"`
 	// GenerateContentRequest: Optional. The overall input given to the model.
 	// CountTokens will count prompt, function calling, etc.
@@ -1468,6 +1469,8 @@ type File struct {
 	// display name must be no more than 512 characters in length, including
 	// spaces. Example: "Welcome Image"
 	DisplayName string `json:"displayName,omitempty"`
+	// Error: Output only. Error status if File processing failed.
+	Error *Status `json:"error,omitempty"`
 	// ExpirationTime: Output only. The timestamp of when the `File` will be
 	// deleted. Only set if the `File` is scheduled to expire.
 	ExpirationTime string `json:"expirationTime,omitempty"`
@@ -1497,6 +1500,8 @@ type File struct {
 	UpdateTime string `json:"updateTime,omitempty"`
 	// Uri: Output only. The uri of the `File`.
 	Uri string `json:"uri,omitempty"`
+	// VideoMetadata: Output only. Metadata for a video.
+	VideoMetadata *VideoMetadata `json:"videoMetadata,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the server.
 	googleapi.ServerResponse `json:"-"`
@@ -2135,6 +2140,13 @@ type GenerationConfig struct {
 	// candidate text. Supported mimetype: `text/plain`: (default) Text output.
 	// `application/json`: JSON response in the candidates.
 	ResponseMimeType string `json:"responseMimeType,omitempty"`
+	// ResponseSchema: Optional. Output response schema of the generated candidate
+	// text when response mime type can have schema. Schema can be objects,
+	// primitives or arrays and is a subset of OpenAPI schema
+	// (https://spec.openapis.org/oas/v3.0.3#schema). If set, a compatible
+	// response_mime_type must also be set. Compatible mimetypes:
+	// `application/json`: Schema for JSON response.
+	ResponseSchema *Schema `json:"responseSchema,omitempty"`
 	// StopSequences: Optional. The set of character sequences (up to 5) that will
 	// stop output generation. If specified, the API will stop at the first
 	// appearance of a stop sequence. The stop sequence will not be included as
@@ -3215,7 +3227,7 @@ func (s *SafetyRating) MarshalJSON() ([]byte, error) {
 }
 
 // SafetySetting: Safety setting, affecting the safety-blocking behavior.
-// Passing a safety setting for a category changes the allowed proability that
+// Passing a safety setting for a category changes the allowed probability that
 // content is blocked.
 type SafetySetting struct {
 	// Category: Required. The category for this setting.
@@ -3875,6 +3887,28 @@ type UsageMetadata struct {
 
 func (s *UsageMetadata) MarshalJSON() ([]byte, error) {
 	type NoMethod UsageMetadata
+	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
+}
+
+// VideoMetadata: Metadata for a video `File`.
+type VideoMetadata struct {
+	// VideoDuration: Duration of the video.
+	VideoDuration string `json:"videoDuration,omitempty"`
+	// ForceSendFields is a list of field names (e.g. "VideoDuration") to
+	// unconditionally include in API requests. By default, fields with empty or
+	// default values are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
+	ForceSendFields []string `json:"-"`
+	// NullFields is a list of field names (e.g. "VideoDuration") to include in API
+	// requests with the JSON null value. By default, fields with empty values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
+	NullFields []string `json:"-"`
+}
+
+func (s *VideoMetadata) MarshalJSON() ([]byte, error) {
+	type NoMethod VideoMetadata
 	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
 }
 

@@ -150,20 +150,16 @@ types:
 
     File:
       fields:
-        CreateTime:
-          # TODO(jba): support time in protoveneer
-          omit: true
-          # type: time.Time
-        UpdateTime:
-          omit: true
-          # type: time.Time
-        ExpirationTime:
-          omit: true
-          # type: time.Time
         Uri:
           name: URI
         MimeType:
           name: MIMEType
+        Error:
+          # TODO(jba): support or convert status.Status
+          omit: true
+        Metadata:
+          # TODO(jba): support
+          omit: true
     File_State:
       name: FileState
       docVerb: represents
