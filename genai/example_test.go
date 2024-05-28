@@ -142,6 +142,7 @@ func ExampleGenerativeModel_CountTokens() {
 	fmt.Println("Num tokens:", resp.TotalTokens)
 }
 
+// This example shows how to get a JSON response that conforms to a schema.
 func ExampleGenerativeModel_JSONSchema() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
@@ -150,8 +151,10 @@ func ExampleGenerativeModel_JSONSchema() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-pro")
+	model := client.GenerativeModel("gemini-1.5-pro-latest")
+	// Ask the model to respond with JSON.
 	model.ResponseMIMEType = "application/json"
+	// Specify the format of the JSON.
 	model.ResponseSchema = &genai.Schema{
 		Type:  genai.TypeArray,
 		Items: &genai.Schema{Type: genai.TypeString},
