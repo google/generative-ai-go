@@ -441,7 +441,7 @@ func TestLive(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		checkMatch(t, responseString(resp), "picture|image", "person", "computer|laptop")
+		checkMatch(t, responseString(resp), "person", "computer|laptop")
 	})
 
 	t.Run("JSON", func(t *testing.T) {
