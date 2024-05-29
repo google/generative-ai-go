@@ -65,4 +65,5 @@ To increase the minor or patch version of the module:
    create the release. Use TAG as the name.
    Provide release notes by summarizing the result of `git log PREVTAG..`,
    where PREVTAG is the previous release tag.
-   
+9. Visit https://pkg.go.dev/github.com/google/generative-ai-go@TAG and request
+   that the version be processed.
