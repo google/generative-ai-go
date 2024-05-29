@@ -454,6 +454,27 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		checkMatch(t, responseString(resp), "person", "computer|laptop")
+
+		t.Run("metadata", func(t *testing.T) {
+			f, err := os.Open(filepath.Join("testdata", "earth.mp4"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+			file, err := client.UploadFile(ctx, "", f, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("uploaded %s, MIME type %q", file.Name, file.MIMEType)
+			defer func() {
+				// Delete the file when the test is done.
+				if err := client.DeleteFile(ctx, file.Name); err != nil {
+					t.Fatal(err)
+				}
+			}()
+			// TODO(jba): verify metadata when it is populated.
+			t.Logf("Metadata: %+v\n", file.Metadata)
+		})
 	})
 
 	t.Run("JSON", func(t *testing.T) {
