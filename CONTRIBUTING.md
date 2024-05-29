@@ -51,7 +51,7 @@ To increase the minor or patch version of the module:
 
 1. Determine the desired tag, using `git tag -l` to see existing tags
    and incrementing as appropriate. We will call the result TAG in
-   these instructions.
+   these instructions. It should be of the form `vX.Y.Z`.
 2. Update the version in genai/internal/version.go to match TAG.
 3. Send a PR with that change. The pre-push hook should complain, so
    pass the `--no-verify` flag to `git push`.
@@ -61,9 +61,8 @@ To increase the minor or patch version of the module:
 6. Run `git tag TAG` to tag the repo locally.
 7. Run `git push origin TAG`. If the pre-push hook complains here, something
    is wrong; stop and review.
-8. Review the changes since the last release to prepare release notes.
-   If the last release tag was PREVTAG, then run `git log PREVTAG..`.
-9. Use the [GitHub UI](https://github.com/google/generative-ai-go/releases) to
-   create the release. Provide release notes by summarizing the log in the previous
-   step.
+8. Use the [GitHub UI](https://github.com/google/generative-ai-go/releases) to
+   create the release. Use TAG as the name.
+   Provide release notes by summarizing the result of `git log PREVTAG..`,
+   where PREVTAG is the previous release tag.
    
