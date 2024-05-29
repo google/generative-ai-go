@@ -34,3 +34,36 @@ Guidelines](https://opensource.google/conduct/).
 All submissions, including submissions by project members, require review. We
 use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
 for this purpose.
+
+## For Maintainers
+
+### Preparation
+
+Install the pre-push hook:
+```
+cp devtools/pre-push-hook.sh .git/hooks/pre-push
+```
+
+### Creating a new release
+
+This repo consists of a single Go module.
+To increase the minor or patch version of the module:
+
+1. Determine the desired tag, using `git tag -l` to see existing tags
+   and incrementing as appropriate. We will call the result TAG in
+   these instructions.
+2. Update the version in genai/internal/version.go to match TAG.
+3. Send a PR with that change. The pre-push hook should complain, so
+   pass the `--no-verify` flag to `git push`.
+4. Submit the PR when approved. _No other PRs should be submitted until
+   the following steps have been completed._
+5. Run `git pull` to get the submitted PR locally. You should be on main.
+6. Run `git tag TAG` to tag the repo locally.
+7. Run `git push origin TAG`. If the pre-push hook complains here, something
+   is wrong; stop and review.
+8. Review the changes since the last release to prepare release notes.
+   If the last release tag was PREVTAG, then run `git log PREVTAG..`.
+9. Use the [GitHub UI](https://github.com/google/generative-ai-go/releases) to
+   create the release. Provide release notes by summarizing the log in the previous
+   step.
+   
