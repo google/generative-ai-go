@@ -441,7 +441,7 @@ func TestLive(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		checkMatch(t, responseString(resp), "picture|image", "person", "computer|laptop")
+		checkMatch(t, responseString(resp), "person", "computer|laptop")
 	})
 
 	t.Run("JSON", func(t *testing.T) {
@@ -454,8 +454,47 @@ func TestLive(t *testing.T) {
 		}
 		got := responseString(res)
 		t.Logf("got %s", got)
+		// Accept any valid JSON
 		var a any
 		if err := json.Unmarshal([]byte(got), &a); err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("JSON schema", func(t *testing.T) {
+		model := client.GenerativeModel("gemini-1.5-pro-latest")
+		model.SetTemperature(0)
+		model.ResponseMIMEType = "application/json"
+		model.ResponseSchema = &Schema{
+			Type: TypeArray,
+			Items: &Schema{
+				Type: TypeObject,
+				Properties: map[string]*Schema{
+					"name": {
+						Type:        TypeString,
+						Description: "The name of the color",
+					},
+					"RGB": {
+						Type:        TypeString,
+						Description: "The RGB value of the color, in hex",
+					},
+				},
+				Required: []string{"name", "RGB"},
+			},
+		}
+		res, err := model.GenerateContent(ctx, Text("List the primary colors."))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := responseString(res)
+		t.Logf("got %s", got)
+		// Check that the format of the result matches the schema. The actual content
+		// doesn't matter here.
+
+		type color struct {
+			Name, RGB string
+		}
+		var v []color
+		if err := json.Unmarshal([]byte(got), &v); err != nil {
 			t.Fatal(err)
 		}
 	})

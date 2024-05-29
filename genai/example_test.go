@@ -16,6 +16,7 @@ package genai_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -141,6 +142,37 @@ func ExampleGenerativeModel_CountTokens() {
 	fmt.Println("Num tokens:", resp.TotalTokens)
 }
 
+// This example shows how to get a JSON response that conforms to a schema.
+func ExampleGenerativeModel_JSONSchema() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-pro-latest")
+	// Ask the model to respond with JSON.
+	model.ResponseMIMEType = "application/json"
+	// Specify the format of the JSON.
+	model.ResponseSchema = &genai.Schema{
+		Type:  genai.TypeArray,
+		Items: &genai.Schema{Type: genai.TypeString},
+	}
+	res, err := model.GenerateContent(ctx, genai.Text("List the primary colors."))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, part := range res.Candidates[0].Content.Parts {
+		if txt, ok := part.(genai.Text); ok {
+			var colors []string
+			if err := json.Unmarshal([]byte(txt), &colors); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(colors)
+		}
+	}
+}
 func ExampleChatSession() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
@@ -399,7 +431,7 @@ func ExampleTool() {
 	printResponse(res)
 }
 
-func ExampleToolConifg() {
+func ExampleToolConfig() {
 	// This example shows how to affect how the model uses the tools provided to it.
 	// By setting the ToolConfig, you can disable function calling.
 
