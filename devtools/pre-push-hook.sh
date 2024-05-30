@@ -1,11 +1,13 @@
-#!/bin/sh
+#!/bin/sh -e
 
-# This script checks that the version in the code matches the latest version
-# tag.
-#
+# This script performs some checks.
 # Install as a pre-push hook from the repo root with:
 #   cp devtools/pre-push-hook.sh .git/hooks/pre-push
 
+go test -short ./...
+go vet ./...
+
+# Check that the version in the code matches the latest version tag.
 version_file=genai/internal/version.go
 latest_tag=$(git tag -l 'v*' | sort -V | tail -1)
 code_version=v$(awk '/^const Version/ {print substr($4, 2, length($4)-2)}' $version_file)
