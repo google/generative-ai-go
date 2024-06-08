@@ -208,11 +208,23 @@ func TestLive(t *testing.T) {
 		}
 	})
 	t.Run("count-tokens", func(t *testing.T) {
-		res, err := model.CountTokens(ctx, Text("The rain in Spain falls mainly on the plain."))
+		text := Text("The rain in Spain falls mainly on the plain.")
+		res, err := model.CountTokens(ctx, text)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if g, w := res.TotalTokens, int32(11); g != w {
+			t.Errorf("got %d, want %d", g, w)
+		}
+
+		// Should count SystemInstruction tokens too.
+		model2 := client.GenerativeModel(defaultModel)
+		model2.SystemInstruction = &Content{Parts: []Part{Text("You are a swashbuckling pirate.")}}
+		res, err = model2.CountTokens(ctx, text)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if g, w := res.TotalTokens, int32(20); g != w {
 			t.Errorf("got %d, want %d", g, w)
 		}
 	})
