@@ -133,7 +133,12 @@ func ExampleGenerativeModel_CountTokens() {
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-1.0-pro")
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{genai.Text("You are an expert ichthyologist.")},
+	}
 
+	// CountTokens will include the prompt, system instruction, and other model content
+	// settings.
 	resp, err := model.CountTokens(ctx, genai.Text("What kind of fish is this?"))
 	if err != nil {
 		log.Fatal(err)

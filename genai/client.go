@@ -279,8 +279,8 @@ func (m *GenerativeModel) CountTokens(ctx context.Context, parts ...Part) (*Coun
 
 func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) *pb.CountTokensRequest {
 	return &pb.CountTokensRequest{
-		Model:    m.fullName,
-		Contents: support.TransformSlice(contents, (*Content).toProto),
+		Model:                  m.fullName,
+		GenerateContentRequest: m.newGenerateContentRequest(contents...),
 	}
 }
 
