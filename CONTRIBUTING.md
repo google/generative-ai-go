@@ -49,9 +49,9 @@ cp devtools/pre-push-hook.sh .git/hooks/pre-push
 This repo consists of a single Go module.
 To increase the minor or patch version of the module:
 
-1. Determine the desired tag, using `git tag -l` to see existing tags
-   and incrementing as appropriate (you may need to run `git pull --tags`
-   to get the up-to-date upstream tags first). We will call the result TAG in
+1. Run `git pull --tags` to get the up-do-date upstream tags.
+2. Determine the desired tag, using `git tag -l` to see existing tags
+   and incrementing as appropriate. We will call the result TAG in
    these instructions. It should be of the form `vX.Y.Z`.
 3. Update the version in genai/internal/version.go to match TAG.
 4. Send a PR with that change. The pre-push hook should complain, so
