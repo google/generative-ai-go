@@ -347,10 +347,6 @@ func (EmbedContentResponse) fromProto(p *pb.EmbedContentResponse) *EmbedContentR
 // File is a file uploaded to the API.
 type File struct {
 	// Metadata for the File.
-	//
-	// Types that are assignable to Metadata:
-	//
-	//	*File_VideoMetadata
 	Metadata *FileMetadata
 	// Immutable. Identifier. The `File` resource name. The ID (name excluding the
 	// "files/" prefix) can contain up to 40 characters that are lowercase
@@ -1255,18 +1251,12 @@ func (v TaskType) String() string {
 // external systems to perform an action, or set of actions, outside of
 // knowledge and scope of the model.
 type Tool struct {
-	// Optional. A list of `FunctionDeclarations` available to the model that can
-	// be used for function calling.
-	//
-	// The model or system does not execute the function. Instead the defined
-	// function may be returned as a [FunctionCall][content.part.function_call]
-	// with arguments to the client side for execution. The model may decide to
-	// call a subset of these functions by populating
-	// [FunctionCall][content.part.function_call] in the response. The next
-	// conversation turn may contain a
-	// [FunctionResponse][content.part.function_response]
-	// with the [content.role] "function" generation context for the next model
-	// turn.
+	// Optional. A list of FunctionDeclarations available to the model that
+	// can be used for function calling. The model or system does not execute
+	// the function. Instead the defined function may be returned as a [FunctionCall]
+	// part with arguments to the client side for execution. The next conversation
+	// turn may contain a [FunctionResponse] with the role "function" generation
+	// context for the next model turn.
 	FunctionDeclarations []*FunctionDeclaration
 }
 
