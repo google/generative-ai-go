@@ -35,8 +35,9 @@ import (
 )
 
 const (
-	defaultModel = "gemini-1.0-pro"
-	imageFile    = "personWorkingOnComputer.jpg"
+	defaultModel   = "gemini-1.0-pro"
+	modelForVision = "gemini-1.5-flash"
+	imageFile      = "personWorkingOnComputer.jpg"
 )
 
 func TestLive(t *testing.T) {
@@ -131,7 +132,7 @@ func TestLive(t *testing.T) {
 	})
 
 	t.Run("image", func(t *testing.T) {
-		vmodel := client.GenerativeModel(defaultModel + "-vision-latest")
+		vmodel := client.GenerativeModel(modelForVision)
 		vmodel.Temperature = Ptr[float32](0)
 
 		data, err := os.ReadFile(filepath.Join("testdata", imageFile))
