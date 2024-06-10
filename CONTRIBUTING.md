@@ -49,21 +49,22 @@ cp devtools/pre-push-hook.sh .git/hooks/pre-push
 This repo consists of a single Go module.
 To increase the minor or patch version of the module:
 
-1. Determine the desired tag, using `git tag -l` to see existing tags
+1. Run `git pull --tags` to get the up-do-date upstream tags.
+2. Determine the desired tag, using `git tag -l` to see existing tags
    and incrementing as appropriate. We will call the result TAG in
    these instructions. It should be of the form `vX.Y.Z`.
-2. Update the version in genai/internal/version.go to match TAG.
-3. Send a PR with that change. The pre-push hook should complain, so
+3. Update the version in genai/internal/version.go to match TAG.
+4. Send a PR with that change. The pre-push hook should complain, so
    pass the `--no-verify` flag to `git push`.
-4. Submit the PR when approved. _No other PRs should be submitted until
+5. Submit the PR when approved. _No other PRs should be submitted until
    the following steps have been completed._
-5. Run `git pull` to get the submitted PR locally. You should be on main.
-6. Run `git tag TAG` to tag the repo locally.
-7. Run `git push origin TAG`. If the pre-push hook complains here, something
+6. Run `git pull` to get the submitted PR locally. You should be on main.
+7. Run `git tag TAG` to tag the repo locally.
+8. Run `git push origin TAG`. If the pre-push hook complains here, something
    is wrong; stop and review.
-8. Use the [GitHub UI](https://github.com/google/generative-ai-go/releases) to
+9. Use the [GitHub UI](https://github.com/google/generative-ai-go/releases) to
    create the release. Use TAG as the name.
    Provide release notes by summarizing the result of `git log PREVTAG..`,
    where PREVTAG is the previous release tag.
-9. Visit https://pkg.go.dev/github.com/google/generative-ai-go@TAG and request
+10. Visit https://pkg.go.dev/github.com/google/generative-ai-go@TAG and request
    that the version be processed.
