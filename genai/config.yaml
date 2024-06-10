@@ -149,17 +149,21 @@ types:
         FunctionCallingConfig_MODE_UNSPECIFIED: FunctionCallingUnspecified
 
     File:
+      populateToFrom: populateFileTo, populateFileFrom
       fields:
         Uri:
           name: URI
         MimeType:
           name: MIMEType
-        Error:
-          # TODO(jba): support or convert status.Status
-          omit: true
         Metadata:
-          # TODO(jba): support
-          omit: true
+          type: '*FileMetadata'
+          noConvert: true
+
+    VideoMetadata:
+      fields:
+        VideoDuration:
+          name: Duration
+
     File_State:
       name: FileState
       docVerb: represents

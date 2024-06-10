@@ -121,3 +121,34 @@ func (it *FileIterator) Next() (*File, error) {
 func (it *FileIterator) PageInfo() *iterator.PageInfo {
 	return it.it.PageInfo()
 }
+
+// FileMetadata holds metadata about a file.
+type FileMetadata struct {
+	// Set if the file contains video.
+	Video *VideoMetadata
+}
+
+func populateFileTo(p *pb.File, f *File) {
+	p.Metadata = nil
+	if f == nil || f.Metadata == nil {
+		return
+	}
+	if f.Metadata.Video != nil {
+		p.Metadata = &pb.File_VideoMetadata{
+			VideoMetadata: f.Metadata.Video.toProto(),
+		}
+	}
+}
+
+func populateFileFrom(f *File, p *pb.File) {
+	f.Metadata = nil
+	if p == nil || p.Metadata == nil {
+		return
+	}
+
+	if f.Metadata.Video != nil {
+		p.Metadata = &pb.File_VideoMetadata{
+			VideoMetadata: f.Metadata.Video.toProto(),
+		}
+	}
+}
