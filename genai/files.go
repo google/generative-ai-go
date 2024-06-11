@@ -146,9 +146,15 @@ func populateFileFrom(f *File, p *pb.File) {
 		return
 	}
 
-	if f.Metadata.Video != nil {
-		p.Metadata = &pb.File_VideoMetadata{
-			VideoMetadata: f.Metadata.Video.toProto(),
+	if p.Metadata != nil {
+		switch m := p.Metadata.(type) {
+		case *pb.File_VideoMetadata:
+			f.Metadata = &FileMetadata{
+				Video: (VideoMetadata{}).fromProto(m.VideoMetadata),
+			}
+		default:
+			// ignore other types
+			// TODO: signal a problem
 		}
 	}
 }
