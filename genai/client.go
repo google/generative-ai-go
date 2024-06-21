@@ -245,7 +245,7 @@ func protoToResponse(resp *pb.GenerateContentResponse) (*GenerateContentResponse
 	}
 	// Assume a non-nil PromptFeedback is an error.
 	// TODO: confirm.
-	if gcp.PromptFeedback != nil && gcp.PromptFeedback.BlockReason != BlockReasonUnspecified {
+	if gcp.PromptFeedback != nil && gcp.PromptFeedback.BlockReason != BlockedReasonUnspecified {
 		return nil, &BlockedError{PromptFeedback: gcp.PromptFeedback}
 	}
 
