@@ -21,9 +21,12 @@ import (
 	"time"
 
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
-	"github.com/google/generative-ai-go/internal/support"
 	"github.com/googleapis/gax-go/v2/apierror"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
+	gstatus "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // BatchEmbedContentsResponse is the response to a `BatchEmbedContentsRequest`.
@@ -38,7 +41,7 @@ func (v *BatchEmbedContentsResponse) toProto() *pb.BatchEmbedContentsResponse {
 		return nil
 	}
 	return &pb.BatchEmbedContentsResponse{
-		Embeddings: support.TransformSlice(v.Embeddings, (*ContentEmbedding).toProto),
+		Embeddings: transformSlice(v.Embeddings, (*ContentEmbedding).toProto),
 	}
 }
 
@@ -47,7 +50,7 @@ func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *B
 		return nil
 	}
 	return &BatchEmbedContentsResponse{
-		Embeddings: support.TransformSlice(p.Embeddings, (ContentEmbedding{}).fromProto),
+		Embeddings: transformSlice(p.Embeddings, (ContentEmbedding{}).fromProto),
 	}
 }
 
@@ -143,10 +146,10 @@ func (v *Candidate) toProto() *pb.Candidate {
 		return nil
 	}
 	return &pb.Candidate{
-		Index:            support.AddrOrNil(v.Index),
+		Index:            pvAddrOrNil(v.Index),
 		Content:          v.Content.toProto(),
 		FinishReason:     pb.Candidate_FinishReason(v.FinishReason),
-		SafetyRatings:    support.TransformSlice(v.SafetyRatings, (*SafetyRating).toProto),
+		SafetyRatings:    transformSlice(v.SafetyRatings, (*SafetyRating).toProto),
 		CitationMetadata: v.CitationMetadata.toProto(),
 		TokenCount:       v.TokenCount,
 	}
@@ -157,10 +160,10 @@ func (Candidate) fromProto(p *pb.Candidate) *Candidate {
 		return nil
 	}
 	return &Candidate{
-		Index:            support.DerefOrZero(p.Index),
+		Index:            pvDerefOrZero(p.Index),
 		Content:          (Content{}).fromProto(p.Content),
 		FinishReason:     FinishReason(p.FinishReason),
-		SafetyRatings:    support.TransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
+		SafetyRatings:    transformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
 		CitationMetadata: (CitationMetadata{}).fromProto(p.CitationMetadata),
 		TokenCount:       p.TokenCount,
 	}
@@ -177,7 +180,7 @@ func (v *CitationMetadata) toProto() *pb.CitationMetadata {
 		return nil
 	}
 	return &pb.CitationMetadata{
-		CitationSources: support.TransformSlice(v.CitationSources, (*CitationSource).toProto),
+		CitationSources: transformSlice(v.CitationSources, (*CitationSource).toProto),
 	}
 }
 
@@ -186,7 +189,7 @@ func (CitationMetadata) fromProto(p *pb.CitationMetadata) *CitationMetadata {
 		return nil
 	}
 	return &CitationMetadata{
-		CitationSources: support.TransformSlice(p.CitationSources, (CitationSource{}).fromProto),
+		CitationSources: transformSlice(p.CitationSources, (CitationSource{}).fromProto),
 	}
 }
 
@@ -216,7 +219,7 @@ func (v *CitationSource) toProto() *pb.CitationSource {
 		StartIndex: v.StartIndex,
 		EndIndex:   v.EndIndex,
 		Uri:        v.URI,
-		License:    support.AddrOrNil(v.License),
+		License:    pvAddrOrNil(v.License),
 	}
 }
 
@@ -228,7 +231,7 @@ func (CitationSource) fromProto(p *pb.CitationSource) *CitationSource {
 		StartIndex: p.StartIndex,
 		EndIndex:   p.EndIndex,
 		URI:        p.Uri,
-		License:    support.DerefOrZero(p.License),
+		License:    pvDerefOrZero(p.License),
 	}
 }
 
@@ -253,7 +256,7 @@ func (v *Content) toProto() *pb.Content {
 		return nil
 	}
 	return &pb.Content{
-		Parts: support.TransformSlice(v.Parts, partToProto),
+		Parts: transformSlice(v.Parts, partToProto),
 		Role:  v.Role,
 	}
 }
@@ -263,7 +266,7 @@ func (Content) fromProto(p *pb.Content) *Content {
 		return nil
 	}
 	return &Content{
-		Parts: support.TransformSlice(p.Parts, partFromProto),
+		Parts: transformSlice(p.Parts, partFromProto),
 		Role:  p.Role,
 	}
 }
@@ -388,13 +391,13 @@ func (v *File) toProto() *pb.File {
 		DisplayName:    v.DisplayName,
 		MimeType:       v.MIMEType,
 		SizeBytes:      v.SizeBytes,
-		CreateTime:     support.TimeToProto(v.CreateTime),
-		UpdateTime:     support.TimeToProto(v.UpdateTime),
-		ExpirationTime: support.TimeToProto(v.ExpirationTime),
+		CreateTime:     pvTimeToProto(v.CreateTime),
+		UpdateTime:     pvTimeToProto(v.UpdateTime),
+		ExpirationTime: pvTimeToProto(v.ExpirationTime),
 		Sha256Hash:     v.Sha256Hash,
 		Uri:            v.URI,
 		State:          pb.File_State(v.State),
-		Error:          support.APIErrorToProto(v.Error),
+		Error:          pvAPIErrorToProto(v.Error),
 	}
 	populateFileTo(p, v)
 	return p
@@ -409,13 +412,13 @@ func (File) fromProto(p *pb.File) *File {
 		DisplayName:    p.DisplayName,
 		MIMEType:       p.MimeType,
 		SizeBytes:      p.SizeBytes,
-		CreateTime:     support.TimeFromProto(p.CreateTime),
-		UpdateTime:     support.TimeFromProto(p.UpdateTime),
-		ExpirationTime: support.TimeFromProto(p.ExpirationTime),
+		CreateTime:     pvTimeFromProto(p.CreateTime),
+		UpdateTime:     pvTimeFromProto(p.UpdateTime),
+		ExpirationTime: pvTimeFromProto(p.ExpirationTime),
 		Sha256Hash:     p.Sha256Hash,
 		URI:            p.Uri,
 		State:          FileState(p.State),
-		Error:          support.APIErrorFromProto(p.Error),
+		Error:          pvAPIErrorFromProto(p.Error),
 	}
 	populateFileFrom(v, p)
 	return v
@@ -529,7 +532,7 @@ func (v *FunctionCall) toProto() *pb.FunctionCall {
 	}
 	return &pb.FunctionCall{
 		Name: v.Name,
-		Args: support.MapToStructPB(v.Args),
+		Args: pvMapToStructPB(v.Args),
 	}
 }
 
@@ -539,7 +542,7 @@ func (FunctionCall) fromProto(p *pb.FunctionCall) *FunctionCall {
 	}
 	return &FunctionCall{
 		Name: p.Name,
-		Args: support.MapFromStructPB(p.Args),
+		Args: pvMapFromStructPB(p.Args),
 	}
 }
 
@@ -672,7 +675,7 @@ func (v *FunctionResponse) toProto() *pb.FunctionResponse {
 	}
 	return &pb.FunctionResponse{
 		Name:     v.Name,
-		Response: support.MapToStructPB(v.Response),
+		Response: pvMapToStructPB(v.Response),
 	}
 }
 
@@ -682,7 +685,7 @@ func (FunctionResponse) fromProto(p *pb.FunctionResponse) *FunctionResponse {
 	}
 	return &FunctionResponse{
 		Name:     p.Name,
-		Response: support.MapFromStructPB(p.Response),
+		Response: pvMapFromStructPB(p.Response),
 	}
 }
 
@@ -710,7 +713,7 @@ func (v *GenerateContentResponse) toProto() *pb.GenerateContentResponse {
 		return nil
 	}
 	return &pb.GenerateContentResponse{
-		Candidates:     support.TransformSlice(v.Candidates, (*Candidate).toProto),
+		Candidates:     transformSlice(v.Candidates, (*Candidate).toProto),
 		PromptFeedback: v.PromptFeedback.toProto(),
 		UsageMetadata:  v.UsageMetadata.toProto(),
 	}
@@ -721,7 +724,7 @@ func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *Generat
 		return nil
 	}
 	return &GenerateContentResponse{
-		Candidates:     support.TransformSlice(p.Candidates, (Candidate{}).fromProto),
+		Candidates:     transformSlice(p.Candidates, (Candidate{}).fromProto),
 		PromptFeedback: (PromptFeedback{}).fromProto(p.PromptFeedback),
 		UsageMetadata:  (UsageMetadata{}).fromProto(p.UsageMetadata),
 	}
@@ -1018,9 +1021,9 @@ func (v *ModelInfo) toProto() *pb.Model {
 		InputTokenLimit:            v.InputTokenLimit,
 		OutputTokenLimit:           v.OutputTokenLimit,
 		SupportedGenerationMethods: v.SupportedGenerationMethods,
-		Temperature:                support.AddrOrNil(v.Temperature),
-		TopP:                       support.AddrOrNil(v.TopP),
-		TopK:                       support.AddrOrNil(v.TopK),
+		Temperature:                pvAddrOrNil(v.Temperature),
+		TopP:                       pvAddrOrNil(v.TopP),
+		TopK:                       pvAddrOrNil(v.TopK),
 	}
 }
 
@@ -1037,9 +1040,9 @@ func (ModelInfo) fromProto(p *pb.Model) *ModelInfo {
 		InputTokenLimit:            p.InputTokenLimit,
 		OutputTokenLimit:           p.OutputTokenLimit,
 		SupportedGenerationMethods: p.SupportedGenerationMethods,
-		Temperature:                support.DerefOrZero(p.Temperature),
-		TopP:                       support.DerefOrZero(p.TopP),
-		TopK:                       support.DerefOrZero(p.TopK),
+		Temperature:                pvDerefOrZero(p.Temperature),
+		TopP:                       pvDerefOrZero(p.TopP),
+		TopK:                       pvDerefOrZero(p.TopK),
 	}
 }
 
@@ -1060,7 +1063,7 @@ func (v *PromptFeedback) toProto() *pb.GenerateContentResponse_PromptFeedback {
 	}
 	return &pb.GenerateContentResponse_PromptFeedback{
 		BlockReason:   pb.GenerateContentResponse_PromptFeedback_BlockReason(v.BlockReason),
-		SafetyRatings: support.TransformSlice(v.SafetyRatings, (*SafetyRating).toProto),
+		SafetyRatings: transformSlice(v.SafetyRatings, (*SafetyRating).toProto),
 	}
 }
 
@@ -1070,7 +1073,7 @@ func (PromptFeedback) fromProto(p *pb.GenerateContentResponse_PromptFeedback) *P
 	}
 	return &PromptFeedback{
 		BlockReason:   BlockReason(p.BlockReason),
-		SafetyRatings: support.TransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
+		SafetyRatings: transformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
 	}
 }
 
@@ -1184,7 +1187,7 @@ func (v *Schema) toProto() *pb.Schema {
 		Nullable:    v.Nullable,
 		Enum:        v.Enum,
 		Items:       v.Items.toProto(),
-		Properties:  support.TransformMapValues(v.Properties, (*Schema).toProto),
+		Properties:  pvTransformMapValues(v.Properties, (*Schema).toProto),
 		Required:    v.Required,
 	}
 }
@@ -1200,7 +1203,7 @@ func (Schema) fromProto(p *pb.Schema) *Schema {
 		Nullable:    p.Nullable,
 		Enum:        p.Enum,
 		Items:       (Schema{}).fromProto(p.Items),
-		Properties:  support.TransformMapValues(p.Properties, (Schema{}).fromProto),
+		Properties:  pvTransformMapValues(p.Properties, (Schema{}).fromProto),
 		Required:    p.Required,
 	}
 }
@@ -1265,7 +1268,7 @@ func (v *Tool) toProto() *pb.Tool {
 		return nil
 	}
 	return &pb.Tool{
-		FunctionDeclarations: support.TransformSlice(v.FunctionDeclarations, (*FunctionDeclaration).toProto),
+		FunctionDeclarations: transformSlice(v.FunctionDeclarations, (*FunctionDeclaration).toProto),
 	}
 }
 
@@ -1274,7 +1277,7 @@ func (Tool) fromProto(p *pb.Tool) *Tool {
 		return nil
 	}
 	return &Tool{
-		FunctionDeclarations: support.TransformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
+		FunctionDeclarations: transformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
 	}
 }
 
@@ -1393,6 +1396,100 @@ func (VideoMetadata) fromProto(p *pb.VideoMetadata) *VideoMetadata {
 		return nil
 	}
 	return &VideoMetadata{
-		Duration: support.DurationFromProto(p.VideoDuration),
+		Duration: pvDurationFromProto(p.VideoDuration),
 	}
+}
+
+func pvTransformSlice[From, To any](from []From, f func(From) To) []To {
+	if from == nil {
+		return nil
+	}
+	to := make([]To, len(from))
+	for i, e := range from {
+		to[i] = f(e)
+	}
+	return to
+}
+
+func pvTransformMapValues[K comparable, VFrom, VTo any](from map[K]VFrom, f func(VFrom) VTo) map[K]VTo {
+	if from == nil {
+		return nil
+	}
+	to := map[K]VTo{}
+	for k, v := range from {
+		to[k] = f(v)
+	}
+	return to
+}
+
+func pvAddrOrNil[T comparable](x T) *T {
+	var z T
+	if x == z {
+		return nil
+	}
+	return &x
+}
+
+func pvDerefOrZero[T any](x *T) T {
+	if x == nil {
+		var z T
+		return z
+	}
+	return *x
+}
+
+func pvMapToStructPB(m map[string]any) *structpb.Struct {
+	if m == nil {
+		return nil
+	}
+	s, err := structpb.NewStruct(m)
+	if err != nil {
+		panic(fmt.Errorf("support.MapToProto: %w", err))
+	}
+	return s
+}
+
+func pvMapFromStructPB(p *structpb.Struct) map[string]any {
+	if p == nil {
+		return nil
+	}
+	return p.AsMap()
+}
+
+func pvTimeToProto(t time.Time) *timestamppb.Timestamp {
+	if t.IsZero() {
+		return nil
+	}
+	return timestamppb.New(t)
+}
+
+func pvTimeFromProto(ts *timestamppb.Timestamp) time.Time {
+	if ts == nil {
+		return time.Time{}
+	}
+	return ts.AsTime()
+}
+
+func pvAPIErrorToProto(ae *apierror.APIError) *spb.Status {
+	if ae == nil {
+		return nil
+	}
+	return ae.GRPCStatus().Proto()
+}
+
+func pvAPIErrorFromProto(s *spb.Status) *apierror.APIError {
+	err := gstatus.ErrorProto(s)
+	aerr, ok := apierror.ParseError(err, true)
+	if !ok {
+		// Should be impossible.
+		return nil
+	}
+	return aerr
+}
+
+func pvDurationFromProto(d *durationpb.Duration) time.Duration {
+	if d == nil {
+		return 0
+	}
+	return d.AsDuration()
 }

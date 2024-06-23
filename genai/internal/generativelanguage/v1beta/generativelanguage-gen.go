@@ -123,6 +123,7 @@ func New(client *http.Client) (*Service, error) {
 		return nil, errors.New("client is nil")
 	}
 	s := &Service{client: client, BasePath: basePath}
+	s.CachedContents = NewCachedContentsService(s)
 	s.Corpora = NewCorporaService(s)
 	s.Files = NewFilesService(s)
 	s.Media = NewMediaService(s)
@@ -135,6 +136,8 @@ type Service struct {
 	client    *http.Client
 	BasePath  string // API endpoint base URL
 	UserAgent string // optional additional User-Agent fragment
+
+	CachedContents *CachedContentsService
 
 	Corpora *CorporaService
 
@@ -152,6 +155,15 @@ func (s *Service) userAgent() string {
 		return googleapi.UserAgent
 	}
 	return googleapi.UserAgent + " " + s.UserAgent
+}
+
+func NewCachedContentsService(s *Service) *CachedContentsService {
+	rs := &CachedContentsService{s: s}
+	return rs
+}
+
+type CachedContentsService struct {
+	s *Service
 }
 
 func NewCorporaService(s *Service) *CorporaService {
@@ -521,6 +533,84 @@ type Blob struct {
 
 func (s *Blob) MarshalJSON() ([]byte, error) {
 	type NoMethod Blob
+	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
+}
+
+// CachedContent: Content that has been preprocessed and can be used in
+// subsequent request to GenerativeService. Cached content can be only used
+// with model it was created for.
+type CachedContent struct {
+	// Contents: Optional. Input only. Immutable. The content to cache.
+	Contents []*Content `json:"contents,omitempty"`
+	// CreateTime: Output only. Creation time of the cache entry.
+	CreateTime string `json:"createTime,omitempty"`
+	// DisplayName: Optional. Immutable. The user-generated meaningful display name
+	// of the cached content. Maximum 128 Unicode characters.
+	DisplayName string `json:"displayName,omitempty"`
+	// ExpireTime: Timestamp in UTC of when this resource is considered expired.
+	// This is *always* provided on output, regardless of what was sent on input.
+	ExpireTime string `json:"expireTime,omitempty"`
+	// Model: Required. Immutable. The name of the `Model` to use for cached
+	// content Format: `models/{model}`
+	Model string `json:"model,omitempty"`
+	// Name: Optional. Identifier. The resource name referring to the cached
+	// content. Format: `cachedContents/{id}`
+	Name string `json:"name,omitempty"`
+	// SystemInstruction: Optional. Input only. Immutable. Developer set system
+	// instruction. Currently text only.
+	SystemInstruction *Content `json:"systemInstruction,omitempty"`
+	// ToolConfig: Optional. Input only. Immutable. Tool config. This config is
+	// shared for all tools.
+	ToolConfig *ToolConfig `json:"toolConfig,omitempty"`
+	// Tools: Optional. Input only. Immutable. A list of `Tools` the model may use
+	// to generate the next response
+	Tools []*Tool `json:"tools,omitempty"`
+	// Ttl: Input only. New TTL for this resource, input only.
+	Ttl string `json:"ttl,omitempty"`
+	// UpdateTime: Output only. When the cache entry was last updated in UTC time.
+	UpdateTime string `json:"updateTime,omitempty"`
+	// UsageMetadata: Output only. Metadata on the usage of the cached content.
+	UsageMetadata *CachedContentUsageMetadata `json:"usageMetadata,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the server.
+	googleapi.ServerResponse `json:"-"`
+	// ForceSendFields is a list of field names (e.g. "Contents") to
+	// unconditionally include in API requests. By default, fields with empty or
+	// default values are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
+	ForceSendFields []string `json:"-"`
+	// NullFields is a list of field names (e.g. "Contents") to include in API
+	// requests with the JSON null value. By default, fields with empty values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
+	NullFields []string `json:"-"`
+}
+
+func (s *CachedContent) MarshalJSON() ([]byte, error) {
+	type NoMethod CachedContent
+	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
+}
+
+// CachedContentUsageMetadata: Metadata on the usage of the cached content.
+type CachedContentUsageMetadata struct {
+	// TotalTokenCount: Total number of tokens that the cached content consumes.
+	TotalTokenCount int64 `json:"totalTokenCount,omitempty"`
+	// ForceSendFields is a list of field names (e.g. "TotalTokenCount") to
+	// unconditionally include in API requests. By default, fields with empty or
+	// default values are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
+	ForceSendFields []string `json:"-"`
+	// NullFields is a list of field names (e.g. "TotalTokenCount") to include in
+	// API requests with the JSON null value. By default, fields with empty values
+	// are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
+	NullFields []string `json:"-"`
+}
+
+func (s *CachedContentUsageMetadata) MarshalJSON() ([]byte, error) {
+	type NoMethod CachedContentUsageMetadata
 	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
 }
 
@@ -1031,7 +1121,9 @@ func (s *CountTokensRequest) MarshalJSON() ([]byte, error) {
 // `token_count` for the `prompt`.
 type CountTokensResponse struct {
 	// TotalTokens: The number of tokens that the `model` tokenizes the `prompt`
-	// into. Always non-negative.
+	// into. Always non-negative. When cached_content is set, this is still the
+	// total effective prompt size. I.e. this includes the number of tokens in the
+	// cached content.
 	TotalTokens int64 `json:"totalTokens,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the server.
@@ -1816,6 +1908,11 @@ func (s *GenerateAnswerResponse) UnmarshalJSON(data []byte) error {
 
 // GenerateContentRequest: Request to generate a completion from the model.
 type GenerateContentRequest struct {
+	// CachedContent: Optional. The name of the cached content used as context to
+	// serve the prediction. Note: only used in explicit caching, where users can
+	// have control over caching (e.g. what content to cache) and enjoy guaranteed
+	// cost savings. Format: `cachedContents/{cachedContent}`
+	CachedContent string `json:"cachedContent,omitempty"`
 	// Contents: Required. The content of the current conversation with the model.
 	// For single-turn queries, this is a single instance. For multi-turn queries,
 	// this is a repeated field that contains conversation history + latest
@@ -1851,13 +1948,13 @@ type GenerateContentRequest struct {
 	// knowledge and scope of the model. The only supported tool is currently
 	// `Function`.
 	Tools []*Tool `json:"tools,omitempty"`
-	// ForceSendFields is a list of field names (e.g. "Contents") to
+	// ForceSendFields is a list of field names (e.g. "CachedContent") to
 	// unconditionally include in API requests. By default, fields with empty or
 	// default values are omitted from API requests. See
 	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
 	// details.
 	ForceSendFields []string `json:"-"`
-	// NullFields is a list of field names (e.g. "Contents") to include in API
+	// NullFields is a list of field names (e.g. "CachedContent") to include in API
 	// requests with the JSON null value. By default, fields with empty values are
 	// omitted from API requests. See
 	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
@@ -2394,6 +2491,34 @@ func (s *InputFeedback) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
 }
 
+// ListCachedContentsResponse: Response with CachedContents list.
+type ListCachedContentsResponse struct {
+	// CachedContents: List of cached contents.
+	CachedContents []*CachedContent `json:"cachedContents,omitempty"`
+	// NextPageToken: A token, which can be sent as `page_token` to retrieve the
+	// next page. If this field is omitted, there are no subsequent pages.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the server.
+	googleapi.ServerResponse `json:"-"`
+	// ForceSendFields is a list of field names (e.g. "CachedContents") to
+	// unconditionally include in API requests. By default, fields with empty or
+	// default values are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
+	ForceSendFields []string `json:"-"`
+	// NullFields is a list of field names (e.g. "CachedContents") to include in
+	// API requests with the JSON null value. By default, fields with empty values
+	// are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
+	NullFields []string `json:"-"`
+}
+
+func (s *ListCachedContentsResponse) MarshalJSON() ([]byte, error) {
+	type NoMethod ListCachedContentsResponse
+	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
+}
+
 // ListChunksResponse: Response from `ListChunks` containing a paginated list
 // of `Chunk`s. The `Chunk`s are sorted by ascending `chunk.create_time`.
 type ListChunksResponse struct {
@@ -2719,6 +2844,8 @@ type Model struct {
 	DisplayName string `json:"displayName,omitempty"`
 	// InputTokenLimit: Maximum number of input tokens allowed for this model.
 	InputTokenLimit int64 `json:"inputTokenLimit,omitempty"`
+	// MaxTemperature: The maximum temperature this model can use.
+	MaxTemperature float64 `json:"maxTemperature,omitempty"`
 	// Name: Required. The resource name of the `Model`. Format: `models/{model}`
 	// with a `{model}` naming convention of: * "{base_model_id}-{version}"
 	// Examples: * `models/chat-bison-001`
@@ -2730,10 +2857,10 @@ type Model struct {
 	// which correspond to API methods.
 	SupportedGenerationMethods []string `json:"supportedGenerationMethods,omitempty"`
 	// Temperature: Controls the randomness of the output. Values can range over
-	// `[0.0,2.0]`, inclusive. A higher value will produce responses that are more
-	// varied, while a value closer to `0.0` will typically result in less
-	// surprising responses from the model. This value specifies default to be used
-	// by the backend while making the call to the model.
+	// `[0.0,max_temperature]`, inclusive. A higher value will produce responses
+	// that are more varied, while a value closer to `0.0` will typically result in
+	// less surprising responses from the model. This value specifies default to be
+	// used by the backend while making the call to the model.
 	Temperature float64 `json:"temperature,omitempty"`
 	// TopK: For Top-k sampling. Top-k sampling considers the set of `top_k` most
 	// probable tokens. This value specifies default to be used by the backend
@@ -2771,14 +2898,16 @@ func (s *Model) MarshalJSON() ([]byte, error) {
 func (s *Model) UnmarshalJSON(data []byte) error {
 	type NoMethod Model
 	var s1 struct {
-		Temperature gensupport.JSONFloat64 `json:"temperature"`
-		TopP        gensupport.JSONFloat64 `json:"topP"`
+		MaxTemperature gensupport.JSONFloat64 `json:"maxTemperature"`
+		Temperature    gensupport.JSONFloat64 `json:"temperature"`
+		TopP           gensupport.JSONFloat64 `json:"topP"`
 		*NoMethod
 	}
 	s1.NoMethod = (*NoMethod)(s)
 	if err := json.Unmarshal(data, &s1); err != nil {
 		return err
 	}
+	s.MaxTemperature = float64(s1.MaxTemperature)
 	s.Temperature = float64(s1.Temperature)
 	s.TopP = float64(s1.TopP)
 	return nil
@@ -2940,7 +3069,7 @@ type PromptFeedback struct {
 	//   "BLOCK_REASON_UNSPECIFIED" - Default value. This value is unused.
 	//   "SAFETY" - Prompt was blocked due to safety reasons. You can inspect
 	// `safety_ratings` to understand which safety category blocked it.
-	//   "OTHER" - Prompt was blocked due to unknown reaasons.
+	//   "OTHER" - Prompt was blocked due to unknown reasons.
 	BlockReason string `json:"blockReason,omitempty"`
 	// SafetyRatings: Ratings for safety of the prompt. There is at most one rating
 	// per category.
@@ -3864,23 +3993,28 @@ func (s *UpdateChunkRequest) MarshalJSON() ([]byte, error) {
 
 // UsageMetadata: Metadata on the generation request's token usage.
 type UsageMetadata struct {
+	// CachedContentTokenCount: Number of tokens in the cached part of the prompt,
+	// i.e. in the cached content.
+	CachedContentTokenCount int64 `json:"cachedContentTokenCount,omitempty"`
 	// CandidatesTokenCount: Total number of tokens across the generated
 	// candidates.
 	CandidatesTokenCount int64 `json:"candidatesTokenCount,omitempty"`
-	// PromptTokenCount: Number of tokens in the prompt.
+	// PromptTokenCount: Number of tokens in the prompt. When cached_content is
+	// set, this is still the total effective prompt size. I.e. this includes the
+	// number of tokens in the cached content.
 	PromptTokenCount int64 `json:"promptTokenCount,omitempty"`
 	// TotalTokenCount: Total token count for the generation request (prompt +
 	// candidates).
 	TotalTokenCount int64 `json:"totalTokenCount,omitempty"`
-	// ForceSendFields is a list of field names (e.g. "CandidatesTokenCount") to
+	// ForceSendFields is a list of field names (e.g. "CachedContentTokenCount") to
 	// unconditionally include in API requests. By default, fields with empty or
 	// default values are omitted from API requests. See
 	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
 	// details.
 	ForceSendFields []string `json:"-"`
-	// NullFields is a list of field names (e.g. "CandidatesTokenCount") to include
-	// in API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. See
+	// NullFields is a list of field names (e.g. "CachedContentTokenCount") to
+	// include in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. See
 	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
 	NullFields []string `json:"-"`
 }
@@ -3910,6 +4044,553 @@ type VideoMetadata struct {
 func (s *VideoMetadata) MarshalJSON() ([]byte, error) {
 	type NoMethod VideoMetadata
 	return gensupport.MarshalJSON(NoMethod(*s), s.ForceSendFields, s.NullFields)
+}
+
+type CachedContentsCreateCall struct {
+	s             *Service
+	cachedcontent *CachedContent
+	urlParams_    gensupport.URLParams
+	ctx_          context.Context
+	header_       http.Header
+}
+
+// Create: Creates CachedContent resource.
+func (r *CachedContentsService) Create(cachedcontent *CachedContent) *CachedContentsCreateCall {
+	c := &CachedContentsCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.cachedcontent = cachedcontent
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
+func (c *CachedContentsCreateCall) Fields(s ...googleapi.Field) *CachedContentsCreateCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method.
+func (c *CachedContentsCreateCall) Context(ctx context.Context) *CachedContentsCreateCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
+func (c *CachedContentsCreateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CachedContentsCreateCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "application/json", c.header_)
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.cachedcontent)
+	if err != nil {
+		return nil, err
+	}
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta/cachedContents")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "generativelanguage.cachedContents.create" call.
+// Any non-2xx status code is an error. Response headers are in either
+// *CachedContent.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to check
+// whether the returned error was because http.StatusNotModified was returned.
+func (c *CachedContentsCreateCall) Do(opts ...googleapi.CallOption) (*CachedContent, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, gensupport.WrapError(&googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, gensupport.WrapError(err)
+	}
+	ret := &CachedContent{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+type CachedContentsDeleteCall struct {
+	s          *Service
+	name       string
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
+}
+
+// Delete: Deletes CachedContent resource.
+//
+//   - name: The resource name referring to the content cache entry Format:
+//     `cachedContents/{id}`.
+func (r *CachedContentsService) Delete(name string) *CachedContentsDeleteCall {
+	c := &CachedContentsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.name = name
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
+func (c *CachedContentsDeleteCall) Fields(s ...googleapi.Field) *CachedContentsDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method.
+func (c *CachedContentsDeleteCall) Context(ctx context.Context) *CachedContentsDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
+func (c *CachedContentsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CachedContentsDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "", c.header_)
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta/{+name}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"name": c.name,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "generativelanguage.cachedContents.delete" call.
+// Any non-2xx status code is an error. Response headers are in either
+// *Empty.ServerResponse.Header or (if a response was returned at all) in
+// error.(*googleapi.Error).Header. Use googleapi.IsNotModified to check
+// whether the returned error was because http.StatusNotModified was returned.
+func (c *CachedContentsDeleteCall) Do(opts ...googleapi.CallOption) (*Empty, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, gensupport.WrapError(&googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, gensupport.WrapError(err)
+	}
+	ret := &Empty{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+type CachedContentsGetCall struct {
+	s            *Service
+	name         string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Reads CachedContent resource.
+//
+//   - name: The resource name referring to the content cache entry. Format:
+//     `cachedContents/{id}`.
+func (r *CachedContentsService) Get(name string) *CachedContentsGetCall {
+	c := &CachedContentsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.name = name
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
+func (c *CachedContentsGetCall) Fields(s ...googleapi.Field) *CachedContentsGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets an optional parameter which makes the operation fail if the
+// object's ETag matches the given value. This is useful for getting updates
+// only after the object has changed since the last request.
+func (c *CachedContentsGetCall) IfNoneMatch(entityTag string) *CachedContentsGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method.
+func (c *CachedContentsGetCall) Context(ctx context.Context) *CachedContentsGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
+func (c *CachedContentsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CachedContentsGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "", c.header_)
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta/{+name}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"name": c.name,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "generativelanguage.cachedContents.get" call.
+// Any non-2xx status code is an error. Response headers are in either
+// *CachedContent.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to check
+// whether the returned error was because http.StatusNotModified was returned.
+func (c *CachedContentsGetCall) Do(opts ...googleapi.CallOption) (*CachedContent, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, gensupport.WrapError(&googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, gensupport.WrapError(err)
+	}
+	ret := &CachedContent{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+type CachedContentsListCall struct {
+	s            *Service
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Lists CachedContents.
+func (r *CachedContentsService) List() *CachedContentsListCall {
+	c := &CachedContentsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	return c
+}
+
+// PageSize sets the optional parameter "pageSize": The maximum number of
+// cached contents to return. The service may return fewer than this value. If
+// unspecified, some default (under maximum) number of items will be returned.
+// The maximum value is 1000; values above 1000 will be coerced to 1000.
+func (c *CachedContentsListCall) PageSize(pageSize int64) *CachedContentsListCall {
+	c.urlParams_.Set("pageSize", fmt.Sprint(pageSize))
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": A page token, received
+// from a previous `ListCachedContents` call. Provide this to retrieve the
+// subsequent page. When paginating, all other parameters provided to
+// `ListCachedContents` must match the call that provided the page token.
+func (c *CachedContentsListCall) PageToken(pageToken string) *CachedContentsListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
+func (c *CachedContentsListCall) Fields(s ...googleapi.Field) *CachedContentsListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets an optional parameter which makes the operation fail if the
+// object's ETag matches the given value. This is useful for getting updates
+// only after the object has changed since the last request.
+func (c *CachedContentsListCall) IfNoneMatch(entityTag string) *CachedContentsListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method.
+func (c *CachedContentsListCall) Context(ctx context.Context) *CachedContentsListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
+func (c *CachedContentsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CachedContentsListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "", c.header_)
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta/cachedContents")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "generativelanguage.cachedContents.list" call.
+// Any non-2xx status code is an error. Response headers are in either
+// *ListCachedContentsResponse.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *CachedContentsListCall) Do(opts ...googleapi.CallOption) (*ListCachedContentsResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, gensupport.WrapError(&googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, gensupport.WrapError(err)
+	}
+	ret := &ListCachedContentsResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *CachedContentsListCall) Pages(ctx context.Context, f func(*ListCachedContentsResponse) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken"))
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+type CachedContentsPatchCall struct {
+	s             *Service
+	name          string
+	cachedcontent *CachedContent
+	urlParams_    gensupport.URLParams
+	ctx_          context.Context
+	header_       http.Header
+}
+
+// Patch: Updates CachedContent resource (only expiration is updatable).
+//
+//   - name: Optional. Identifier. The resource name referring to the cached
+//     content. Format: `cachedContents/{id}`.
+func (r *CachedContentsService) Patch(name string, cachedcontent *CachedContent) *CachedContentsPatchCall {
+	c := &CachedContentsPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.name = name
+	c.cachedcontent = cachedcontent
+	return c
+}
+
+// UpdateMask sets the optional parameter "updateMask": The list of fields to
+// update.
+func (c *CachedContentsPatchCall) UpdateMask(updateMask string) *CachedContentsPatchCall {
+	c.urlParams_.Set("updateMask", updateMask)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
+func (c *CachedContentsPatchCall) Fields(s ...googleapi.Field) *CachedContentsPatchCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method.
+func (c *CachedContentsPatchCall) Context(ctx context.Context) *CachedContentsPatchCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
+func (c *CachedContentsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *CachedContentsPatchCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "application/json", c.header_)
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.cachedcontent)
+	if err != nil {
+		return nil, err
+	}
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "v1beta/{+name}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("PATCH", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"name": c.name,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "generativelanguage.cachedContents.patch" call.
+// Any non-2xx status code is an error. Response headers are in either
+// *CachedContent.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to check
+// whether the returned error was because http.StatusNotModified was returned.
+func (c *CachedContentsPatchCall) Do(opts ...googleapi.CallOption) (*CachedContent, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, gensupport.WrapError(&googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, gensupport.WrapError(err)
+	}
+	ret := &CachedContent{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 
 type CorporaCreateCall struct {

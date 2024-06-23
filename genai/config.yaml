@@ -17,7 +17,6 @@
 package: genai
 
 protoImportPath: cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb
-supportImportPath: github.com/google/generative-ai-go/internal/support
 
 types:
     HarmCategory:
