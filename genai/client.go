@@ -21,6 +21,12 @@
 // Set the environment variable GOOGLE_CLOUD_GO to the path to the above repo on your machine.
 // For example:
 //     export GOOGLE_CLOUD_GO=$HOME/repos/google-cloud-go
+//
+// Ensure that the working directory of that repo is at the version of cloud.google.com/go/ai in
+// this repo's go.mod file. For example, if the go.mod contains
+//   cloud.google.com/go/ai v0.6.0
+// then from the root of the google-cloud-go repo, run
+//   git switch -d ai/v0.6.0
 
 //go:generate protoveneer -license license.txt config.yaml $GOOGLE_CLOUD_GO/ai/generativelanguage/apiv1beta/generativelanguagepb
 
@@ -39,7 +45,6 @@ import (
 	"github.com/google/generative-ai-go/genai/internal"
 	gld "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
 
-	"github.com/google/generative-ai-go/internal/support"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -190,9 +195,9 @@ func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateC
 func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) *pb.GenerateContentRequest {
 	return &pb.GenerateContentRequest{
 		Model:             m.fullName,
-		Contents:          support.TransformSlice(contents, (*Content).toProto),
-		SafetySettings:    support.TransformSlice(m.SafetySettings, (*SafetySetting).toProto),
-		Tools:             support.TransformSlice(m.Tools, (*Tool).toProto),
+		Contents:          transformSlice(contents, (*Content).toProto),
+		SafetySettings:    transformSlice(m.SafetySettings, (*SafetySetting).toProto),
+		Tools:             transformSlice(m.Tools, (*Tool).toProto),
 		ToolConfig:        m.ToolConfig.toProto(),
 		GenerationConfig:  m.GenerationConfig.toProto(),
 		SystemInstruction: m.SystemInstruction.toProto(),
@@ -405,4 +410,17 @@ func mergeTexts(in []Part) []Part {
 		}
 	}
 	return out
+}
+
+// transformSlice applies f to each element of from and returns
+// a new slice with the results.
+func transformSlice[From, To any](from []From, f func(From) To) []To {
+	if from == nil {
+		return nil
+	}
+	to := make([]To, len(from))
+	for i, e := range from {
+		to[i] = f(e)
+	}
+	return to
 }
