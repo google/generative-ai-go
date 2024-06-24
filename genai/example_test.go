@@ -362,7 +362,7 @@ func ExampleTool() {
 		Properties: map[string]*genai.Schema{
 			"location": {
 				Type:        genai.TypeString,
-				Description: "The city and state, e.g. San Francisco, CA",
+				Description: "The city and state, for example 'San Francisco, CA'. Both city and state are mandatory",
 			},
 			"unit": {
 				Type: genai.TypeString,
@@ -380,7 +380,7 @@ func ExampleTool() {
 		}},
 	}
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-flash-latest")
 
 	// Before initiating a conversation, we tell the model which tools it has
 	// at its disposal.
