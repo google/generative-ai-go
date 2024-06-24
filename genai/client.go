@@ -199,7 +199,7 @@ func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateC
 }
 
 func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.GenerateContentRequest, error) {
-	return catchPVPanic(func() *pb.GenerateContentRequest {
+	return pvCatchPanic(func() *pb.GenerateContentRequest {
 		return &pb.GenerateContentRequest{
 			Model:             m.fullName,
 			Contents:          transformSlice(contents, (*Content).toProto),
@@ -444,20 +444,5 @@ func transformSlice[From, To any](from []From, f func(From) To) []To {
 
 func fromProto[V interface{ fromProto(P) *V }, P any](p P) (*V, error) {
 	var v V
-	return catchPVPanic(func() *V { return v.fromProto(p) })
-}
-
-// catchPVPanic recovers from panics of type pvPanic and
-// returns an error instead.
-func catchPVPanic[T any](f func() T) (_ T, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(pvPanic); ok {
-				err = r.(error)
-			} else {
-				panic(r)
-			}
-		}
-	}()
-	return f(), nil
+	return pvCatchPanic(func() *V { return v.fromProto(p) })
 }
