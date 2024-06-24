@@ -191,6 +191,22 @@ types:
         TotalTokenCount:
           type: int32
 
+    CachedContent:
+      populateToFrom: populateCachedContentTo, populateCachedContentFrom
+      fields:
+        Expiration:
+          type: ExpireTimeOrTTL
+          noConvert: true
+        Name:
+          type: string
+        Model:
+          type: string
+        DisplayName:
+          type: string
+
+    CachedContent_UsageMetadata:
+      name: CachedContentUsageMetadata
+
 # Omit everything not explicitly configured.
 omitTypes:
   - '*'

@@ -407,23 +407,7 @@ func TestLive(t *testing.T) {
 	})
 
 	t.Run("files", func(t *testing.T) {
-		f, err := os.Open(filepath.Join("testdata", imageFile))
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer f.Close()
-		// Upload a file. Using the empty string as a name will generate a unique name.
-		file, err := client.UploadFile(ctx, "", f, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("uploaded %s, MIME type %q", file.Name, file.MIMEType)
-		defer func() {
-			// Delete the file when the test is done.
-			if err := client.DeleteFile(ctx, file.Name); err != nil {
-				t.Fatal(err)
-			}
-		}()
+		file := uploadFile(t, ctx, client, filepath.Join("testdata", imageFile))
 		// Sanity checks on the returned file.
 		if !strings.HasPrefix(file.Name, "files/") {
 			t.Fatalf("got %q, want file name beginning 'files/'", file.Name)
@@ -541,6 +525,7 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+	t.Run("caching", func(t *testing.T) { testCaching(t, client) })
 }
 
 func TestJoinResponses(t *testing.T) {
@@ -778,4 +763,37 @@ func TestRecoverPanic(t *testing.T) {
 	if err == nil {
 		t.Fatal("got nil, want error")
 	}
+}
+
+func uploadFile(t *testing.T, ctx context.Context, client *Client, filename string) *File {
+	osf, err := os.Open(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer osf.Close()
+	// Upload a file. Using the empty string as a name will generate a unique name.
+	file, err := client.UploadFile(ctx, "", osf, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("uploaded %s, MIME type %q", file.Name, file.MIMEType)
+	for file.State == FileStateProcessing {
+		t.Logf("waiting for uploaded file to become active")
+		time.Sleep(time.Second)
+		var err error
+		file, err = client.GetFile(ctx, file.Name)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if file.State != FileStateActive {
+		t.Fatalf("uploaded file has state %s, not FileStateActive", file.State)
+	}
+	t.Cleanup(func() {
+		// Delete the file when the test is done.
+		if err := client.DeleteFile(ctx, file.Name); err != nil {
+			t.Fatal(err)
+		}
+	})
+	return file
 }

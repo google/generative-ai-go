@@ -55,7 +55,7 @@ func (m *EmbeddingModel) EmbedContent(ctx context.Context, parts ...Part) (*Embe
 // the task type is set to TaskTypeRetrievalDocument.
 func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string, parts ...Part) (*EmbedContentResponse, error) {
 	req := newEmbedContentRequest(m.fullName, m.TaskType, title, parts)
-	res, err := m.c.c.EmbedContent(ctx, req)
+	res, err := m.c.gc.EmbedContent(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (b *EmbeddingBatch) AddContentWithTitle(title string, parts ...Part) *Embed
 
 // BatchEmbedContents returns the embeddings for all the contents in the batch.
 func (m *EmbeddingModel) BatchEmbedContents(ctx context.Context, b *EmbeddingBatch) (*BatchEmbedContentsResponse, error) {
-	res, err := m.c.c.BatchEmbedContents(ctx, b.req)
+	res, err := m.c.gc.BatchEmbedContents(ctx, b.req)
 	if err != nil {
 		return nil, err
 	}
