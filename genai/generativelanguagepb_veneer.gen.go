@@ -301,8 +301,13 @@ func (ContentEmbedding) fromProto(p *pb.ContentEmbedding) *ContentEmbedding {
 type CountTokensResponse struct {
 	// The number of tokens that the `model` tokenizes the `prompt` into.
 	//
-	// Always non-negative.
+	// Always non-negative. When cached_content is set, this is still the total
+	// effective prompt size. I.e. this includes the number of tokens in the
+	// cached content.
 	TotalTokens int32
+	// Number of tokens in the cached part of the prompt, i.e. in the cached
+	// content.
+	CachedContentTokenCount int32
 }
 
 func (v *CountTokensResponse) toProto() *pb.CountTokensResponse {
@@ -310,7 +315,8 @@ func (v *CountTokensResponse) toProto() *pb.CountTokensResponse {
 		return nil
 	}
 	return &pb.CountTokensResponse{
-		TotalTokens: v.TotalTokens,
+		TotalTokens:             v.TotalTokens,
+		CachedContentTokenCount: v.CachedContentTokenCount,
 	}
 }
 
@@ -319,7 +325,8 @@ func (CountTokensResponse) fromProto(p *pb.CountTokensResponse) *CountTokensResp
 		return nil
 	}
 	return &CountTokensResponse{
-		TotalTokens: p.TotalTokens,
+		TotalTokens:             p.TotalTokens,
+		CachedContentTokenCount: p.CachedContentTokenCount,
 	}
 }
 
@@ -588,7 +595,7 @@ const (
 	// FunctionCallingUnspecified means unspecified function calling mode. This value should not be used.
 	FunctionCallingUnspecified FunctionCallingMode = 0
 	// FunctionCallingAuto means default model behavior, model decides to predict either a function call
-	// or a natural language repspose.
+	// or a natural language response.
 	FunctionCallingAuto FunctionCallingMode = 1
 	// FunctionCallingAny means model is constrained to always predicting a function call only.
 	// If "allowed_function_names" are set, the predicted function call will be
@@ -985,7 +992,7 @@ type ModelInfo struct {
 	SupportedGenerationMethods []string
 	// Controls the randomness of the output.
 	//
-	// Values can range over `[0.0,1.0]`, inclusive. A value closer to `1.0` will
+	// Values can range over `[0.0,2.0]`, inclusive. A higher value will
 	// produce responses that are more varied, while a value closer to `0.0` will
 	// typically result in less surprising responses from the model.
 	// This value specifies default to be used by the backend while making the
@@ -1346,8 +1353,13 @@ func (v Type) String() string {
 
 // UsageMetadata is metadata on the generation request's token usage.
 type UsageMetadata struct {
-	// Number of tokens in the prompt.
+	// Number of tokens in the prompt. When cached_content is set, this is still
+	// the total effective prompt size. I.e. this includes the number of tokens
+	// in the cached content.
 	PromptTokenCount int32
+	// Number of tokens in the cached part of the prompt, i.e. in the cached
+	// content.
+	CachedContentTokenCount int32
 	// Total number of tokens across the generated candidates.
 	CandidatesTokenCount int32
 	// Total token count for the generation request (prompt + candidates).
@@ -1359,9 +1371,10 @@ func (v *UsageMetadata) toProto() *pb.GenerateContentResponse_UsageMetadata {
 		return nil
 	}
 	return &pb.GenerateContentResponse_UsageMetadata{
-		PromptTokenCount:     v.PromptTokenCount,
-		CandidatesTokenCount: v.CandidatesTokenCount,
-		TotalTokenCount:      v.TotalTokenCount,
+		PromptTokenCount:        v.PromptTokenCount,
+		CachedContentTokenCount: v.CachedContentTokenCount,
+		CandidatesTokenCount:    v.CandidatesTokenCount,
+		TotalTokenCount:         v.TotalTokenCount,
 	}
 }
 
@@ -1370,9 +1383,10 @@ func (UsageMetadata) fromProto(p *pb.GenerateContentResponse_UsageMetadata) *Usa
 		return nil
 	}
 	return &UsageMetadata{
-		PromptTokenCount:     p.PromptTokenCount,
-		CandidatesTokenCount: p.CandidatesTokenCount,
-		TotalTokenCount:      p.TotalTokenCount,
+		PromptTokenCount:        p.PromptTokenCount,
+		CachedContentTokenCount: p.CachedContentTokenCount,
+		CandidatesTokenCount:    p.CandidatesTokenCount,
+		TotalTokenCount:         p.TotalTokenCount,
 	}
 }
 
