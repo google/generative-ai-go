@@ -12,23 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// For the following go:generate line to work, do the following:
-// Install the protoveener tool:
+// For the following go:generate line to work, install the protoveener tool:
 //    git clone https://github.com/googleapis/google-cloud-go
 //    cd google-cloud-go
 //    go install ./internal/protoveneer/cmd/protoveneer
 //
-// Set the environment variable GOOGLE_CLOUD_GO to the path to the above repo on your machine.
-// For example:
-//     export GOOGLE_CLOUD_GO=$HOME/repos/google-cloud-go
-//
-// Ensure that the working directory of that repo is at the version of cloud.google.com/go/ai in
-// this repo's go.mod file. For example, if the go.mod contains
-//   cloud.google.com/go/ai v0.6.0
-// then from the root of the google-cloud-go repo, run
-//   git switch -d ai/v0.6.0
-
-//go:generate protoveneer -license license.txt config.yaml $GOOGLE_CLOUD_GO/ai/generativelanguage/apiv1beta/generativelanguagepb
+//go:generate ./generate.sh
 
 package genai
 
