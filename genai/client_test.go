@@ -766,3 +766,16 @@ func TestNoAPIKey(t *testing.T) {
 		t.Fatal("got nil, want error")
 	}
 }
+
+func TestRecoverPanic(t *testing.T) {
+	// Verify that conversions that used to cause a panic now result in an error.
+	fr := &FunctionResponse{
+		Name:     "r",
+		Response: map[string]any{"x": 1 + 2i}, // complex values are invalid
+	}
+	var m GenerativeModel
+	_, err := m.newGenerateContentRequest(newUserContent([]Part{fr}))
+	if err == nil {
+		t.Fatal("got nil, want error")
+	}
+}

@@ -158,7 +158,10 @@ func fullModelName(name string) string {
 // GenerateContent produces a single request and response.
 func (m *GenerativeModel) GenerateContent(ctx context.Context, parts ...Part) (*GenerateContentResponse, error) {
 	content := newUserContent(parts)
-	req := m.newGenerateContentRequest(content)
+	req, err := m.newGenerateContentRequest(content)
+	if err != nil {
+		return nil, err
+	}
 	res, err := m.c.c.GenerateContent(ctx, req)
 	if err != nil {
 		return nil, err
@@ -168,11 +171,14 @@ func (m *GenerativeModel) GenerateContent(ctx context.Context, parts ...Part) (*
 
 // GenerateContentStream returns an iterator that enumerates responses.
 func (m *GenerativeModel) GenerateContentStream(ctx context.Context, parts ...Part) *GenerateContentResponseIterator {
-	streamClient, err := m.c.c.StreamGenerateContent(ctx, m.newGenerateContentRequest(newUserContent(parts)))
-	return &GenerateContentResponseIterator{
-		sc:  streamClient,
-		err: err,
+	iter := &GenerateContentResponseIterator{}
+	req, err := m.newGenerateContentRequest(newUserContent(parts))
+	if err != nil {
+		iter.err = err
+	} else {
+		iter.sc, iter.err = m.c.c.StreamGenerateContent(ctx, req)
 	}
+	return iter
 }
 
 func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateContentRequest) (*GenerateContentResponse, error) {
@@ -192,16 +198,18 @@ func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateC
 	}
 }
 
-func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) *pb.GenerateContentRequest {
-	return &pb.GenerateContentRequest{
-		Model:             m.fullName,
-		Contents:          transformSlice(contents, (*Content).toProto),
-		SafetySettings:    transformSlice(m.SafetySettings, (*SafetySetting).toProto),
-		Tools:             transformSlice(m.Tools, (*Tool).toProto),
-		ToolConfig:        m.ToolConfig.toProto(),
-		GenerationConfig:  m.GenerationConfig.toProto(),
-		SystemInstruction: m.SystemInstruction.toProto(),
-	}
+func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.GenerateContentRequest, error) {
+	return pvCatchPanic(func() *pb.GenerateContentRequest {
+		return &pb.GenerateContentRequest{
+			Model:             m.fullName,
+			Contents:          transformSlice(contents, (*Content).toProto),
+			SafetySettings:    transformSlice(m.SafetySettings, (*SafetySetting).toProto),
+			Tools:             transformSlice(m.Tools, (*Tool).toProto),
+			ToolConfig:        m.ToolConfig.toProto(),
+			GenerationConfig:  m.GenerationConfig.toProto(),
+			SystemInstruction: m.SystemInstruction.toProto(),
+		}
+	})
 }
 
 func newUserContent(parts []Part) *Content {
@@ -244,7 +252,10 @@ func (iter *GenerateContentResponseIterator) Next() (*GenerateContentResponse, e
 }
 
 func protoToResponse(resp *pb.GenerateContentResponse) (*GenerateContentResponse, error) {
-	gcp := (GenerateContentResponse{}).fromProto(resp)
+	gcp, err := fromProto[GenerateContentResponse](resp)
+	if err != nil {
+		return nil, err
+	}
 	if gcp == nil {
 		return nil, errors.New("empty response from model")
 	}
@@ -273,20 +284,26 @@ func (iter *GenerateContentResponseIterator) MergedResponse() *GenerateContentRe
 
 // CountTokens counts the number of tokens in the content.
 func (m *GenerativeModel) CountTokens(ctx context.Context, parts ...Part) (*CountTokensResponse, error) {
-	req := m.newCountTokensRequest(newUserContent(parts))
+	req, err := m.newCountTokensRequest(newUserContent(parts))
+	if err != nil {
+		return nil, err
+	}
 	res, err := m.c.c.CountTokens(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-
-	return (CountTokensResponse{}).fromProto(res), nil
+	return fromProto[CountTokensResponse](res)
 }
 
-func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) *pb.CountTokensRequest {
+func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) (*pb.CountTokensRequest, error) {
+	gcr, err := m.newGenerateContentRequest(contents...)
+	if err != nil {
+		return nil, err
+	}
 	return &pb.CountTokensRequest{
 		Model:                  m.fullName,
-		GenerateContentRequest: m.newGenerateContentRequest(contents...),
-	}
+		GenerateContentRequest: gcr,
+	}, nil
 }
 
 // Info returns information about the model.
@@ -300,7 +317,7 @@ func (c *Client) modelInfo(ctx context.Context, fullName string) (*ModelInfo, er
 	if err != nil {
 		return nil, err
 	}
-	return (ModelInfo{}).fromProto(res), nil
+	return fromProto[ModelInfo](res)
 }
 
 // A BlockedError indicates that the model's response was blocked.
@@ -423,4 +440,9 @@ func transformSlice[From, To any](from []From, f func(From) To) []To {
 		to[i] = f(e)
 	}
 	return to
+}
+
+func fromProto[V interface{ fromProto(P) *V }, P any](p P) (*V, error) {
+	var v V
+	return pvCatchPanic(func() *V { return v.fromProto(p) })
 }

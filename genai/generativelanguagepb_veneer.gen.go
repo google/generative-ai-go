@@ -41,7 +41,7 @@ func (v *BatchEmbedContentsResponse) toProto() *pb.BatchEmbedContentsResponse {
 		return nil
 	}
 	return &pb.BatchEmbedContentsResponse{
-		Embeddings: transformSlice(v.Embeddings, (*ContentEmbedding).toProto),
+		Embeddings: pvTransformSlice(v.Embeddings, (*ContentEmbedding).toProto),
 	}
 }
 
@@ -50,7 +50,7 @@ func (BatchEmbedContentsResponse) fromProto(p *pb.BatchEmbedContentsResponse) *B
 		return nil
 	}
 	return &BatchEmbedContentsResponse{
-		Embeddings: transformSlice(p.Embeddings, (ContentEmbedding{}).fromProto),
+		Embeddings: pvTransformSlice(p.Embeddings, (ContentEmbedding{}).fromProto),
 	}
 }
 
@@ -149,7 +149,7 @@ func (v *Candidate) toProto() *pb.Candidate {
 		Index:            pvAddrOrNil(v.Index),
 		Content:          v.Content.toProto(),
 		FinishReason:     pb.Candidate_FinishReason(v.FinishReason),
-		SafetyRatings:    transformSlice(v.SafetyRatings, (*SafetyRating).toProto),
+		SafetyRatings:    pvTransformSlice(v.SafetyRatings, (*SafetyRating).toProto),
 		CitationMetadata: v.CitationMetadata.toProto(),
 		TokenCount:       v.TokenCount,
 	}
@@ -163,7 +163,7 @@ func (Candidate) fromProto(p *pb.Candidate) *Candidate {
 		Index:            pvDerefOrZero(p.Index),
 		Content:          (Content{}).fromProto(p.Content),
 		FinishReason:     FinishReason(p.FinishReason),
-		SafetyRatings:    transformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
+		SafetyRatings:    pvTransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
 		CitationMetadata: (CitationMetadata{}).fromProto(p.CitationMetadata),
 		TokenCount:       p.TokenCount,
 	}
@@ -180,7 +180,7 @@ func (v *CitationMetadata) toProto() *pb.CitationMetadata {
 		return nil
 	}
 	return &pb.CitationMetadata{
-		CitationSources: transformSlice(v.CitationSources, (*CitationSource).toProto),
+		CitationSources: pvTransformSlice(v.CitationSources, (*CitationSource).toProto),
 	}
 }
 
@@ -189,7 +189,7 @@ func (CitationMetadata) fromProto(p *pb.CitationMetadata) *CitationMetadata {
 		return nil
 	}
 	return &CitationMetadata{
-		CitationSources: transformSlice(p.CitationSources, (CitationSource{}).fromProto),
+		CitationSources: pvTransformSlice(p.CitationSources, (CitationSource{}).fromProto),
 	}
 }
 
@@ -256,7 +256,7 @@ func (v *Content) toProto() *pb.Content {
 		return nil
 	}
 	return &pb.Content{
-		Parts: transformSlice(v.Parts, partToProto),
+		Parts: pvTransformSlice(v.Parts, partToProto),
 		Role:  v.Role,
 	}
 }
@@ -266,7 +266,7 @@ func (Content) fromProto(p *pb.Content) *Content {
 		return nil
 	}
 	return &Content{
-		Parts: transformSlice(p.Parts, partFromProto),
+		Parts: pvTransformSlice(p.Parts, partFromProto),
 		Role:  p.Role,
 	}
 }
@@ -713,7 +713,7 @@ func (v *GenerateContentResponse) toProto() *pb.GenerateContentResponse {
 		return nil
 	}
 	return &pb.GenerateContentResponse{
-		Candidates:     transformSlice(v.Candidates, (*Candidate).toProto),
+		Candidates:     pvTransformSlice(v.Candidates, (*Candidate).toProto),
 		PromptFeedback: v.PromptFeedback.toProto(),
 		UsageMetadata:  v.UsageMetadata.toProto(),
 	}
@@ -724,7 +724,7 @@ func (GenerateContentResponse) fromProto(p *pb.GenerateContentResponse) *Generat
 		return nil
 	}
 	return &GenerateContentResponse{
-		Candidates:     transformSlice(p.Candidates, (Candidate{}).fromProto),
+		Candidates:     pvTransformSlice(p.Candidates, (Candidate{}).fromProto),
 		PromptFeedback: (PromptFeedback{}).fromProto(p.PromptFeedback),
 		UsageMetadata:  (UsageMetadata{}).fromProto(p.UsageMetadata),
 	}
@@ -1063,7 +1063,7 @@ func (v *PromptFeedback) toProto() *pb.GenerateContentResponse_PromptFeedback {
 	}
 	return &pb.GenerateContentResponse_PromptFeedback{
 		BlockReason:   pb.GenerateContentResponse_PromptFeedback_BlockReason(v.BlockReason),
-		SafetyRatings: transformSlice(v.SafetyRatings, (*SafetyRating).toProto),
+		SafetyRatings: pvTransformSlice(v.SafetyRatings, (*SafetyRating).toProto),
 	}
 }
 
@@ -1073,7 +1073,7 @@ func (PromptFeedback) fromProto(p *pb.GenerateContentResponse_PromptFeedback) *P
 	}
 	return &PromptFeedback{
 		BlockReason:   BlockReason(p.BlockReason),
-		SafetyRatings: transformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
+		SafetyRatings: pvTransformSlice(p.SafetyRatings, (SafetyRating{}).fromProto),
 	}
 }
 
@@ -1268,7 +1268,7 @@ func (v *Tool) toProto() *pb.Tool {
 		return nil
 	}
 	return &pb.Tool{
-		FunctionDeclarations: transformSlice(v.FunctionDeclarations, (*FunctionDeclaration).toProto),
+		FunctionDeclarations: pvTransformSlice(v.FunctionDeclarations, (*FunctionDeclaration).toProto),
 	}
 }
 
@@ -1277,7 +1277,7 @@ func (Tool) fromProto(p *pb.Tool) *Tool {
 		return nil
 	}
 	return &Tool{
-		FunctionDeclarations: transformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
+		FunctionDeclarations: pvTransformSlice(p.FunctionDeclarations, (FunctionDeclaration{}).fromProto),
 	}
 }
 
@@ -1444,7 +1444,7 @@ func pvMapToStructPB(m map[string]any) *structpb.Struct {
 	}
 	s, err := structpb.NewStruct(m)
 	if err != nil {
-		panic(fmt.Errorf("support.MapToProto: %w", err))
+		panic(pvPanic(fmt.Errorf("pvMapToStructPB: %w", err)))
 	}
 	return s
 }
@@ -1492,4 +1492,24 @@ func pvDurationFromProto(d *durationpb.Duration) time.Duration {
 		return 0
 	}
 	return d.AsDuration()
+}
+
+// pvPanic wraps panics from support functions.
+// User-provided functions in the same package can also use it.
+// It allows callers to distinguish conversion function panics from other panics.
+type pvPanic error
+
+// pvCatchPanic recovers from panics of type pvPanic and
+// returns an error instead.
+func pvCatchPanic[T any](f func() T) (_ T, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(pvPanic); ok {
+				err = r.(error)
+			} else {
+				panic(r)
+			}
+		}
+	}()
+	return f(), nil
 }
