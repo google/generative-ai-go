@@ -40,9 +40,10 @@ import (
 
 // A Client is a Google generative AI client.
 type Client struct {
-	c  *gl.GenerativeClient
+	gc *gl.GenerativeClient
 	mc *gl.ModelClient
 	fc *gl.FileClient
+	cc *gl.CacheClient
 	ds *gld.Service
 }
 
@@ -62,7 +63,7 @@ then pass it as an option:
 (If you're doing that already, then maybe the environment variable is empty or unset.)
 Import the option package as "google.golang.org/api/option".`)
 	}
-	c, err := gl.NewGenerativeRESTClient(ctx, opts...)
+	gc, err := gl.NewGenerativeRESTClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,12 +75,16 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, err
 	}
+	cc, err := gl.NewCacheClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
 	ds, err := gld.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
-	c.SetGoogleClientInfo("gccl", "v"+internal.Version, "genai-go", internal.Version)
-	return &Client{c, mc, fc, ds}, nil
+	gc.SetGoogleClientInfo("gccl", "v"+internal.Version, "genai-go", internal.Version)
+	return &Client{gc, mc, fc, cc, ds}, nil
 }
 
 // hasAuthOption reports whether an authentication-related option was provided.
@@ -107,7 +112,7 @@ func hasAuthOption(opts []option.ClientOption) bool {
 
 // Close closes the client.
 func (c *Client) Close() error {
-	return errors.Join(c.c.Close(), c.mc.Close(), c.fc.Close())
+	return errors.Join(c.gc.Close(), c.mc.Close(), c.fc.Close())
 }
 
 // GenerativeModel is a model that can generate text.
@@ -124,6 +129,9 @@ type GenerativeModel struct {
 	// SystemInstruction (also known as "system prompt") is a more forceful prompt to the model.
 	// The model will adhere the instructions more strongly than if they appeared in a normal prompt.
 	SystemInstruction *Content
+	// The name of the CachedContent to use.
+	// Must have already been created with [Client.CreateCachedContent].
+	CachedContentName string
 }
 
 // GenerativeModel creates a new instance of the named generative model.
@@ -151,7 +159,7 @@ func (m *GenerativeModel) GenerateContent(ctx context.Context, parts ...Part) (*
 	if err != nil {
 		return nil, err
 	}
-	res, err := m.c.c.GenerateContent(ctx, req)
+	res, err := m.c.gc.GenerateContent(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -165,13 +173,13 @@ func (m *GenerativeModel) GenerateContentStream(ctx context.Context, parts ...Pa
 	if err != nil {
 		iter.err = err
 	} else {
-		iter.sc, iter.err = m.c.c.StreamGenerateContent(ctx, req)
+		iter.sc, iter.err = m.c.gc.StreamGenerateContent(ctx, req)
 	}
 	return iter
 }
 
 func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateContentRequest) (*GenerateContentResponse, error) {
-	streamClient, err := m.c.c.StreamGenerateContent(ctx, req)
+	streamClient, err := m.c.gc.StreamGenerateContent(ctx, req)
 	iter := &GenerateContentResponseIterator{
 		sc:  streamClient,
 		err: err,
@@ -277,7 +285,7 @@ func (m *GenerativeModel) CountTokens(ctx context.Context, parts ...Part) (*Coun
 	if err != nil {
 		return nil, err
 	}
-	res, err := m.c.c.CountTokens(ctx, req)
+	res, err := m.c.gc.CountTokens(ctx, req)
 	if err != nil {
 		return nil, err
 	}

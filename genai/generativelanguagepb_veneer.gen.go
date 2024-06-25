@@ -117,6 +117,110 @@ func (v BlockReason) String() string {
 	return fmt.Sprintf("BlockReason(%d)", v)
 }
 
+// CachedContent is content that has been preprocessed and can be used in subsequent request
+// to GenerativeService.
+//
+// Cached content can be only used with model it was created for.
+type CachedContent struct {
+	// Specifies when this resource will expire.
+	//
+	// Types that are assignable to Expiration:
+	//
+	//	*CachedContent_ExpireTime
+	//	*CachedContent_Ttl
+	Expiration ExpireTimeOrTTL
+	// Optional. Identifier. The resource name referring to the cached content.
+	// Format: `cachedContents/{id}`
+	Name string
+	// Optional. Immutable. The user-generated meaningful display name of the
+	// cached content. Maximum 128 Unicode characters.
+	DisplayName string
+	// Required. Immutable. The name of the `Model` to use for cached content
+	// Format: `models/{model}`
+	Model string
+	// Optional. Input only. Immutable. Developer set system instruction.
+	// Currently text only.
+	SystemInstruction *Content
+	// Optional. Input only. Immutable. The content to cache.
+	Contents []*Content
+	// Optional. Input only. Immutable. A list of `Tools` the model may use to
+	// generate the next response
+	Tools []*Tool
+	// Optional. Input only. Immutable. Tool config. This config is shared for all
+	// tools.
+	ToolConfig *ToolConfig
+	// Output only. Creation time of the cache entry.
+	CreateTime time.Time
+	// Output only. When the cache entry was last updated in UTC time.
+	UpdateTime time.Time
+	// Output only. Metadata on the usage of the cached content.
+	UsageMetadata *CachedContentUsageMetadata
+}
+
+func (v *CachedContent) toProto() *pb.CachedContent {
+	if v == nil {
+		return nil
+	}
+	p := &pb.CachedContent{
+		Name:              pvAddrOrNil(v.Name),
+		DisplayName:       pvAddrOrNil(v.DisplayName),
+		Model:             pvAddrOrNil(v.Model),
+		SystemInstruction: v.SystemInstruction.toProto(),
+		Contents:          pvTransformSlice(v.Contents, (*Content).toProto),
+		Tools:             pvTransformSlice(v.Tools, (*Tool).toProto),
+		ToolConfig:        v.ToolConfig.toProto(),
+		CreateTime:        pvTimeToProto(v.CreateTime),
+		UpdateTime:        pvTimeToProto(v.UpdateTime),
+		UsageMetadata:     v.UsageMetadata.toProto(),
+	}
+	populateCachedContentTo(p, v)
+	return p
+}
+
+func (CachedContent) fromProto(p *pb.CachedContent) *CachedContent {
+	if p == nil {
+		return nil
+	}
+	v := &CachedContent{
+		Name:              pvDerefOrZero(p.Name),
+		DisplayName:       pvDerefOrZero(p.DisplayName),
+		Model:             pvDerefOrZero(p.Model),
+		SystemInstruction: (Content{}).fromProto(p.SystemInstruction),
+		Contents:          pvTransformSlice(p.Contents, (Content{}).fromProto),
+		Tools:             pvTransformSlice(p.Tools, (Tool{}).fromProto),
+		ToolConfig:        (ToolConfig{}).fromProto(p.ToolConfig),
+		CreateTime:        pvTimeFromProto(p.CreateTime),
+		UpdateTime:        pvTimeFromProto(p.UpdateTime),
+		UsageMetadata:     (CachedContentUsageMetadata{}).fromProto(p.UsageMetadata),
+	}
+	populateCachedContentFrom(v, p)
+	return v
+}
+
+// CachedContentUsageMetadata is metadata on the usage of the cached content.
+type CachedContentUsageMetadata struct {
+	// Total number of tokens that the cached content consumes.
+	TotalTokenCount int32
+}
+
+func (v *CachedContentUsageMetadata) toProto() *pb.CachedContent_UsageMetadata {
+	if v == nil {
+		return nil
+	}
+	return &pb.CachedContent_UsageMetadata{
+		TotalTokenCount: v.TotalTokenCount,
+	}
+}
+
+func (CachedContentUsageMetadata) fromProto(p *pb.CachedContent_UsageMetadata) *CachedContentUsageMetadata {
+	if p == nil {
+		return nil
+	}
+	return &CachedContentUsageMetadata{
+		TotalTokenCount: p.TotalTokenCount,
+	}
+}
+
 // Candidate is a response candidate generated from the model.
 type Candidate struct {
 	// Output only. Index of the candidate in the list of candidates.
