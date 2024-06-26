@@ -197,6 +197,10 @@ func (m *GenerativeModel) generateContent(ctx context.Context, req *pb.GenerateC
 
 func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.GenerateContentRequest, error) {
 	return pvCatchPanic(func() *pb.GenerateContentRequest {
+		var cc *string
+		if m.CachedContentName != "" {
+			cc = &m.CachedContentName
+		}
 		return &pb.GenerateContentRequest{
 			Model:             m.fullName,
 			Contents:          transformSlice(contents, (*Content).toProto),
@@ -205,6 +209,7 @@ func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.G
 			ToolConfig:        m.ToolConfig.toProto(),
 			GenerationConfig:  m.GenerationConfig.toProto(),
 			SystemInstruction: m.SystemInstruction.toProto(),
+			CachedContent:     cc,
 		}
 	})
 }

@@ -155,7 +155,7 @@ func testCaching(t *testing.T, client *Client) {
 			t.Fatal("want error, got nil")
 		}
 	})
-	t.Run("generation", func(t *testing.T) {
+	t.Run("use", func(t *testing.T) {
 		txt := strings.Repeat("George Washington was the first president of the United States. ", 3000)
 		argcc := &CachedContent{
 			Model:    model,
@@ -166,16 +166,36 @@ func testCaching(t *testing.T, client *Client) {
 			t.Fatal(err)
 		}
 		defer client.DeleteCachedContent(ctx, cc.Name)
+		tokenCount := cc.UsageMetadata.TotalTokenCount
 		m := client.GenerativeModelFromCachedContent(cc)
-		res, err := m.GenerateContent(ctx, Text("Who was the first US president?"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		got := responseString(res)
-		const want = "Washington"
-		if !strings.Contains(got, want) {
-			t.Errorf("got %q, want string containing %q", got, want)
-		}
+		t.Run("generation", func(t *testing.T) {
+			res, err := m.GenerateContent(ctx, Text("Who was the first US president?"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := responseString(res)
+			const want = "Washington"
+			if !strings.Contains(got, want) {
+				t.Errorf("got %q, want string containing %q", got, want)
+			}
+			if g, w := res.UsageMetadata.CachedContentTokenCount, tokenCount; g != w {
+				t.Errorf("CachedContentTokenCount: got %d, want %d", g, w)
+			}
+		})
+		t.Run("count", func(t *testing.T) {
+			t.Skip("not yet implemented")
+			gotRes, err := m.CountTokens(ctx, Text("Who Was the first US president?"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantRes := &CountTokensResponse{
+				TotalTokens:             8,
+				CachedContentTokenCount: tokenCount,
+			}
+			if !cmp.Equal(gotRes, wantRes) {
+				t.Errorf("got %+v, want %+v", gotRes, wantRes)
+			}
+		})
 	})
 }
 
