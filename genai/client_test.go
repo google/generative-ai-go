@@ -787,8 +787,8 @@ func (t *customRT) RoundTrip(req *http.Request) (*http.Response, error) {
 
 func TestCustomHTTPClient(t *testing.T) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
-	if testing.Short() {
-		t.Skip("skipping live test in -short mode")
+	if testing.Short() || apiKey == "" {
+		t.Skip("skipping live test in -short mode, or when API key isn't provided")
 	}
 	c := &http.Client{
 		Transport: &customRT{APIKey: apiKey},
