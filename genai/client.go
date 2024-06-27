@@ -65,23 +65,23 @@ Import the option package as "google.golang.org/api/option".`)
 	}
 	gc, err := gl.NewGenerativeRESTClient(ctx, opts...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating generative client: %w", err)
 	}
 	mc, err := gl.NewModelRESTClient(ctx, opts...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating model client: %w", err)
 	}
 	fc, err := gl.NewFileRESTClient(ctx, opts...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating file client: %w", err)
 	}
 	cc, err := gl.NewCacheClient(ctx, opts...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating cache client: %w", err)
 	}
 	ds, err := gld.NewService(ctx, opts...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating discovery client: %w", err)
 	}
 	gc.SetGoogleClientInfo("gccl", "v"+internal.Version, "genai-go", internal.Version)
 	return &Client{gc, mc, fc, cc, ds}, nil
