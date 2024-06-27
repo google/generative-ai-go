@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -763,6 +764,25 @@ func TestRecoverPanic(t *testing.T) {
 	if err == nil {
 		t.Fatal("got nil, want error")
 	}
+}
+
+func TestCustomHTTPClient(t *testing.T) {
+	t.Skip("custom HTTP client not working right now")
+	c := http.DefaultClient
+
+	ctx := context.Background()
+	client, err := NewClient(ctx, option.WithHTTPClient(c))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel(defaultModel)
+	resp, err := model.GenerateContent(ctx, Text("What are some of the largest cities in the US?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp)
 }
 
 func uploadFile(t *testing.T, ctx context.Context, client *Client, filename string) *File {
