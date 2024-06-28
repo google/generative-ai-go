@@ -75,10 +75,14 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, fmt.Errorf("creating file client: %w", err)
 	}
-	cc, err := gl.NewCacheClient(ctx, opts...)
+
+	// Workaround for https://github.com/google/generative-ai-go/issues/151
+	optsForCache := removeHTTPClientOption(opts)
+	cc, err := gl.NewCacheClient(ctx, optsForCache...)
 	if err != nil {
 		return nil, fmt.Errorf("creating cache client: %w", err)
 	}
+
 	ds, err := gld.NewService(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("creating discovery client: %w", err)
@@ -108,6 +112,19 @@ func hasAuthOption(opts []option.ClientOption) bool {
 		}
 	}
 	return false
+}
+
+// removeHTTPClientOption removes option.withHTTPClient from the given list
+// of options, if it exists; it returns the new (filtered) list.
+func removeHTTPClientOption(opts []option.ClientOption) []option.ClientOption {
+	var newOpts []option.ClientOption
+	for _, opt := range opts {
+		ts := reflect.ValueOf(opt).Type().String()
+		if ts != "option.withHTTPClient" {
+			newOpts = append(newOpts, opt)
+		}
+	}
+	return newOpts
 }
 
 // Close closes the client.

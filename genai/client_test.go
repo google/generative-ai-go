@@ -766,9 +766,33 @@ func TestRecoverPanic(t *testing.T) {
 	}
 }
 
+type customRT struct {
+	APIKey string
+}
+
+func (t *customRT) RoundTrip(req *http.Request) (*http.Response, error) {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	newReq := req.Clone(req.Context())
+	vals := newReq.URL.Query()
+	vals.Set("key", t.APIKey)
+	newReq.URL.RawQuery = vals.Encode()
+
+	resp, err := transport.RoundTrip(newReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func TestCustomHTTPClient(t *testing.T) {
-	t.Skip("custom HTTP client not working right now")
-	c := http.DefaultClient
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	if testing.Short() || apiKey == "" {
+		t.Skip("skipping live test in -short mode, or when API key isn't provided")
+	}
+	c := &http.Client{
+		Transport: &customRT{APIKey: apiKey},
+	}
 
 	ctx := context.Background()
 	client, err := NewClient(ctx, option.WithHTTPClient(c))
@@ -780,9 +804,10 @@ func TestCustomHTTPClient(t *testing.T) {
 	model := client.GenerativeModel(defaultModel)
 	resp, err := model.GenerateContent(ctx, Text("What are some of the largest cities in the US?"))
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
-	fmt.Println(resp)
+	got := responseString(resp)
+	checkMatch(t, got, `new york`)
 }
 
 func uploadFile(t *testing.T, ctx context.Context, client *Client, filename string) *File {
