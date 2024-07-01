@@ -101,6 +101,29 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	printResponse(resp)
 }
 
+func ExampleGenerativeModel_GenerateContent_codeExecution() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.0-pro")
+	// To enable code execution, set the CodeExecution tool.
+	model.Tools = []*genai.Tool{{CodeExecution: &genai.CodeExecution{}}}
+	resp, err := model.GenerateContent(ctx, genai.Text(`
+		788477675 * 778 = x.  Find x and also compute largest odd number smaller than this number.
+		`))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// The model will generate code to solve the problem, which is returned in an ExecutableCode part.
+	// It will also run that code and use the result, which is returned in a CodeExecutionResult part.
+	printResponse(resp)
+
+}
+
 func ExampleGenerativeModel_GenerateContentStream() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))

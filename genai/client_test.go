@@ -532,7 +532,7 @@ func TestLive(t *testing.T) {
 		model.SetTemperature(0)
 		model.Tools = []*Tool{{CodeExecution: &CodeExecution{}}}
 		res, err := model.GenerateContent(ctx, Text(`
-			788477675 * 778 = x  Find x and also compute largest odd number smaller than this number.
+			788477675 * 778 = x.  Find x and also compute largest odd number smaller than this number.
 			`))
 		if err != nil {
 			t.Fatal(err)
