@@ -38,7 +38,7 @@ func ExampleGenerativeModel_GenerateContent() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
@@ -83,7 +83,7 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -109,7 +109,7 @@ func ExampleGenerativeModel_GenerateContent_codeExecution() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	// To enable code execution, set the CodeExecution tool.
 	model.Tools = []*genai.Tool{{CodeExecution: &genai.CodeExecution{}}}
 	resp, err := model.GenerateContent(ctx, genai.Text(`
@@ -132,7 +132,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 
 	iter := model.GenerateContentStream(ctx, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
 	for {
@@ -155,7 +155,7 @@ func ExampleGenerativeModel_CountTokens() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	model.SystemInstruction = &genai.Content{
 		Parts: []genai.Part{genai.Text("You are an expert ichthyologist.")},
 	}
@@ -208,7 +208,7 @@ func ExampleChatSession() {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	cs := model.StartChat()
 
 	send := func(msg string) *genai.GenerateContentResponse {
@@ -252,7 +252,7 @@ func ExampleChatSession_history() {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
@@ -320,7 +320,7 @@ func ExampleGenerativeModel_GenerateContentStream_errors() {
 		log.Fatal(err)
 	}
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 
 	iter := model.GenerateContentStream(ctx, genai.ImageData("foo", []byte("bar")))
 	res, err := iter.Next()
@@ -572,7 +572,7 @@ func ExampleClient_setProxy() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.0-pro")
+	model := client.GenerativeModel("gemini-1.5-pro")
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
 		log.Fatal(err)
