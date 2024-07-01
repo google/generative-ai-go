@@ -121,7 +121,6 @@ func ExampleGenerativeModel_GenerateContent_codeExecution() {
 	// The model will generate code to solve the problem, which is returned in an ExecutableCode part.
 	// It will also run that code and use the result, which is returned in a CodeExecutionResult part.
 	printResponse(resp)
-
 }
 
 func ExampleGenerativeModel_GenerateContentStream() {
@@ -201,6 +200,7 @@ func ExampleGenerativeModel_jSONSchema() {
 		}
 	}
 }
+
 func ExampleChatSession() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
