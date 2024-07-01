@@ -30,7 +30,7 @@ var (
 		return &gax.Backoff{Initial: 100 * time.Millisecond}
 	}
 	// syscallRetryable is a platform-specific hook, specified in retryable_linux.go
-	syscallRetryable func(error) bool = func(err error) bool { return false }
+	syscallRetryable func(error) bool = func(_ error) bool { return false }
 )
 
 const (
