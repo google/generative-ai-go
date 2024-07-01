@@ -91,7 +91,6 @@ func testCaching(t *testing.T, client *Client) {
 			}
 			if got.UpdateTime.IsZero() {
 				t.Error("missing UpdateTime")
-
 			}
 			if diff := cmp.Diff(want, got,
 				cmpopts.EquateApproxTime(10*time.Second),
