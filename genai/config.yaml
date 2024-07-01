@@ -207,6 +207,22 @@ types:
     CachedContent_UsageMetadata:
       name: CachedContentUsageMetadata
 
+    CodeExecution:
+    ExecutableCode:
+    CodeExecutionResult:
+
+    ExecutableCode_Language:
+      name: ExecutableCodeLanguage
+      protoPrefix: ExecutableCode
+      veneerPrefix: ExecutableCode
+
+    CodeExecutionResult_Outcome:
+      name: CodeExecutionResultOutcome
+      protoPrefix: CodeExecutionResult
+      veneerPrefix: CodeExecutionResult
+      valueNames:
+        CodeExecutionResult_OUTCOME_OK: CodeExecutionResultOutcomeOK
+
 # Omit everything not explicitly configured.
 omitTypes:
   - '*'

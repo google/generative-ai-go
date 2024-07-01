@@ -3423,7 +3423,7 @@ type Schema struct {
 	Enum []string `json:"enum,omitempty"`
 	// Format: Optional. The format of the data. This is used only for primitive
 	// datatypes. Supported formats: for NUMBER type: float, double for INTEGER
-	// type: int32, int64
+	// type: int32, int64 for STRING type: enum
 	Format string `json:"format,omitempty"`
 	// Items: Optional. Schema of the elements of Type.ARRAY.
 	Items *Schema `json:"items,omitempty"`

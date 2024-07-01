@@ -527,6 +527,28 @@ func TestLive(t *testing.T) {
 		}
 	})
 	t.Run("caching", func(t *testing.T) { testCaching(t, client) })
+	t.Run("code-execution", func(t *testing.T) {
+		model := client.GenerativeModel("gemini-1.5-flash")
+		model.SetTemperature(0)
+		model.Tools = []*Tool{{CodeExecution: &CodeExecution{}}}
+		res, err := model.GenerateContent(ctx, Text(`
+			788477675 * 778 = x.  Find x and also compute largest odd number smaller than this number.
+			`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Look for the right types of parts.
+		if len(res.Candidates) == 0 {
+			t.Fatal("no candidates")
+		}
+		seen := map[reflect.Type]bool{}
+		for _, p := range res.Candidates[0].Content.Parts {
+			seen[reflect.TypeOf(p)] = true
+		}
+		if !seen[reflect.TypeOf(&ExecutableCode{})] || !seen[reflect.TypeOf(&CodeExecutionResult{})] {
+			t.Error("missing ExecutableCode or CodeExecutionResult")
+		}
+	})
 }
 
 func TestJoinResponses(t *testing.T) {
