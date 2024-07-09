@@ -38,6 +38,7 @@ import (
 const (
 	defaultModel   = "gemini-1.0-pro"
 	modelForVision = "gemini-1.5-flash"
+	modelForTools  = "gemini-1.5-pro-latest"
 	imageFile      = "personWorkingOnComputer.jpg"
 )
 
@@ -332,24 +333,24 @@ func TestLive(t *testing.T) {
 	})
 
 	t.Run("tools", func(t *testing.T) {
-		weatherChat := func(t *testing.T, s *Schema, fcm FunctionCallingMode) {
-			weatherTool := &Tool{
+		movieChat := func(t *testing.T, s *Schema, fcm FunctionCallingMode) {
+			movieTool := &Tool{
 				FunctionDeclarations: []*FunctionDeclaration{{
-					Name:        "CurrentWeather",
-					Description: "Get the current weather in a given location",
+					Name:        "find_theaters",
+					Description: "find theaters based on location and optionally movie title which is currently playing in theaters",
 					Parameters:  s,
 				}},
 			}
-			model := client.GenerativeModel(defaultModel)
+			model := client.GenerativeModel(modelForTools)
 			model.SetTemperature(0)
-			model.Tools = []*Tool{weatherTool}
+			model.Tools = []*Tool{movieTool}
 			model.ToolConfig = &ToolConfig{
 				FunctionCallingConfig: &FunctionCallingConfig{
 					Mode: fcm,
 				},
 			}
 			session := model.StartChat()
-			res, err := session.SendMessage(ctx, Text("What is the weather like in New York?"))
+			res, err := session.SendMessage(ctx, Text("Which theaters in Mountain View show Barbie movie?"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -364,46 +365,46 @@ func TestLive(t *testing.T) {
 				t.Fatalf("got %d FunctionCalls, want 1", len(funcalls))
 			}
 			funcall := funcalls[0]
-			if g, w := funcall.Name, weatherTool.FunctionDeclarations[0].Name; g != w {
+			if g, w := funcall.Name, movieTool.FunctionDeclarations[0].Name; g != w {
 				t.Errorf("FunctionCall.Name: got %q, want %q", g, w)
 			}
 			locArg, ok := funcall.Args["location"].(string)
 			if !ok {
 				t.Fatal(`funcall.Args["location"] is not a string`)
 			}
-			if c := "New York"; !strings.Contains(locArg, c) {
+			if c := "Mountain View"; !strings.Contains(locArg, c) {
 				t.Errorf(`FunctionCall.Args["location"]: got %q, want string containing %q`, locArg, c)
 			}
 			res, err = session.SendMessage(ctx, FunctionResponse{
-				Name: weatherTool.FunctionDeclarations[0].Name,
+				Name: movieTool.FunctionDeclarations[0].Name,
 				Response: map[string]any{
-					"weather_there": "cold",
+					"theater": "AMC16",
 				},
 			})
 			if err != nil {
 				t.Fatal(err)
 			}
-			checkMatch(t, responseString(res), "(it's|it is|weather) .*cold")
+			checkMatch(t, responseString(res), "AMC")
 		}
 		schema := &Schema{
 			Type: TypeObject,
 			Properties: map[string]*Schema{
 				"location": {
 					Type:        TypeString,
-					Description: "The city and state, e.g. San Francisco, CA",
+					Description: "The city and state, e.g. San Francisco, CA or a zip code e.g. 95616",
 				},
-				"unit": {
-					Type: TypeString,
-					Enum: []string{"celsius", "fahrenheit"},
+				"title": {
+					Type:        TypeString,
+					Description: "Any movie title",
 				},
 			},
 			Required: []string{"location"},
 		}
 		t.Run("direct", func(t *testing.T) {
-			weatherChat(t, schema, FunctionCallingAuto)
+			movieChat(t, schema, FunctionCallingAuto)
 		})
 		t.Run("none", func(t *testing.T) {
-			weatherChat(t, schema, FunctionCallingNone)
+			movieChat(t, schema, FunctionCallingNone)
 		})
 	})
 
