@@ -21,12 +21,15 @@ var goVersion = goVer(runtime.Version())
 const develPrefix = "devel +"
 
 func goVer(s string) string {
+	var builder strings.Builder
+
 	if strings.HasPrefix(s, develPrefix) {
 		s = s[len(develPrefix):]
 		if p := strings.IndexFunc(s, unicode.IsSpace); p >= 0 {
 			s = s[:p]
 		}
-		return s
+		builder.WriteString(s)
+		return builder.String()
 	}
 
 	if strings.HasPrefix(s, "go1") {
@@ -35,15 +38,17 @@ func goVer(s string) string {
 		if p := strings.IndexFunc(s, notSemverRune); p >= 0 {
 			s, prerelease = s[:p], s[p:]
 		}
+		builder.WriteString(s)
 		if strings.HasSuffix(s, ".") {
-			s += "0"
+			builder.WriteString("0")
 		} else if strings.Count(s, ".") < 2 {
-			s += ".0"
+			builder.WriteString(".0")
 		}
 		if prerelease != "" {
-			s += "-" + prerelease
+			builder.WriteString("-")
+			builder.WriteString(prerelease)
 		}
-		return s
+		return builder.String()
 	}
 	return ""
 }
