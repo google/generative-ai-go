@@ -30,6 +30,9 @@ type clientInfo struct {
 	key, value string
 }
 
+// optionOfType returns the first value of opts that has type T,
+// along with true. If there is no option of that type, it returns
+// the zero value for T and false.
 func optionOfType[T option.ClientOption](opts []option.ClientOption) (T, bool) {
 	for _, opt := range opts {
 		if opt, ok := opt.(T); ok {
