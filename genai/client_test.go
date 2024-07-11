@@ -865,3 +865,16 @@ func uploadFile(t *testing.T, ctx context.Context, client *Client, filename stri
 	})
 	return file
 }
+
+func TestAttribution(t *testing.T) {
+	a := WithClientInfo("k", "v")
+	opts := []option.ClientOption{option.WithAPIKey("x"), a, option.WithEndpoint("e")}
+	got, ok := optionOfType[*clientInfo](opts)
+	if !ok {
+		t.Fatal("not found")
+	}
+	want := a.(*clientInfo)
+	if got.key != want.key || got.value != want.value {
+		t.Errorf("got %q, %q, want %q, %q", got.key, got.value, want.key, want.value)
+	}
+}
