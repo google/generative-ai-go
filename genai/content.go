@@ -27,12 +27,12 @@ const (
 
 // A Part is a piece of model content.
 // A Part can be one of the following types:
-// - Text
-// - Blob
-// - FunctionCall
-// - FunctionResponse
-// - ExecutableCode
-// - CodeExecutionResult
+//   - Text
+//   - Blob
+//   - FunctionCall
+//   - FunctionResponse
+//   - ExecutableCode
+//   - CodeExecutionResult
 type Part interface {
 	toPart() *pb.Part
 }
