@@ -236,7 +236,7 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 	}
 	defer client.Close()
 
-	// [START token_cached_content]
+	// [START tokens_cached_content]
 	txt := strings.Repeat("George Washington was the first president of the United States. ", 3000)
 	argcc := &genai.CachedContent{
 		Model:    "gemini-1.5-flash-001",
@@ -265,15 +265,125 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("cached_content_token_count:", resp.UsageMetadata.CachedContentTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
-	// [END token_cached_content]
+	// [END tokens_cached_content]
 
-	// [START token_cached_content_return]
+	// [START tokens_cached_content_return]
 	// total_tokens: 5
 	// prompt_token_count: 33007
 	// candidates_token_count: 39
 	// cached_content_token_count: 33002
 	// total_token_count: 33046
-	// [END token_cached_content_return]
+	// [END tokens_cached_content_return]
+}
+
+func ExampleGenerativeModel_CountTokens_imageInline() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START tokens_multimodal_image_inline]
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "Tell me about this image"
+	imageFile, err := os.ReadFile(filepath.Join(moduleRootDir(), "genai", "testdata", "personWorkingOnComputer.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), genai.ImageData("jpeg", imageFile))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// [END tokens_multimodal_image_inline]
+
+	// [START tokens_multimodal_image_inline_return]
+	// total_tokens: 264
+	// [END tokens_multimodal_image_inline_return]
+}
+
+func ExampleGenerativeModel_CountTokens_imageUploadFile() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START tokens_multimodal_image_file_api]
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "Tell me about this image"
+	imageFile, err := os.Open(filepath.Join(moduleRootDir(), "genai", "testdata", "personWorkingOnComputer.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer imageFile.Close()
+
+	uploadedFile, err := client.UploadFile(ctx, "", imageFile, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fd := genai.FileData{
+		URI: uploadedFile.URI,
+	}
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// [END tokens_multimodal_image_file_api]
+
+	// [START tokens_multimodal_image_file_api_return]
+	// total_tokens: 264
+	// [END tokens_multimodal_image_file_api_return]
+}
+
+func ExampleGenerativeModel_CountTokens_chat() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START tokens_chat]
+	model := client.GenerativeModel("gemini-1.5-flash")
+	cs := model.StartChat()
+
+	cs.History = []*genai.Content{
+		{
+			Parts: []genai.Part{
+				genai.Text("Hi my name is Bob"),
+			},
+			Role: "user",
+		},
+		{
+			Parts: []genai.Part{
+				genai.Text("Hi Bob!"),
+			},
+			Role: "model",
+		},
+	}
+
+	prompt := "Explain how a computer works to a young child."
+	resp, err := cs.SendMessage(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
+	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
+	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// [END tokens_chat]
+
+	// [START tokens_chat_return]
+	// prompt_token_count: 21
+	// candidates_token_count: 1
+	// total_token_count: 22
+	// [END tokens_chat_return]
 }
 
 func ExampleGenerativeModel_CountTokens_systemInstruction() {
@@ -284,7 +394,7 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 	}
 	defer client.Close()
 
-	// [START token_system_instruction]
+	// [START tokens_system_instruction]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "The quick brown fox jumps over the lazy dog"
 
@@ -304,12 +414,12 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", respWithInstruction.TotalTokens)
-	// [END token_system_instruction]
+	// [END tokens_system_instruction]
 
-	// [START token_system_instruction_return]
+	// [START tokens_system_instruction_return]
 	// totak_tokens: 10
 	// totak_tokens: 21
-	// [END token_system_instruction_return]
+	// [END tokens_system_instruction_return]
 }
 
 // This example shows how to get a JSON response that conforms to a schema.
