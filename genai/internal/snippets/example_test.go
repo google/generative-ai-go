@@ -14,6 +14,8 @@
 
 package genai_test
 
+//go:generate go run ../cmd/gen-examples/gen-examples.go -in $GOFILE -out ../../example_test.go
+
 import (
 	"context"
 	"encoding/json"
