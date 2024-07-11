@@ -162,12 +162,12 @@ func ExampleGenerativeModel_CountTokens_contextWindow() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("input_token_limit=%v\n", info.InputTokenLimit)
-	fmt.Printf("output_token_limit=%v\n", info.OutputTokenLimit)
+	fmt.Println("input_token_limit:", info.InputTokenLimit)
+	fmt.Println("output_token_limit:", info.OutputTokenLimit)
 
 }
 
-func ExampleGenerativeModel_CountTokens() {
+func ExampleGenerativeModel_CountTokens_textOnly() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
@@ -175,19 +175,55 @@ func ExampleGenerativeModel_CountTokens() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-pro")
-	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text("You are an expert ichthyologist.")},
-	}
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "The quick brown fox jumps over the lazy dog"
 
-	// CountTokens will include the prompt, system instruction, and other model content
-	// settings.
-	resp, err := model.CountTokens(ctx, genai.Text("What kind of fish is this?"))
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Num tokens:", resp.TotalTokens)
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
+	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
+	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+
+}
+
+func ExampleGenerativeModel_CountTokens_systemInstruction() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "The quick brown fox jumps over the lazy dog"
+
+	// Without system instruction
+	respNoInstruction, err := model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("total_tokens:", respNoInstruction.TotalTokens)
+
+	// Same prompt, this time with system instruction
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{genai.Text("You are a cat. Your name is Neko.")},
+	}
+	respWithInstruction, err := model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("total_tokens:", respWithInstruction.TotalTokens)
+
 }
 
 // This example shows how to get a JSON response that conforms to a schema.
