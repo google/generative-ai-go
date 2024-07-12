@@ -205,6 +205,7 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
 	// ( prompt_token_count: 10, candidates_token_count: 38, total_token_count: 48 )
+	// [END tokens_text_only]
 }
 
 func ExampleGenerativeModel_CountTokens_cachedContent() {
