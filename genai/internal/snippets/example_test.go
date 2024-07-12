@@ -35,11 +35,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-// testDataDir is the location of the testdata directory in this project's
-// source tree.
-// Note: typically Go tests can assume a fixed directory location, but this
-// particular file gets copied and can run from multiple directories (see
-// the generate directive above).
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
 func ExampleGenerativeModel_GenerateContent() {

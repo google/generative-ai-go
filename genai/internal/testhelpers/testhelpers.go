@@ -6,6 +6,10 @@ import (
 	"path/filepath"
 )
 
+// ModuleRootDir finds the location of the root directory of this respository.
+// Note: typically Go tests can assume a fixed directory location, but this
+// particular file gets copied and can run from multiple directories (see
+// the generate directive above).
 func ModuleRootDir() string {
 	dir, err := os.Getwd()
 	if err != nil {
