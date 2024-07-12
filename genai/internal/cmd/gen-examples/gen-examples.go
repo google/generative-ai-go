@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This code generator takes examples from the internal/snippets directory
+// This code generator takes examples from the internal/samples directory
 // and copies them to "official" examples in genai/example_test.go, while
 // removing snippet comments (between [START...] and [END...]) that are used
 // for website documentation purposes.
@@ -68,7 +68,7 @@ func main() {
 }
 
 const preamble = `
-// This file was generated from internal/snippets/example_test.go. DO NOT EDIT.
+// This file was generated from internal/samples/docs-snippets_test.go. DO NOT EDIT.
 `
 
 func printCommentGroup(cg *ast.CommentGroup) {
