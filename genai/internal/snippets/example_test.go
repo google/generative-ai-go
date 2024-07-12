@@ -167,14 +167,13 @@ func ExampleGenerativeModel_CountTokens_contextWindow() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("input_token_limit:", info.InputTokenLimit)
-	fmt.Println("output_token_limit:", info.OutputTokenLimit)
-	// [END tokens_context_window]
 
-	// [START tokens_context_window_return]
-	// input_token_limit: 30720
-	// output_token_limit: 2048
-	// [END tokens_context_window_return]
+	// Returns the "context window" for the model,
+	// which is the combined input and output token limits.
+	fmt.Printf("input_token_limit=%v\n", info.InputTokenLimit)
+	fmt.Printf("output_token_limit=%v\n", info.OutputTokenLimit)
+	// ( input_token_limit=30720, output_token_limit=2048 )
+	// [END tokens_context_window]
 }
 
 func ExampleGenerativeModel_CountTokens_textOnly() {
