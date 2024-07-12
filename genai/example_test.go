@@ -166,8 +166,12 @@ func ExampleGenerativeModel_CountTokens_contextWindow() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("input_token_limit:", info.InputTokenLimit)
-	fmt.Println("output_token_limit:", info.OutputTokenLimit)
+
+	// Returns the "context window" for the model,
+	// which is the combined input and output token limits.
+	fmt.Printf("input_token_limit=%v\n", info.InputTokenLimit)
+	fmt.Printf("output_token_limit=%v\n", info.OutputTokenLimit)
+	// ( input_token_limit=30720, output_token_limit=2048 )
 
 }
 
@@ -188,6 +192,7 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	}
 
 	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 10 )
 
 	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
@@ -197,7 +202,7 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
-
+	// ( prompt_token_count: 10, candidates_token_count: 38, total_token_count: 48 )
 }
 
 func ExampleGenerativeModel_CountTokens_cachedContent() {
@@ -226,6 +231,7 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 5 )
 
 	resp, err := modelWithCache.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
@@ -236,6 +242,7 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("cached_content_token_count:", resp.UsageMetadata.CachedContentTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// ( prompt_token_count: 33007,  candidates_token_count: 39, cached_content_token_count: 33002, total_token_count: 33046 )
 
 }
 
@@ -253,12 +260,26 @@ func ExampleGenerativeModel_CountTokens_imageInline() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// Call `CountTokens` to get the input token count
+	// of the combined text and file (`total_tokens`).
+	// An image's display or file size does not affect its token count.
+	// Optionally, you can call `count_tokens` for the text and file separately.
 	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), genai.ImageData("jpeg", imageFile))
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 264 )
+
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt), genai.ImageData("jpeg", imageFile))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
+	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
+	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// ( prompt_token_count: 264, candidates_token_count: 100, total_token_count: 364 )
 
 }
 
@@ -286,11 +307,26 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	fd := genai.FileData{
 		URI: uploadedFile.URI,
 	}
+	// Call `CountTokens` to get the input token count
+	// of the combined text and file (`total_tokens`).
+	// An image's display or file size does not affect its token count.
+	// Optionally, you can call `count_tokens` for the text and file separately.
 	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), fd)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 264 )
+
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
+	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
+	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// ( prompt_token_count: 264, candidates_token_count: 100, total_token_count: 364 )
 
 }
 
@@ -326,9 +362,14 @@ func ExampleGenerativeModel_CountTokens_chat() {
 		log.Fatal(err)
 	}
 
+	// On the response for SendMessage, use `UsageMetadata` to get
+	// separate input and output token counts
+	// (`prompt_token_count` and `candidates_token_count`, respectively),
+	// as well as the combined token count (`total_token_count`).
 	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// ( prompt_token_count: 25, candidates_token_count: 21, total_token_count: 46 )
 
 }
 
@@ -349,6 +390,7 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", respNoInstruction.TotalTokens)
+	// ( total_tokens: 10 )
 
 	// Same prompt, this time with system instruction
 	model.SystemInstruction = &genai.Content{
@@ -359,6 +401,7 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 		log.Fatal(err)
 	}
 	fmt.Println("total_tokens:", respWithInstruction.TotalTokens)
+	// ( total_tokens: 21 )
 
 }
 
