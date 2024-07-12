@@ -29,29 +29,18 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/google/generative-ai-go/genai/internal/testhelpers"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-func moduleRootDir() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal("Getcwd:", err)
-	}
-
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			return dir
-		}
-
-		parentDir := filepath.Dir(dir)
-		if parentDir == dir {
-			log.Fatal("unable to find")
-		}
-		dir = parentDir
-	}
-}
+// testDataDir is the location of the testdata directory in this project's
+// source tree.
+// Note: typically Go tests can assume a fixed directory location, but this
+// particular file gets copied and can run from multiple directories (see
+// the generate directive above).
+var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
 func ExampleGenerativeModel_GenerateContent() {
 	ctx := context.Background()
@@ -265,7 +254,7 @@ func ExampleGenerativeModel_CountTokens_imageInline() {
 
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this image"
-	imageFile, err := os.ReadFile(filepath.Join(moduleRootDir(), "genai", "testdata", "personWorkingOnComputer.jpg"))
+	imageFile, err := os.ReadFile(filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -288,7 +277,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this image"
-	imageFile, err := os.Open(filepath.Join(moduleRootDir(), "genai", "testdata", "personWorkingOnComputer.jpg"))
+	imageFile, err := os.Open(filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
 	if err != nil {
 		log.Fatal(err)
 	}
