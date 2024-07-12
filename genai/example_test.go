@@ -1,4 +1,4 @@
-// This file was generated from internal/snippets/example_test.go. DO NOT EDIT.
+// This file was generated from internal/samples/docs-snippets_test.go. DO NOT EDIT.
 
 // Copyright 2023 Google LLC
 //
