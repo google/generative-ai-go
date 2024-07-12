@@ -87,7 +87,15 @@ Import the option package as "google.golang.org/api/option".`)
 	if err != nil {
 		return nil, fmt.Errorf("creating discovery client: %w", err)
 	}
-	gc.SetGoogleClientInfo("gccl", "v"+internal.Version, "genai-go", internal.Version)
+
+	kvs := []string{"gccl", "v" + internal.Version, "genai-go", internal.Version}
+	if a, ok := optionOfType[*clientInfo](opts); ok {
+		kvs = append(kvs, a.key, a.value)
+	}
+	gc.SetGoogleClientInfo(kvs...)
+	mc.SetGoogleClientInfo(kvs...)
+	fc.SetGoogleClientInfo(kvs...)
+
 	return &Client{gc, mc, fc, cc, ds}, nil
 }
 
