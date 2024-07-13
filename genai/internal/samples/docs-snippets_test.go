@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/google/generative-ai-go/genai/internal/testhelpers"
@@ -36,6 +37,38 @@ import (
 )
 
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
+
+// uploadFile uploads the given file to the service, and returns a [genai.File]
+// representing it.
+// To clean up the file, defer a client.DeleteFile(ctx, file.Name)
+// call when a file is successfully returned. file.Name will be a uniqely
+// generated string to identify the file on the service.
+func uploadFile(ctx context.Context, client *genai.Client, filepath string) (*genai.File, error) {
+	osf, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer osf.Close()
+
+	file, err := client.UploadFile(ctx, "", osf, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for file.State == genai.FileStateProcessing {
+		log.Printf("processing %s", file.Name)
+		time.Sleep(5 * time.Second)
+		var err error
+		file, err = client.GetFile(ctx, file.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if file.State != genai.FileStateActive {
+		return nil, fmt.Errorf("uploaded file has state %s, not active", file.State)
+	}
+	return file, nil
+}
 
 func ExampleGenerativeModel_GenerateContent() {
 	ctx := context.Background()
@@ -299,19 +332,14 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	// [START tokens_multimodal_image_file_api]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this image"
-	imageFile, err := os.Open(filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer imageFile.Close()
-
-	uploadedFile, err := client.UploadFile(ctx, "", imageFile, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	defer client.DeleteFile(ctx, file.Name)
 
 	fd := genai.FileData{
-		URI: uploadedFile.URI,
+		URI: file.URI,
 	}
 	// Call `CountTokens` to get the input token count
 	// of the combined text and file (`total_tokens`).
