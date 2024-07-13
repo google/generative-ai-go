@@ -38,8 +38,8 @@ import (
 
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
-// uploadFile uploads the five file to the service, and returns its handle if
-// successful.
+// uploadFile uploads the given file to the service, and returns a [genai.File]
+// representing it.
 // To clean up the file, defer a client.DeleteFile(ctx, file.Name)
 // call when a file is successfully returned. file.Name will be a uniqely
 // generated string to identify the file on the service.
