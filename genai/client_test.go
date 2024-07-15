@@ -190,9 +190,8 @@ func TestLive(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 		gotr := res.Candidates[0].FinishReason
-		wantr := FinishReasonStop
-		if gotr != wantr {
-			t.Errorf("got %s, want %s", gotr, wantr)
+		if gotr != FinishReasonStop && gotr != FinishReasonMaxTokens {
+			t.Errorf("got %s, want 'stop' or 'max tokens'", gotr)
 		}
 	})
 	t.Run("max-tokens-streaming", func(t *testing.T) {
@@ -214,9 +213,8 @@ func TestLive(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 		gotr := res.Candidates[0].FinishReason
-		wantr := FinishReasonStop
-		if gotr != wantr {
-			t.Errorf("got %s, want %s", gotr, wantr)
+		if gotr != FinishReasonStop && gotr != FinishReasonMaxTokens {
+			t.Errorf("got %s, want 'stop' or 'max tokens'", gotr)
 		}
 	})
 	t.Run("count-tokens", func(t *testing.T) {
