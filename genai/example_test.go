@@ -173,9 +173,9 @@ func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
 
 }
 
-// This example shows how to a configure a model. See [GenerationConfig]
-// for the complete set of configuration options.
 func ExampleGenerativeModel_GenerateContent_config() {
+	// This example shows how to a configure a model. See [GenerationConfig]
+	// for the complete set of configuration options.
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
@@ -197,10 +197,29 @@ func ExampleGenerativeModel_GenerateContent_config() {
 		log.Fatal(err)
 	}
 	printResponse(resp)
+
 }
 
-// This example shows how to use SafetySettings to change the threshold
-// for unsafe responses.
+func ExampleGenerativeModel_GenerateContent_systemInstruction() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	model.SystemInstruction = &genai.Content{
+		Parts: []genai.Part{genai.Text("You are a cat. Your name is Neko.")},
+	}
+	resp, err := model.GenerateContent(ctx, genai.Text("Good morning! How are you?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+
+}
+
 func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
@@ -209,7 +228,30 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-pro")
+	model := client.GenerativeModel("gemini-1.5-flash")
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockOnlyHigh,
+		},
+	}
+	resp, err := model.GenerateContent(ctx, genai.Text("I support Martians Soccer Club and I think Jupiterians Football Club sucks! Write a ironic phrase about them."))
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+
+}
+
+func ExampleGenerativeModel_GenerateContent_safetySettingMulti() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -220,11 +262,12 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 			Threshold: genai.HarmBlockMediumAndAbove,
 		},
 	}
-	resp, err := model.GenerateContent(ctx, genai.Text("I want to be bad. Please help."))
+	resp, err := model.GenerateContent(ctx, genai.Text("I support Martians Soccer Club and I think Jupiterians Football Club sucks! Write a ironic phrase about them."))
 	if err != nil {
 		log.Fatal(err)
 	}
 	printResponse(resp)
+
 }
 
 func ExampleGenerativeModel_GenerateContent_codeExecution() {
@@ -585,8 +628,8 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 
 }
 
-// This example shows how to get a JSON response that conforms to a schema.
 func ExampleGenerativeModel_jSONSchema() {
+	// This example shows how to get a JSON response that conforms to a schema.
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
@@ -597,67 +640,47 @@ func ExampleGenerativeModel_jSONSchema() {
 	model := client.GenerativeModel("gemini-1.5-pro-latest")
 	// Ask the model to respond with JSON.
 	model.ResponseMIMEType = "application/json"
-	// Specify the format of the JSON.
+	// Specify the schema.
 	model.ResponseSchema = &genai.Schema{
 		Type:  genai.TypeArray,
 		Items: &genai.Schema{Type: genai.TypeString},
 	}
-	res, err := model.GenerateContent(ctx, genai.Text("List the primary colors."))
+	resp, err := model.GenerateContent(ctx, genai.Text("List a few popular cookie recipes using this JSON schema."))
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, part := range res.Candidates[0].Content.Parts {
+	for _, part := range resp.Candidates[0].Content.Parts {
 		if txt, ok := part.(genai.Text); ok {
-			var colors []string
-			if err := json.Unmarshal([]byte(txt), &colors); err != nil {
+			var recipes []string
+			if err := json.Unmarshal([]byte(txt), &recipes); err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(colors)
+			fmt.Println(recipes)
 		}
 	}
+
 }
 
-func ExampleChatSession() {
+func ExampleGenerativeModel_jSONNoSchema() {
+	// This example shows how to get a JSON response without requestin a specific
+	// schema.
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel("gemini-1.5-pro")
-	cs := model.StartChat()
 
-	send := func(msg string) *genai.GenerateContentResponse {
-		fmt.Printf("== Me: %s\n== Model:\n", msg)
-		res, err := cs.SendMessage(ctx, genai.Text(msg))
-		if err != nil {
-			log.Fatal(err)
-		}
-		return res
-	}
-
-	res := send("Can you name some brands of air fryer?")
-	printResponse(res)
-	iter := cs.SendMessageStream(ctx, genai.Text("Which one of those do you recommend?"))
-	for {
-		res, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		printResponse(res)
-	}
-
-	for i, c := range cs.History {
-		log.Printf("    %d: %+v", i, c)
-	}
-	res = send("Why do you like the Philips?")
+	model := client.GenerativeModel("gemini-1.5-pro-latest")
+	// Ask the model to respond with JSON.
+	model.ResponseMIMEType = "application/json"
+	resp, err := model.GenerateContent(ctx, genai.Text("List a few popular cookie recipes."))
 	if err != nil {
 		log.Fatal(err)
 	}
-	printResponse(res)
+
+	printResponse(resp)
+
 }
 
 // This example shows how to set the History field on ChatSession explicitly.
@@ -668,7 +691,8 @@ func ExampleChatSession_history() {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	model := client.GenerativeModel("gemini-1.5-pro")
+
+	model := client.GenerativeModel("gemini-1.5-flash")
 	cs := model.StartChat()
 
 	cs.History = []*genai.Content{
@@ -691,6 +715,81 @@ func ExampleChatSession_history() {
 		log.Fatal(err)
 	}
 	printResponse(res)
+
+}
+
+func ExampleChatSession_streaming() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	cs := model.StartChat()
+
+	cs.History = []*genai.Content{
+		{
+			Parts: []genai.Part{
+				genai.Text("Hello, I have 2 dogs in my house."),
+			},
+			Role: "user",
+		},
+		{
+			Parts: []genai.Part{
+				genai.Text("Great to meet you. What would you like to know?"),
+			},
+			Role: "model",
+		},
+	}
+
+	iter := cs.SendMessageStream(ctx, genai.Text("How many paws are in my house?"))
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+
+}
+
+func ExampleChatSession_streamingWithImage() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	cs := model.StartChat()
+
+	cs.SendMessage(ctx, genai.Text("Hello, I'm interested in learning about musical instruments. Can I show you one?"))
+
+	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	iter := cs.SendMessageStream(ctx,
+		genai.Text("What family of instruments does this instrument belong to?"),
+		genai.ImageData("jpeg", imgData))
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+
 }
 
 func ExampleEmbeddingModel_EmbedContent() {
