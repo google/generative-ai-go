@@ -3,12 +3,15 @@
 # This script generates the "discovery" client for the GenerativeLanguage API.
 # It is needed for file upload, which GAPIC clients don't support.
 
+# Run this tool from the `genai` directory of this repository.
+
 # The repo github.com/googleapis/google-api-go-client (corresponding to the Go import
 # path google.golang.org/api) contains a program that generates a Go client from
 # a discovery doc. It also contains all the clients generated from public discovery
 # docs, but the generativelanguage doc isn't public. In fact, retrieving it requires
 # an API key. We also don't want to put the discovery client in that repo, because
 # we don't want it to be public either; that would only confuse users.
+
 
 if [[ $GEMINI_API_KEY = '' ]]; then
   echo >&2 "need to set GEMINI_API_KEY"
