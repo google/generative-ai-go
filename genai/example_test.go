@@ -38,8 +38,8 @@ import (
 
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
-// uploadFile uploads the five file to the service, and returns its handle if
-// successful.
+// uploadFile uploads the given file to the service, and returns a [genai.File]
+// representing it.
 // To clean up the file, defer a client.DeleteFile(ctx, file.Name)
 // call when a file is successfully returned. file.Name will be a uniqely
 // generated string to identify the file on the service.
@@ -70,7 +70,7 @@ func uploadFile(ctx context.Context, client *genai.Client, filepath string) (*ge
 	return file, nil
 }
 
-func ExampleGenerativeModel_GenerateContent() {
+func ExampleGenerativeModel_GenerateContent_textOnly() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
@@ -78,13 +78,99 @@ func ExampleGenerativeModel_GenerateContent() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-pro")
-	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx, genai.Text("Write a story about a magic backpack."))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	printResponse(resp)
+
+}
+
+func ExampleGenerativeModel_GenerateContent_imagePrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("Tell me about this instrument"),
+		genai.ImageData("jpeg", imgData))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+}
+
+func ExampleGenerativeModel_GenerateContent_videoPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("Describe this video clip"),
+		genai.FileData{URI: file.URI})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+}
+
+func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	imgData1, err := os.ReadFile(filepath.Join(testDataDir, "Cajun_instruments.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	imgData2, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("What is the difference between these instruments?"),
+		genai.ImageData("jpeg", imgData1),
+		genai.ImageData("jpeg", imgData2),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
 }
 
 // This example shows how to a configure a model. See [GenerationConfig]
@@ -171,9 +257,9 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-pro")
-
-	iter := model.GenerateContentStream(ctx, genai.Text("Tell me a story about a lumberjack and his giant ox. Keep it very short."))
+	// START [text_gen_text_only_prompt_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+	iter := model.GenerateContentStream(ctx, genai.Text("Write a story about a magic backpack."))
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
@@ -184,6 +270,71 @@ func ExampleGenerativeModel_GenerateContentStream() {
 		}
 		printResponse(resp)
 	}
+	// END [text_gen_text_only_prompt_streaming]
+}
+
+func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// START [text_gen_multimodal_one_image_prompt_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	iter := model.GenerateContentStream(ctx,
+		genai.Text("Tell me about this instrument"),
+		genai.ImageData("jpeg", imgData))
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+	// END [text_gen_multimodal_one_image_prompt_streaming]
+}
+
+func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// START [text_gen_multimodal_video_prompt_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	iter := model.GenerateContentStream(ctx,
+		genai.Text("Describe this video clip"),
+		genai.FileData{URI: file.URI})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+	// END [text_gen_multimodal_video_prompt_streaming]
 }
 
 func ExampleGenerativeModel_CountTokens_contextWindow() {
