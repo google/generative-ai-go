@@ -43,14 +43,18 @@ var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata"
 // To clean up the file, defer a client.DeleteFile(ctx, file.Name)
 // call when a file is successfully returned. file.Name will be a uniqely
 // generated string to identify the file on the service.
-func uploadFile(ctx context.Context, client *genai.Client, filepath string) (*genai.File, error) {
-	osf, err := os.Open(filepath)
+func uploadFile(ctx context.Context, client *genai.Client, path string) (*genai.File, error) {
+	osf, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer osf.Close()
 
-	file, err := client.UploadFile(ctx, "", osf, nil)
+	opts := &genai.UploadFileOptions{}
+	if filepath.Ext(path) == ".txt" {
+		opts.MIMEType = "text/plain"
+	}
+	file, err := client.UploadFile(ctx, "", osf, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -1004,7 +1008,7 @@ func ExampleToolConfig() {
 	// for details.
 }
 
-func ExampleClient_UploadFile() {
+func ExampleClient_UploadFile_text() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
 	if err != nil {
@@ -1012,26 +1016,135 @@ func ExampleClient_UploadFile() {
 	}
 	defer client.Close()
 
-	// Use Client.UploadFile to Upload a file to the service.
-	// Pass it an io.Reader.
-	f, err := os.Open("path/to/file")
+	// [START files_create_text]
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "poem.txt"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
-	// You can choose a name, or pass the empty string to generate a unique one.
-	file, err := client.UploadFile(ctx, "", f, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// The return value's URI field should be passed to the model in a FileData part.
-	model := client.GenerativeModel("gemini-1.5-pro")
+	defer client.DeleteFile(ctx, file.Name)
 
-	resp, err := model.GenerateContent(ctx, genai.FileData{URI: file.URI})
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Can you add a few more lines to this poem?"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = resp // Use resp as usual.
+
+	printResponse(resp)
+	// [END files_create_text]
+}
+
+func ExampleClient_UploadFile_image() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START files_create_image]
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "Cajun_instruments.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Can you tell me about the instruments in this photo?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+	// [END files_create_image]
+}
+
+func ExampleClient_UploadFile_video() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START files_create_video]
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Describe this video clip"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+	// [END files_create_video]
+}
+
+func ExampleClient_GetFile() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START files_get]
+	// [START files_delete]
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	gotFile, err := client.GetFile(ctx, file.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Got file:", gotFile.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Describe this image"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+	// [END files_get]
+	// [END files_delete]
+}
+
+func ExampleClient_ListFiles() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START files_list]
+	iter := client.ListFiles(ctx)
+	for {
+		ifile, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(ifile.Name)
+	}
+	// [END files_list]
 }
 
 // ProxyRoundTripper is an implementation of http.RoundTripper that supports
