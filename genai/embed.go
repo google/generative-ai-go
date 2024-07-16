@@ -67,6 +67,7 @@ func newEmbedContentRequest(model string, tt TaskType, title string, parts []Par
 		Model:   model,
 		Content: newUserContent(parts).toProto(),
 	}
+	debugPrint(req)
 	// A non-empty title overrides the task type.
 	if title != "" {
 		req.Title = &title

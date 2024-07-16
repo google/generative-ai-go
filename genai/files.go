@@ -74,7 +74,9 @@ func (c *Client) UploadFile(ctx context.Context, name string, r io.Reader, opts 
 
 // GetFile returns the named file.
 func (c *Client) GetFile(ctx context.Context, name string) (*File, error) {
-	pf, err := c.fc.GetFile(ctx, &pb.GetFileRequest{Name: userNameToServiceName(name)})
+	req := &pb.GetFileRequest{Name: userNameToServiceName(name)}
+	debugPrint(req)
+	pf, err := c.fc.GetFile(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +86,9 @@ func (c *Client) GetFile(ctx context.Context, name string) (*File, error) {
 // DeleteFile deletes the file with the given name.
 // It is an error to delete a file that does not exist.
 func (c *Client) DeleteFile(ctx context.Context, name string) error {
-	return c.fc.DeleteFile(ctx, &pb.DeleteFileRequest{Name: userNameToServiceName(name)})
+	req := &pb.DeleteFileRequest{Name: userNameToServiceName(name)}
+	debugPrint(req)
+	return c.fc.DeleteFile(ctx, req)
 }
 
 // userNameToServiceName converts a name supplied by the user to a name required by the service.
