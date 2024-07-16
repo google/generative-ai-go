@@ -64,9 +64,11 @@ func (c *Client) CreateCachedContent(ctx context.Context, cc *CachedContent) (*C
 	}
 	pcc := cc.toProto()
 	pcc.Model = Ptr(fullModelName(cc.Model))
-	return c.cachedContentFromProto(c.cc.CreateCachedContent(ctx, &pb.CreateCachedContentRequest{
+	req := &pb.CreateCachedContentRequest{
 		CachedContent: pcc,
-	}))
+	}
+	debugPrint(req)
+	return c.cachedContentFromProto(c.cc.CreateCachedContent(ctx, req))
 }
 
 // GetCachedContent retrieves the CachedContent with the given name.
@@ -108,10 +110,12 @@ func (c *Client) UpdateCachedContent(ctx context.Context, cc *CachedContent, ccu
 	if ccu.Expiration.ExpireTime.IsZero() {
 		mask = "ttl"
 	}
-	return c.cachedContentFromProto(c.cc.UpdateCachedContent(ctx, &pb.UpdateCachedContentRequest{
+	req := &pb.UpdateCachedContentRequest{
 		CachedContent: cc2.toProto(),
 		UpdateMask:    &fieldmaskpb.FieldMask{Paths: []string{mask}},
-	}))
+	}
+	debugPrint(req)
+	return c.cachedContentFromProto(c.cc.UpdateCachedContent(ctx, req))
 }
 
 // ListCachedContents lists all the CachedContents associated with the project and location.

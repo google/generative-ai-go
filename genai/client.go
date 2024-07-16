@@ -226,7 +226,7 @@ func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.G
 		if m.CachedContentName != "" {
 			cc = &m.CachedContentName
 		}
-		return &pb.GenerateContentRequest{
+		req := &pb.GenerateContentRequest{
 			Model:             m.fullName,
 			Contents:          transformSlice(contents, (*Content).toProto),
 			SafetySettings:    transformSlice(m.SafetySettings, (*SafetySetting).toProto),
@@ -236,6 +236,8 @@ func (m *GenerativeModel) newGenerateContentRequest(contents ...*Content) (*pb.G
 			SystemInstruction: m.SystemInstruction.toProto(),
 			CachedContent:     cc,
 		}
+		debugPrint(req)
+		return req
 	})
 }
 
@@ -327,10 +329,12 @@ func (m *GenerativeModel) newCountTokensRequest(contents ...*Content) (*pb.Count
 	if err != nil {
 		return nil, err
 	}
-	return &pb.CountTokensRequest{
+	req := &pb.CountTokensRequest{
 		Model:                  m.fullName,
 		GenerateContentRequest: gcr,
-	}, nil
+	}
+	debugPrint(req)
+	return req, nil
 }
 
 // Info returns information about the model.
@@ -340,6 +344,7 @@ func (m *GenerativeModel) Info(ctx context.Context) (*ModelInfo, error) {
 
 func (c *Client) modelInfo(ctx context.Context, fullName string) (*ModelInfo, error) {
 	req := &pb.GetModelRequest{Name: fullName}
+	debugPrint(req)
 	res, err := c.mc.GetModel(ctx, req)
 	if err != nil {
 		return nil, err

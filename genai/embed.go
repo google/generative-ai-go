@@ -76,6 +76,7 @@ func newEmbedContentRequest(model string, tt TaskType, title string, parts []Par
 		taskType := pb.TaskType(tt)
 		req.TaskType = &taskType
 	}
+	debugPrint(req)
 	return req
 }
 
