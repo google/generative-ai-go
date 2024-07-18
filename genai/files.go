@@ -30,16 +30,27 @@ import (
 
 // UploadFileOptions are options for [Client.UploadFile].
 type UploadFileOptions struct {
-	DisplayName string // a more readable name for the file
-	MIMEType    string // the MIME type of the file; if omitted, it will be inferred
+	// A more readable name for the file.
+	DisplayName string
+
+	// The IANA standard MIME type of the file. It will be stored with the file as metadata.
+	// If omitted, the service will try to infer it. You may instead wish to use
+	// [http.DetectContentType].
+	// The supported MIME types are documented on [this page].
+	//
+	// [this page]: https://ai.google.dev/gemini-api/docs/prompting_with_media?lang=go#supported_file_formats
+	MIMEType string
 }
 
 // UploadFile copies the contents of the given io.Reader to file storage associated
 // with the service, and returns information about the resulting file.
 //
-// The name may be empty, in which case a unique name will be generated.
+// The name is a relatively short, unique identifier for the file (rather than a typical
+// filename).
+// Typically it should be left empty, in which case a unique name will be generated.
 // Otherwise, it can contain up to 40 characters that are lowercase
 // alphanumeric or dashes (-), not starting or ending with a dash.
+// To generate your own unique names, consider a cryptographic hash algorithm like SHA-1.
 // The string "files/" is prepended to the name if it does not contain a '/'.
 //
 // Use the returned file's URI field with a [FileData] Part to use it for generation.
