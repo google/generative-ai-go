@@ -676,9 +676,14 @@ func (File) fromProto(p *pb.File) *File {
 
 // FileData is URI based data.
 type FileData struct {
-	// Optional. The IANA standard MIME type of the source data.
+	// The IANA standard MIME type of the source data.
+	// If present, this overrides the MIME type specified or inferred
+	// when the file was uploaded.
+	// The supported MIME types are documented on [this page].
+	//
+	// [this page]: https://ai.google.dev/gemini-api/docs/prompting_with_media?lang=go#supported_file_formats
 	MIMEType string
-	// Required. URI.
+	// The URI returned from UploadFile or GetFile.
 	URI string
 }
 

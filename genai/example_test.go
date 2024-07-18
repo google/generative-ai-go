@@ -531,9 +531,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	}
 	defer client.DeleteFile(ctx, file.Name)
 
-	fd := genai.FileData{
-		URI: file.URI,
-	}
+	fd := genai.FileData{URI: file.URI}
 	// Call `CountTokens` to get the input token count
 	// of the combined text and file (`total_tokens`).
 	// An image's display or file size does not affect its token count.
@@ -554,6 +552,46 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
 	// ( prompt_token_count: 264, candidates_token_count: 100, total_token_count: 364 )
+
+}
+
+func ExampleGenerativeModel_CountTokens_videoUploadFile() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "Tell me about this video"
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	fd := genai.FileData{URI: file.URI}
+	// Call `CountTokens` to get the input token count
+	// of the combined text and file (`total_tokens`).
+	// An image's display or file size does not affect its token count.
+	// Optionally, you can call `count_tokens` for the text and file separately.
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 1481 )
+
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
+	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
+	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
+	// ( prompt_token_count: 1481, candidates_token_count: 43, total_token_count: 1524 )
 
 }
 
