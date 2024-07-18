@@ -50,6 +50,10 @@ func uploadFile(ctx context.Context, client *genai.Client, path string) (*genai.
 	}
 	defer osf.Close()
 
+	// The service detects the MIME type of uploaded data automatically, but
+	// sometimes we have to specify it manually. One example is when text/* MIME
+	// types are considered (as it may be difficult to automatically detect the
+	// exact sub-type of a text file).
 	opts := &genai.UploadFileOptions{}
 	if filepath.Ext(path) == ".txt" {
 		opts.MIMEType = "text/plain"
@@ -1087,6 +1091,33 @@ func ExampleClient_UploadFile_video() {
 
 	printResponse(resp)
 	// [END files_create_video]
+}
+
+func ExampleClient_UploadFile_audio() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START files_create_audio]
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Describe this audio clip"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+	// [END files_create_audio]
 }
 
 func ExampleClient_GetFile() {
