@@ -50,10 +50,6 @@ func uploadFile(ctx context.Context, client *genai.Client, path string) (*genai.
 	}
 	defer osf.Close()
 
-	// The service detects the MIME type of uploaded data automatically, but
-	// sometimes we have to specify it manually. One example is when text/* MIME
-	// types are considered (as it may be difficult to automatically detect the
-	// exact sub-type of a text file).
 	opts := &genai.UploadFileOptions{}
 	if filepath.Ext(path) == ".txt" {
 		opts.MIMEType = "text/plain"
