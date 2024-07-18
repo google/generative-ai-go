@@ -40,6 +40,7 @@ const (
 	modelForVision = "gemini-1.5-flash"
 	modelForTools  = "gemini-1.5-pro-latest"
 	imageFile      = "personWorkingOnComputer.jpg"
+	audioFile      = "sample.mp3"
 )
 
 func TestLive(t *testing.T) {
@@ -149,6 +150,23 @@ func TestLive(t *testing.T) {
 		}
 		got := responseString(resp)
 		checkMatch(t, got, "man|person", "computer|laptop")
+	})
+	t.Run("audio", func(t *testing.T) {
+		vmodel := client.GenerativeModel(modelForVision)
+		vmodel.Temperature = Ptr[float32](0)
+
+		data, err := os.ReadFile(filepath.Join("testdata", audioFile))
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, err := vmodel.GenerateContent(ctx,
+			Text("What is this sound?"),
+			Blob{Data: data, MIMEType: http.DetectContentType(data)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := responseString(resp)
+		checkMatch(t, got, "sounds like")
 	})
 
 	t.Run("blocked", func(t *testing.T) {
@@ -415,11 +433,15 @@ func TestLive(t *testing.T) {
 		if got, want := file.SizeBytes, int64(9218); got != want {
 			t.Errorf("got file size %d, want %d", got, want)
 		}
+		if got, want := file.MIMEType, "image/jpeg"; got != want {
+			t.Errorf("got MIME type %q, want %q", got, want)
+		}
 		// The file should have just been created. Be generous, though.
 		now := time.Now()
 		if file.CreateTime.Before(now.Add(-time.Hour)) || file.CreateTime.After(now.Add(time.Hour)) {
 			t.Errorf("got file time %s, wanted around now (%s)", file.CreateTime, now)
 		}
+
 		// Don't test GetFile, because UploadFile already calls GetFile.
 		// ListFiles should return the file we just uploaded, and maybe other files too.
 		iter := client.ListFiles(ctx)
@@ -448,6 +470,17 @@ func TestLive(t *testing.T) {
 			t.Fatal(err)
 		}
 		checkMatch(t, responseString(resp), "person", "computer|laptop")
+
+		// Test MIME detection for mp3 files.
+		file = uploadFile(t, ctx, client, filepath.Join("testdata", audioFile))
+		if got, want := file.MIMEType, "audio/mpeg"; got != want {
+			t.Errorf("got MIME type %q, want %q", got, want)
+		}
+		resp, err = model.GenerateContent(ctx, FileData{URI: file.URI})
+		if err != nil {
+			t.Fatal(err)
+		}
+		// We don't care about the response to the audio file, only that it doesn't fail.
 
 		t.Run("metadata", func(t *testing.T) {
 			f, err := os.Open(filepath.Join("testdata", "earth.mp4"))
