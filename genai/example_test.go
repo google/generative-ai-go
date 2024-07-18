@@ -531,9 +531,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	}
 	defer client.DeleteFile(ctx, file.Name)
 
-	fd := genai.FileData{
-		URI: file.URI,
-	}
+	fd := genai.FileData{URI: file.URI}
 	// Call `CountTokens` to get the input token count
 	// of the combined text and file (`total_tokens`).
 	// An image's display or file size does not affect its token count.
@@ -573,9 +571,7 @@ func ExampleGenerativeModel_CountTokens_videoUploadFile() {
 	}
 	defer client.DeleteFile(ctx, file.Name)
 
-	fd := genai.FileData{
-		URI: file.URI,
-	}
+	fd := genai.FileData{URI: file.URI}
 	// Call `CountTokens` to get the input token count
 	// of the combined text and file (`total_tokens`).
 	// An image's display or file size does not affect its token count.
