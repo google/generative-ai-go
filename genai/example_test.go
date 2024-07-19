@@ -1104,6 +1104,32 @@ func ExampleClient_UploadFile_video() {
 
 }
 
+func ExampleClient_UploadFile_audio() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.FileData{URI: file.URI},
+		genai.Text("Describe this audio clip"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+}
+
 func ExampleClient_GetFile() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
