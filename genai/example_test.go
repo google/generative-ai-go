@@ -303,7 +303,6 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	// START [text_gen_text_only_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	iter := model.GenerateContentStream(ctx, genai.Text("Write a story about a magic backpack."))
 	for {
@@ -316,7 +315,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_text_only_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
@@ -327,7 +326,6 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_one_image_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
@@ -347,7 +345,7 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_one_image_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
@@ -358,7 +356,6 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_video_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
@@ -380,7 +377,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_video_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_CountTokens_contextWindow() {
@@ -433,6 +430,44 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
 	// ( prompt_token_count: 10, candidates_token_count: 38, total_token_count: 48 )
+
+}
+
+func ExampleGenerativeModel_CountTokens_tools() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-1.5-flash-001")
+	prompt := "I have 57 cats, each owns 44 mittens, how many mittens is that in total?"
+
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 23 )
+
+	tools := []*genai.Tool{
+		&genai.Tool{FunctionDeclarations: []*genai.FunctionDeclaration{
+			{Name: "add"},
+			{Name: "subtract"},
+			{Name: "multiply"},
+			{Name: "divide"},
+		}}}
+
+	model.Tools = tools
+	tokResp, err = model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 99 )
 
 }
 
