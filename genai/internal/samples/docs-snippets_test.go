@@ -311,7 +311,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	// START [text_gen_text_only_prompt_streaming]
+	// [START text_gen_text_only_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	iter := model.GenerateContentStream(ctx, genai.Text("Write a story about a magic backpack."))
 	for {
@@ -324,7 +324,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_text_only_prompt_streaming]
+	// [END text_gen_text_only_prompt_streaming]
 }
 
 func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
@@ -335,7 +335,7 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_one_image_prompt_streaming]
+	// [START text_gen_multimodal_one_image_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
@@ -355,7 +355,7 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_one_image_prompt_streaming]
+	// [END text_gen_multimodal_one_image_prompt_streaming]
 }
 
 func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
@@ -366,7 +366,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_video_prompt_streaming]
+	// [START text_gen_multimodal_video_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
@@ -388,7 +388,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_video_prompt_streaming]
+	// [END text_gen_multimodal_video_prompt_streaming]
 }
 
 func ExampleGenerativeModel_CountTokens_contextWindow() {
