@@ -40,7 +40,7 @@ var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata"
 
 // uploadFile uploads the given file to the service, and returns a [genai.File]
 // representing it. mimeType optionally specifies the MIME type of the data in
-// the file; if ommitted, the service will attempt to infer it from the file
+// the file; if empty, the service will attempt to infer it from the file
 // contents; for ambiguous file types (e.g. text files), it is recommended to
 // explicitly specify the MIME type.
 //
