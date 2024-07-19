@@ -39,20 +39,20 @@ import (
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
 // uploadFile uploads the given file to the service, and returns a [genai.File]
-// representing it. mime optionally specifies the MIME type of the data in the
-// file; if set to "", the service will try to automatically determine the type
-// from the data contents.
+// representing it. mimeType optionally specifies the MIME type of the data in
+// the file; if set to "", the service will try to automatically determine the
+// type from the data contents.
 // To clean up the file, defer a client.DeleteFile(ctx, file.Name)
 // call when a file is successfully returned. file.Name will be a uniqely
 // generated string to identify the file on the service.
-func uploadFile(ctx context.Context, client *genai.Client, path string, mime string) (*genai.File, error) {
+func uploadFile(ctx context.Context, client *genai.Client, path, mimeType string) (*genai.File, error) {
 	osf, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer osf.Close()
 
-	opts := &genai.UploadFileOptions{MIMEType: mime}
+	opts := &genai.UploadFileOptions{MIMEType: mimeType}
 	file, err := client.UploadFile(ctx, "", osf, opts)
 	if err != nil {
 		return nil, err
@@ -1225,7 +1225,7 @@ func ExampleCachedContent_create() {
 
 	// [START cache_create]
 	// [START cache_delete]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1264,7 +1264,7 @@ func ExampleCachedContent_createFromChat() {
 	defer client.Close()
 
 	// [START cache_create_from_chat]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1321,7 +1321,7 @@ func ExampleClient_GetCachedContent() {
 
 	// [START cache_create_from_name]
 	// [START cache_get]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1368,7 +1368,7 @@ func ExampleClient_ListCachedContents() {
 	defer client.Close()
 
 	// [START cache_list]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1410,7 +1410,7 @@ func ExampleClient_UpdateCachedContent() {
 	defer client.Close()
 
 	// [START cache_update]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
