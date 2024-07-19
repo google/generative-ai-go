@@ -111,7 +111,7 @@ func testCaching(t *testing.T, client *Client) {
 		argcc := &CachedContent{
 			Model:      model,
 			Expiration: ExpireTimeOrTTL{TTL: ttl},
-			Contents:   []*Content{{Role: "user", Parts: parts}},
+			Contents:   []*Content{NewUserContent(parts...)},
 		}
 		cc := must(client.CreateCachedContent(ctx, argcc))
 		compare(cc, wantExpireTime)
@@ -158,7 +158,7 @@ func testCaching(t *testing.T, client *Client) {
 		txt := strings.Repeat("George Washington was the first president of the United States. ", 3000)
 		argcc := &CachedContent{
 			Model:    model,
-			Contents: []*Content{{Role: "user", Parts: []Part{Text(txt)}}},
+			Contents: []*Content{NewUserContent(Text(txt))},
 		}
 		cc, err := client.CreateCachedContent(ctx, argcc)
 		if err != nil {

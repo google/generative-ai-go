@@ -65,7 +65,7 @@ func (m *EmbeddingModel) EmbedContentWithTitle(ctx context.Context, title string
 func newEmbedContentRequest(model string, tt TaskType, title string, parts []Part) *pb.EmbedContentRequest {
 	req := &pb.EmbedContentRequest{
 		Model:   model,
-		Content: newUserContent(parts).toProto(),
+		Content: NewUserContent(parts...).toProto(),
 	}
 	// A non-empty title overrides the task type.
 	if title != "" {
