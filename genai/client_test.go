@@ -814,7 +814,7 @@ func TestRecoverPanic(t *testing.T) {
 		Response: map[string]any{"x": 1 + 2i}, // complex values are invalid
 	}
 	var m GenerativeModel
-	_, err := m.newGenerateContentRequest(newUserContent([]Part{fr}))
+	_, err := m.newGenerateContentRequest(NewUserContent(fr))
 	if err == nil {
 		t.Fatal("got nil, want error")
 	}

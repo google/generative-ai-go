@@ -191,9 +191,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	model.SetTopP(0.5)
 	model.SetTopK(20)
 	model.SetMaxOutputTokens(100)
-	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text("You are Yoda from Star Wars.")},
-	}
+	model.SystemInstruction = genai.NewUserContent(genai.Text("You are Yoda from Star Wars."))
 	model.ResponseMIMEType = "application/json"
 	resp, err := model.GenerateContent(ctx, genai.Text("What is the average size of a swallow?"))
 	if err != nil {
@@ -212,9 +210,7 @@ func ExampleGenerativeModel_GenerateContent_systemInstruction() {
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-1.5-flash")
-	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text("You are a cat. Your name is Neko.")},
-	}
+	model.SystemInstruction = genai.NewUserContent(genai.Text("You are a cat. Your name is Neko."))
 	resp, err := model.GenerateContent(ctx, genai.Text("Good morning! How are you?"))
 	if err != nil {
 		log.Fatal(err)
@@ -303,7 +299,6 @@ func ExampleGenerativeModel_GenerateContentStream() {
 	}
 	defer client.Close()
 
-	// START [text_gen_text_only_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	iter := model.GenerateContentStream(ctx, genai.Text("Write a story about a magic backpack."))
 	for {
@@ -316,7 +311,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_text_only_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
@@ -327,7 +322,6 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_one_image_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	imgData, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
@@ -347,7 +341,7 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_one_image_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
@@ -358,7 +352,6 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	}
 	defer client.Close()
 
-	// START [text_gen_multimodal_video_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
 	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
@@ -380,7 +373,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 		}
 		printResponse(resp)
 	}
-	// END [text_gen_multimodal_video_prompt_streaming]
+
 }
 
 func ExampleGenerativeModel_CountTokens_contextWindow() {
@@ -447,7 +440,7 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 	txt := strings.Repeat("George Washington was the first president of the United States. ", 3000)
 	argcc := &genai.CachedContent{
 		Model:    "gemini-1.5-flash-001",
-		Contents: []*genai.Content{{Role: "user", Parts: []genai.Part{genai.Text(txt)}}},
+		Contents: []*genai.Content{genai.NewUserContent(genai.Text(txt))},
 	}
 	cc, err := client.CreateCachedContent(ctx, argcc)
 	if err != nil {
@@ -657,9 +650,7 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 	// ( total_tokens: 10 )
 
 	// Same prompt, this time with system instruction
-	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text("You are a cat. Your name is Neko.")},
-	}
+	model.SystemInstruction = genai.NewUserContent(genai.Text("You are a cat. Your name is Neko."))
 	respWithInstruction, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
@@ -1201,8 +1192,8 @@ func ExampleCachedContent_create() {
 
 	argcc := &genai.CachedContent{
 		Model:             "gemini-1.5-flash-001",
-		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
-		Contents:          []*genai.Content{userContent(fd)},
+		SystemInstruction: genai.NewUserContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{genai.NewUserContent(fd)},
 	}
 	cc, err := client.CreateCachedContent(ctx, argcc)
 	if err != nil {
@@ -1238,7 +1229,7 @@ func ExampleCachedContent_createFromChat() {
 
 	modelName := "gemini-1.5-flash-001"
 	model := client.GenerativeModel(modelName)
-	model.SystemInstruction = userContent(genai.Text("You are an expert analyzing transcripts."))
+	model.SystemInstruction = genai.NewUserContent(genai.Text("You are an expert analyzing transcripts."))
 
 	cs := model.StartChat()
 	resp, err := cs.SendMessage(ctx, genai.Text("Hi, could you summarize this transcript?"), fd)
@@ -1292,8 +1283,8 @@ func ExampleClient_GetCachedContent() {
 
 	argcc := &genai.CachedContent{
 		Model:             "gemini-1.5-flash-001",
-		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
-		Contents:          []*genai.Content{userContent(fd)},
+		SystemInstruction: genai.NewUserContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{genai.NewUserContent(fd)},
 	}
 	cc, err := client.CreateCachedContent(ctx, argcc)
 	if err != nil {
@@ -1337,8 +1328,8 @@ func ExampleClient_ListCachedContents() {
 
 	argcc := &genai.CachedContent{
 		Model:             "gemini-1.5-flash-001",
-		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
-		Contents:          []*genai.Content{userContent(fd)},
+		SystemInstruction: genai.NewUserContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{genai.NewUserContent(fd)},
 	}
 	cc, err := client.CreateCachedContent(ctx, argcc)
 	if err != nil {
@@ -1378,8 +1369,8 @@ func ExampleClient_UpdateCachedContent() {
 
 	argcc := &genai.CachedContent{
 		Model:             "gemini-1.5-flash-001",
-		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
-		Contents:          []*genai.Content{userContent(fd)},
+		SystemInstruction: genai.NewUserContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{genai.NewUserContent(fd)},
 	}
 	cc, err := client.CreateCachedContent(ctx, argcc)
 	if err != nil {
@@ -1453,19 +1444,6 @@ func ExampleClient_setProxy() {
 	}
 
 	printResponse(resp)
-}
-
-// userContent helps create a *genai.Content with a "user" role and one or
-// more parts with less verbosity.
-func userContent(parts ...genai.Part) *genai.Content {
-	content := &genai.Content{
-		Role:  "user",
-		Parts: []genai.Part{},
-	}
-	for _, part := range parts {
-		content.Parts = append(content.Parts, part)
-	}
-	return content
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
