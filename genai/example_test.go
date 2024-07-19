@@ -1184,6 +1184,220 @@ func ExampleClient_ListFiles() {
 
 }
 
+func ExampleCachedContent_create() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	fd := genai.FileData{URI: file.URI}
+
+	argcc := &genai.CachedContent{
+		Model:             "gemini-1.5-flash-001",
+		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{userContent(fd)},
+	}
+	cc, err := client.CreateCachedContent(ctx, argcc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteCachedContent(ctx, cc.Name)
+
+	modelWithCache := client.GenerativeModelFromCachedContent(cc)
+	prompt := "Please summarize this transcript"
+	resp, err := modelWithCache.GenerateContent(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+}
+
+func ExampleCachedContent_createFromChat() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+	fd := genai.FileData{URI: file.URI}
+
+	modelName := "gemini-1.5-flash-001"
+	model := client.GenerativeModel(modelName)
+	model.SystemInstruction = userContent(genai.Text("You are an expert analyzing transcripts."))
+
+	cs := model.StartChat()
+	resp, err := cs.SendMessage(ctx, genai.Text("Hi, could you summarize this transcript?"), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err = cs.SendMessage(ctx, genai.Text("Okay, could you tell me more about the trans-lunar injection"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// To cache the conversation so far, pass the chat history as the list of
+	// contents.
+
+	argcc := &genai.CachedContent{
+		Model:             modelName,
+		SystemInstruction: model.SystemInstruction,
+		Contents:          cs.History,
+	}
+	cc, err := client.CreateCachedContent(ctx, argcc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteCachedContent(ctx, cc.Name)
+
+	modelWithCache := client.GenerativeModelFromCachedContent(cc)
+	cs = modelWithCache.StartChat()
+	resp, err = cs.SendMessage(ctx, genai.Text("I didn't understand that last part, could you please explain it in simpler language?"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+
+}
+
+func ExampleClient_GetCachedContent() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+	fd := genai.FileData{URI: file.URI}
+
+	argcc := &genai.CachedContent{
+		Model:             "gemini-1.5-flash-001",
+		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{userContent(fd)},
+	}
+	cc, err := client.CreateCachedContent(ctx, argcc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteCachedContent(ctx, cc.Name)
+
+	// Save the name for later
+	cacheName := cc.Name
+
+	// ... Later
+	cc2, err := client.GetCachedContent(ctx, cacheName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	modelWithCache := client.GenerativeModelFromCachedContent(cc2)
+	prompt := "Find a lighthearted moment from this transcript"
+	resp, err := modelWithCache.GenerateContent(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+}
+
+func ExampleClient_ListCachedContents() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+	fd := genai.FileData{URI: file.URI}
+
+	argcc := &genai.CachedContent{
+		Model:             "gemini-1.5-flash-001",
+		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{userContent(fd)},
+	}
+	cc, err := client.CreateCachedContent(ctx, argcc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteCachedContent(ctx, cc.Name)
+
+	fmt.Println("My caches:")
+	iter := client.ListCachedContents(ctx)
+	for {
+		cc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("   ", cc.Name)
+	}
+
+}
+
+func ExampleClient_UpdateCachedContent() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+	fd := genai.FileData{URI: file.URI}
+
+	argcc := &genai.CachedContent{
+		Model:             "gemini-1.5-flash-001",
+		SystemInstruction: userContent(genai.Text("You are an expert analyzing transcripts.")),
+		Contents:          []*genai.Content{userContent(fd)},
+	}
+	cc, err := client.CreateCachedContent(ctx, argcc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteCachedContent(ctx, cc.Name)
+
+	// You can update the TTL
+	newExpireTime := cc.Expiration.ExpireTime.Add(2 * time.Hour)
+	_, err = client.UpdateCachedContent(ctx, cc, &genai.CachedContentToUpdate{
+		Expiration: &genai.ExpireTimeOrTTL{ExpireTime: newExpireTime}})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 // ProxyRoundTripper is an implementation of http.RoundTripper that supports
 // setting a proxy server URL for genai clients. This type should be used with
 // a custom http.Client that's passed to WithHTTPClient. For such clients,
@@ -1240,6 +1454,19 @@ func ExampleClient_setProxy() {
 	}
 
 	printResponse(resp)
+}
+
+// userContent helps create a *genai.Content with a "user" role and one or
+// more parts with less verbosity.
+func userContent(parts ...genai.Part) *genai.Content {
+	content := &genai.Content{
+		Role:  "user",
+		Parts: []genai.Part{},
+	}
+	for _, part := range parts {
+		content.Parts = append(content.Parts, part)
+	}
+	return content
 }
 
 func printResponse(resp *genai.GenerateContentResponse) {
