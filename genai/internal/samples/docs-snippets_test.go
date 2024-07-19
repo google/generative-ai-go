@@ -39,21 +39,20 @@ import (
 var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata")
 
 // uploadFile uploads the given file to the service, and returns a [genai.File]
-// representing it.
+// representing it. mimeType optionally specifies the MIME type of the data in
+// the file; if set to "", the service will try to automatically determine the
+// type from the data contents.
 // To clean up the file, defer a client.DeleteFile(ctx, file.Name)
 // call when a file is successfully returned. file.Name will be a uniqely
 // generated string to identify the file on the service.
-func uploadFile(ctx context.Context, client *genai.Client, path string) (*genai.File, error) {
+func uploadFile(ctx context.Context, client *genai.Client, path, mimeType string) (*genai.File, error) {
 	osf, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer osf.Close()
 
-	opts := &genai.UploadFileOptions{}
-	if filepath.Ext(path) == ".txt" {
-		opts.MIMEType = "text/plain"
-	}
+	opts := &genai.UploadFileOptions{MIMEType: mimeType}
 	file, err := client.UploadFile(ctx, "", osf, opts)
 	if err != nil {
 		return nil, err
@@ -131,7 +130,7 @@ func ExampleGenerativeModel_GenerateContent_videoPrompt() {
 	// [START text_gen_multimodal_video_prompt]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -370,7 +369,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	// START [text_gen_multimodal_video_prompt_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -538,7 +537,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	// [START tokens_multimodal_image_file_api]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this image"
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -579,7 +578,7 @@ func ExampleGenerativeModel_CountTokens_videoUploadFile() {
 	// [START tokens_multimodal_video_audio_file_api]
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this video"
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1057,7 +1056,9 @@ func ExampleClient_UploadFile_text() {
 	defer client.Close()
 
 	// [START files_create_text]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "poem.txt"))
+	// Set MIME type explicitly for text files - the service may have difficulty
+	// distingushing between different MIME types of text files automatically.
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "poem.txt"), "text/plain")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1084,7 +1085,7 @@ func ExampleClient_UploadFile_image() {
 	defer client.Close()
 
 	// [START files_create_image]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "Cajun_instruments.jpg"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "Cajun_instruments.jpg"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1111,7 +1112,7 @@ func ExampleClient_UploadFile_video() {
 	defer client.Close()
 
 	// [START files_create_video]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1138,7 +1139,7 @@ func ExampleClient_UploadFile_audio() {
 	defer client.Close()
 
 	// [START files_create_audio]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1166,7 +1167,7 @@ func ExampleClient_GetFile() {
 
 	// [START files_get]
 	// [START files_delete]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1224,7 +1225,7 @@ func ExampleCachedContent_create() {
 
 	// [START cache_create]
 	// [START cache_delete]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1263,7 +1264,7 @@ func ExampleCachedContent_createFromChat() {
 	defer client.Close()
 
 	// [START cache_create_from_chat]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1320,7 +1321,7 @@ func ExampleClient_GetCachedContent() {
 
 	// [START cache_create_from_name]
 	// [START cache_get]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1367,7 +1368,7 @@ func ExampleClient_ListCachedContents() {
 	defer client.Close()
 
 	// [START cache_list]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1409,7 +1410,7 @@ func ExampleClient_UpdateCachedContent() {
 	defer client.Close()
 
 	// [START cache_update]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"))
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
 	if err != nil {
 		log.Fatal(err)
 	}
