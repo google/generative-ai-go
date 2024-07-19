@@ -442,6 +442,46 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	// [END tokens_text_only]
 }
 
+func ExampleGenerativeModel_CountTokens_tools() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START tokens_tools]
+	model := client.GenerativeModel("gemini-1.5-flash-001")
+	prompt := "I have 57 cats, each owns 44 mittens, how many mittens is that in total?"
+
+	tokResp, err := model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 23 )
+
+	tools := []*genai.Tool{
+		&genai.Tool{FunctionDeclarations: []*genai.FunctionDeclaration{
+			{Name: "add"},
+			{Name: "subtract"},
+			{Name: "multiply"},
+			{Name: "divide"},
+		}}}
+
+	model.Tools = tools
+	tokResp, err = model.CountTokens(ctx, genai.Text(prompt))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("total_tokens:", tokResp.TotalTokens)
+	// ( total_tokens: 99 )
+
+	// [END tokens_tools]
+}
+
 func ExampleGenerativeModel_CountTokens_cachedContent() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
