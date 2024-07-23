@@ -604,7 +604,8 @@ func ExampleGenerativeModel_CountTokens_videoUploadFile() {
 	fd := genai.FileData{URI: file.URI}
 	// Call `CountTokens` to get the input token count
 	// of the combined text and file (`total_tokens`).
-	// An image's display or file size does not affect its token count.
+	// A video or audio file is converted to tokens at a fixed rate of tokens per
+	// second.
 	// Optionally, you can call `count_tokens` for the text and file separately.
 	tokResp, err := model.CountTokens(ctx, genai.Text(prompt), fd)
 	if err != nil {
