@@ -1223,7 +1223,7 @@ func ExampleCachedContent_create() {
 	}
 	defer client.Close()
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "text/plain")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1262,7 +1262,7 @@ func ExampleCachedContent_create() {
 
 	// [START cache_create]
 	// [START cache_delete]
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "")
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "a11.txt"), "text/plain")
 	if err != nil {
 		log.Fatal(err)
 	}
