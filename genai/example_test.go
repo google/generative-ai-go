@@ -411,6 +411,7 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "The quick brown fox jumps over the lazy dog"
 
+	// Call CountTokens to get the input token count (`total tokens`).
 	tokResp, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
@@ -424,6 +425,10 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 		log.Fatal(err)
 	}
 
+	// On the response for GenerateContent, use UsageMetadata to get
+	// separate input and output token counts (PromptTokenCount and
+	// CandidatesTokenCount, respectively), as well as the combined
+	// token count (TotalTokenCount).
 	fmt.Println("prompt_token_count:", resp.UsageMetadata.PromptTokenCount)
 	fmt.Println("candidates_token_count:", resp.UsageMetadata.CandidatesTokenCount)
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
@@ -459,6 +464,10 @@ func ExampleGenerativeModel_CountTokens_tools() {
 		}}}
 
 	model.Tools = tools
+
+	// The total token count includes everything sent to the GenerateContent
+	// request. When you use tools (like function calling), the total
+	// token count increases.
 	tokResp, err = model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
@@ -682,7 +691,6 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "The quick brown fox jumps over the lazy dog"
 
-	// Without system instruction
 	respNoInstruction, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
@@ -690,7 +698,9 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 	fmt.Println("total_tokens:", respNoInstruction.TotalTokens)
 	// ( total_tokens: 10 )
 
-	// Same prompt, this time with system instruction
+	// The total token count includes everything sent to the GenerateContent
+	// request. When you use system instructions, the total token
+	// count increases.
 	model.SystemInstruction = genai.NewUserContent(genai.Text("You are a cat. Your name is Neko."))
 	respWithInstruction, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
@@ -1117,11 +1127,30 @@ func ExampleClient_UploadFile_video() {
 	}
 	defer client.Close()
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "earth.mp4"), "")
+	osf, err := os.Open(filepath.Join(testDataDir, "earth.mp4"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer osf.Close()
+
+	file, err := client.UploadFile(ctx, "", osf, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.DeleteFile(ctx, file.Name)
+
+	// Videos need to be processed before you can use them.
+	for file.State == genai.FileStateProcessing {
+		log.Printf("processing %s", file.Name)
+		time.Sleep(5 * time.Second)
+		var err error
+		if file, err = client.GetFile(ctx, file.Name); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if file.State != genai.FileStateActive {
+		log.Fatalf("uploaded file has state %s, not active", file.State)
+	}
 
 	model := client.GenerativeModel("gemini-1.5-flash")
 	resp, err := model.GenerateContent(ctx,
