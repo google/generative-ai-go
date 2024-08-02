@@ -1119,6 +1119,33 @@ func ExampleClient_UploadFile_image() {
 
 }
 
+func ExampleClient_UploadFile_pdf() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "test.pdf"), "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("Give me a summary of this pdf file."),
+		genai.FileData{URI: file.URI})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+
+	// Output: bidke
+}
+
 func ExampleClient_UploadFile_video() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
