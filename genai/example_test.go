@@ -1143,7 +1143,6 @@ func ExampleClient_UploadFile_pdf() {
 
 	printResponse(resp)
 
-	// Output: bidke
 }
 
 func ExampleClient_UploadFile_video() {

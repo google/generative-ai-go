@@ -1175,8 +1175,6 @@ func ExampleClient_UploadFile_pdf() {
 
 	printResponse(resp)
 	// [END files_create_pdf]
-
-	// Output: bidke
 }
 
 func ExampleClient_UploadFile_video() {
