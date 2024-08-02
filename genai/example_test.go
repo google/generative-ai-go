@@ -566,7 +566,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 
 	model := client.GenerativeModel("gemini-1.5-flash")
 	prompt := "Tell me about this image"
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"), "")
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "personWorkingOnComputer.jpg"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
