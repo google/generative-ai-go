@@ -864,14 +864,10 @@ func TestCustomHTTPClient(t *testing.T) {
 	checkMatch(t, got, `new york`)
 }
 
+// uploadFile is a helper function for tests: it uploads a file, reports its
+// upload status until it's ready, and registers a cleanup.
 func uploadFile(t *testing.T, ctx context.Context, client *Client, filename string) *File {
-	osf, err := os.Open(filename)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer osf.Close()
-	// Upload a file. Using the empty string as a name will generate a unique name.
-	file, err := client.UploadFile(ctx, "", osf, nil)
+	file, err := client.UploadFileFromPath(ctx, filename, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
