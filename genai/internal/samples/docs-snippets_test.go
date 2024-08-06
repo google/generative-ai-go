@@ -136,7 +136,7 @@ func ExampleGenerativeModel_GenerateContent_pdfPrompt() {
 	// [START text_gen_multimodal_pdf]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "test.pdf"), "")
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "test.pdf"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -404,7 +404,7 @@ func ExampleGenerativeModel_GenerateContentStream_audioPrompt() {
 	// [START text_gen_multimodal_audio_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"), "")
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "sample.mp3"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -437,7 +437,7 @@ func ExampleGenerativeModel_GenerateContentStream_pdfPrompt() {
 	// [START text_gen_multimodal_pdf_streaming]
 	model := client.GenerativeModel("gemini-1.5-flash")
 
-	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "test.pdf"), "")
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "test.pdf"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
