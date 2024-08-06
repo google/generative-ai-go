@@ -138,6 +138,19 @@ func ExampleGenerativeModel_GenerateContent_videoPrompt() {
 	}
 	defer client.DeleteFile(ctx, file.Name)
 
+	// Videos need to be processed before you can use them.
+	for file.State == genai.FileStateProcessing {
+		log.Printf("processing %s", file.Name)
+		time.Sleep(5 * time.Second)
+		var err error
+		if file, err = client.GetFile(ctx, file.Name); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if file.State != genai.FileStateActive {
+		log.Fatalf("uploaded file has state %s, not active", file.State)
+	}
+
 	resp, err := model.GenerateContent(ctx,
 		genai.Text("Describe this video clip"),
 		genai.FileData{URI: file.URI})
@@ -147,6 +160,34 @@ func ExampleGenerativeModel_GenerateContent_videoPrompt() {
 
 	printResponse(resp)
 	// [END text_gen_multimodal_video_prompt]
+}
+
+func ExampleGenerativeModel_GenerateContent_pdfPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START text_gen_multimodal_pdf]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "test.pdf"), "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("Give me a summary of this document:"),
+		genai.FileData{URI: file.URI})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	printResponse(resp)
+	// [END text_gen_multimodal_pdf_prompt]
 }
 
 func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
@@ -389,6 +430,72 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	// [END text_gen_multimodal_video_prompt_streaming]
 }
 
+func ExampleGenerativeModel_GenerateContentStream_audioPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START text_gen_multimodal_audio_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "sample.mp3"), "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	iter := model.GenerateContentStream(ctx,
+		genai.Text("Give me a summary of this audio file."),
+		genai.FileData{URI: file.URI})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+	// [END text_gen_multimodal_audio_streaming]
+}
+
+func ExampleGenerativeModel_GenerateContentStream_pdfPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START text_gen_multimodal_pdf_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := uploadFile(ctx, client, filepath.Join(testDataDir, "test.pdf"), "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	iter := model.GenerateContentStream(ctx,
+		genai.Text("Give me a summary of this document:"),
+		genai.FileData{URI: file.URI})
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+	// [END text_gen_multimodal_pdf_streaming]
+}
+
 func ExampleGenerativeModel_CountTokens_contextWindow() {
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
@@ -612,6 +719,32 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	fmt.Println("total_token_count:", resp.UsageMetadata.TotalTokenCount)
 	// ( prompt_token_count: 264, candidates_token_count: 100, total_token_count: 364 )
 	// [END tokens_multimodal_image_file_api]
+}
+
+func ExampleGenerativeModel_CountTokens_pdfUploadFile() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START tokens_multimodal_pdf_file_api]
+	model := client.GenerativeModel("gemini-1.5-flash")
+	prompt := "Give me a summary of this document."
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "test.pdf"), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	fd := genai.FileData{URI: file.URI}
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt), fd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp.UsageMetadata)
+	// [END tokens_multimodal_pdf_file_api]
 }
 
 func ExampleGenerativeModel_CountTokens_videoUploadFile() {
