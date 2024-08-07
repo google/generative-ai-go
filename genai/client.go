@@ -434,10 +434,11 @@ func joinParts(dest, src []Part) []Part {
 
 func mergeTexts(in []Part) []Part {
 	var out []Part
+	var texts []string
 	i := 0
 	for i < len(in) {
 		if t, ok := in[i].(Text); ok {
-			texts := []string{string(t)}
+			texts = append(texts, string(t))
 			var j int
 			for j = i + 1; j < len(in); j++ {
 				if t, ok := in[j].(Text); ok {
@@ -448,6 +449,7 @@ func mergeTexts(in []Part) []Part {
 			}
 			// j is just after the last Text.
 			out = append(out, Text(strings.Join(texts, "")))
+			texts = texts[:0]
 			i = j
 		} else {
 			out = append(out, in[i])
