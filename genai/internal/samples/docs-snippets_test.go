@@ -186,6 +186,44 @@ func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
 	// [END text_gen_multimodal_multi_image_prompt]
 }
 
+func ExampleGenerativeModel_GenerateContentStream_multiImagePrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START text_gen_multimodal_multi_image_prompt_streaming]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	imgData1, err := os.ReadFile(filepath.Join(testDataDir, "Cajun_instruments.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	imgData2, err := os.ReadFile(filepath.Join(testDataDir, "organ.jpg"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	iter := model.GenerateContentStream(ctx,
+		genai.Text("What is the difference between these instruments?"),
+		genai.ImageData("jpeg", imgData1),
+		genai.ImageData("jpeg", imgData2),
+	)
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		printResponse(resp)
+	}
+	// [END text_gen_multimodal_multi_image_prompt_streaming]
+}
+
 func ExampleGenerativeModel_GenerateContent_config() {
 	// This example shows how to a configure a model. See [GenerationConfig]
 	// for the complete set of configuration options.
@@ -391,6 +429,33 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 		printResponse(resp)
 	}
 	// [END text_gen_multimodal_video_prompt_streaming]
+}
+
+func ExampleGenerativeModel_GenerateContent_audioPrompt() {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+
+	// [START text_gen_multimodal_audio]
+	model := client.GenerativeModel("gemini-1.5-flash")
+
+	file, err := client.UploadFileFromPath(ctx, filepath.Join(testDataDir, "sample.mp3"), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.DeleteFile(ctx, file.Name)
+
+	resp, err := model.GenerateContent(ctx,
+		genai.Text("Give me a summary of this audio file."),
+		genai.FileData{URI: file.URI})
+	if err != nil {
+		log.Fatal(err)
+	}
+	printResponse(resp)
+	// [END text_gen_multimodal_audio]
 }
 
 func ExampleGenerativeModel_GenerateContentStream_audioPrompt() {
