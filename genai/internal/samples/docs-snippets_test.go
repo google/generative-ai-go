@@ -942,7 +942,10 @@ func ExampleGenerativeModel_jSONNoSchema() {
 	model := client.GenerativeModel("gemini-1.5-pro-latest")
 	// Ask the model to respond with JSON.
 	model.ResponseMIMEType = "application/json"
-	resp, err := model.GenerateContent(ctx, genai.Text("List a few popular cookie recipes."))
+	prompt := `List a few popular cookie recipes using this JSON schema:
+                   Recipe = {'recipeName': string}
+	           Return: Array<Recipe>`
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
 		log.Fatal(err)
 	}
