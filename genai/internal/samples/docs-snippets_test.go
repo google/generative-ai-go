@@ -40,13 +40,23 @@ var testDataDir = filepath.Join(testhelpers.ModuleRootDir(), "genai", "testdata"
 
 func ExampleGenerativeModel_GenerateContent_textOnly() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
 	// [START text_gen_text_only_prompt]
+	import "github.com/google/generative-ai-go/genai"
+	import "google.golang.org/api/option"
+	
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
+	if err != nil {
+	    log.Fatal(err)
+	}
+	defer client.Close()
+	
 	model := client.GenerativeModel("gemini-1.5-flash")
 	resp, err := model.GenerateContent(ctx, genai.Text("Write a story about a magic backpack."))
 	if err != nil {
@@ -59,7 +69,7 @@ func ExampleGenerativeModel_GenerateContent_textOnly() {
 
 func ExampleGenerativeModel_GenerateContent_imagePrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,7 +96,7 @@ func ExampleGenerativeModel_GenerateContent_imagePrompt() {
 
 func ExampleGenerativeModel_GenerateContent_videoPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,7 +137,7 @@ func ExampleGenerativeModel_GenerateContent_videoPrompt() {
 
 func ExampleGenerativeModel_GenerateContent_pdfPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +165,7 @@ func ExampleGenerativeModel_GenerateContent_pdfPrompt() {
 
 func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -188,7 +198,7 @@ func ExampleGenerativeModel_GenerateContent_multiImagePrompt() {
 
 func ExampleGenerativeModel_GenerateContentStream_multiImagePrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -228,7 +238,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 	// This example shows how to a configure a model. See [GenerationConfig]
 	// for the complete set of configuration options.
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -252,7 +262,7 @@ func ExampleGenerativeModel_GenerateContent_config() {
 
 func ExampleGenerativeModel_GenerateContent_systemInstruction() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -271,7 +281,7 @@ func ExampleGenerativeModel_GenerateContent_systemInstruction() {
 
 func ExampleGenerativeModel_GenerateContent_safetySetting() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -295,7 +305,7 @@ func ExampleGenerativeModel_GenerateContent_safetySetting() {
 
 func ExampleGenerativeModel_GenerateContent_safetySettingMulti() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -323,7 +333,7 @@ func ExampleGenerativeModel_GenerateContent_safetySettingMulti() {
 
 func ExampleGenerativeModel_GenerateContent_codeExecution() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -345,7 +355,7 @@ func ExampleGenerativeModel_GenerateContent_codeExecution() {
 
 func ExampleGenerativeModel_GenerateContentStream() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -369,7 +379,7 @@ func ExampleGenerativeModel_GenerateContentStream() {
 
 func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -400,7 +410,7 @@ func ExampleGenerativeModel_GenerateContentStream_imagePrompt() {
 
 func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -433,7 +443,7 @@ func ExampleGenerativeModel_GenerateContentStream_videoPrompt() {
 
 func ExampleGenerativeModel_GenerateContent_audioPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -460,7 +470,7 @@ func ExampleGenerativeModel_GenerateContent_audioPrompt() {
 
 func ExampleGenerativeModel_GenerateContentStream_audioPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -493,7 +503,7 @@ func ExampleGenerativeModel_GenerateContentStream_audioPrompt() {
 
 func ExampleGenerativeModel_GenerateContentStream_pdfPrompt() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -526,7 +536,7 @@ func ExampleGenerativeModel_GenerateContentStream_pdfPrompt() {
 
 func ExampleGenerativeModel_CountTokens_contextWindow() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -549,7 +559,7 @@ func ExampleGenerativeModel_CountTokens_contextWindow() {
 
 func ExampleGenerativeModel_CountTokens_textOnly() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -586,7 +596,7 @@ func ExampleGenerativeModel_CountTokens_textOnly() {
 
 func ExampleGenerativeModel_CountTokens_tools() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -630,7 +640,7 @@ func ExampleGenerativeModel_CountTokens_tools() {
 
 func ExampleGenerativeModel_CountTokens_cachedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -672,7 +682,7 @@ func ExampleGenerativeModel_CountTokens_cachedContent() {
 
 func ExampleGenerativeModel_CountTokens_imageInline() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -710,7 +720,7 @@ func ExampleGenerativeModel_CountTokens_imageInline() {
 
 func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -751,7 +761,7 @@ func ExampleGenerativeModel_CountTokens_imageUploadFile() {
 
 func ExampleGenerativeModel_CountTokens_pdfUploadFile() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -777,7 +787,7 @@ func ExampleGenerativeModel_CountTokens_pdfUploadFile() {
 
 func ExampleGenerativeModel_CountTokens_videoUploadFile() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -820,7 +830,7 @@ func ExampleGenerativeModel_CountTokens_videoUploadFile() {
 
 func ExampleGenerativeModel_CountTokens_chat() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -864,7 +874,7 @@ func ExampleGenerativeModel_CountTokens_chat() {
 
 func ExampleGenerativeModel_CountTokens_systemInstruction() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -897,7 +907,7 @@ func ExampleGenerativeModel_CountTokens_systemInstruction() {
 func ExampleGenerativeModel_jSONSchema() {
 	// This example shows how to get a JSON response that conforms to a schema.
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -932,7 +942,7 @@ func ExampleGenerativeModel_jSONNoSchema() {
 	// This example shows how to get a JSON response without requestin a specific
 	// schema.
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -957,7 +967,7 @@ func ExampleGenerativeModel_jSONNoSchema() {
 // This example shows how to set the History field on ChatSession explicitly.
 func ExampleChatSession_history() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -992,7 +1002,7 @@ func ExampleChatSession_history() {
 
 func ExampleChatSession_streaming() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1033,7 +1043,7 @@ func ExampleChatSession_streaming() {
 
 func ExampleChatSession_streamingWithImage() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1068,7 +1078,7 @@ func ExampleChatSession_streamingWithImage() {
 
 func ExampleEmbeddingModel_EmbedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1083,7 +1093,7 @@ func ExampleEmbeddingModel_EmbedContent() {
 
 func ExampleEmbeddingBatch() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1104,7 +1114,7 @@ func ExampleEmbeddingBatch() {
 // This example shows how to get more information from an error.
 func ExampleGenerativeModel_GenerateContentStream_errors() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1126,7 +1136,7 @@ func ExampleGenerativeModel_GenerateContentStream_errors() {
 
 func ExampleClient_ListModels() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1147,7 +1157,7 @@ func ExampleClient_ListModels() {
 
 func ExampleTool() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1289,7 +1299,7 @@ func ExampleClient_UploadFile_text() {
 
 func ExampleClient_UploadFile_image() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1316,7 +1326,7 @@ func ExampleClient_UploadFile_image() {
 
 func ExampleClient_UploadFile_pdf() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1343,7 +1353,7 @@ func ExampleClient_UploadFile_pdf() {
 
 func ExampleClient_UploadFile_video() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1383,7 +1393,7 @@ func ExampleClient_UploadFile_video() {
 
 func ExampleClient_UploadFile_audio() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1410,7 +1420,7 @@ func ExampleClient_UploadFile_audio() {
 
 func ExampleClient_GetFile() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1445,7 +1455,7 @@ func ExampleClient_GetFile() {
 
 func ExampleClient_ListFiles() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1468,7 +1478,7 @@ func ExampleClient_ListFiles() {
 
 func ExampleCachedContent_create() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1510,7 +1520,7 @@ func ExampleCachedContent_create() {
 
 func ExampleCachedContent_createFromChat() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1566,7 +1576,7 @@ func ExampleCachedContent_createFromChat() {
 
 func ExampleClient_GetCachedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1614,7 +1624,7 @@ func ExampleClient_GetCachedContent() {
 
 func ExampleClient_ListCachedContents() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1656,7 +1666,7 @@ func ExampleClient_ListCachedContents() {
 
 func ExampleClient_UpdateCachedContent() {
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GEMINI_API_KEY")))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("GOOGLE_API_KEY")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1729,7 +1739,7 @@ func (t *ProxyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 
 func ExampleClient_setProxy() {
 	c := &http.Client{Transport: &ProxyRoundTripper{
-		APIKey:   os.Getenv("GEMINI_API_KEY"),
+		APIKey:   os.Getenv("GOOGLE_API_KEY"),
 		ProxyURL: "http://<proxy-url>",
 	}}
 
