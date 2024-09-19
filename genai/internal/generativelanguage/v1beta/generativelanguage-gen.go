@@ -62,8 +62,8 @@ import (
 	"strconv"
 	"strings"
 
-	internal "github.com/google/generative-ai-go/genai/internal"
-	gensupport "github.com/google/generative-ai-go/genai/internal/gensupport"
+	internal "github.com/Bin-Huang/generative-ai-go/genai/internal"
+	gensupport "github.com/Bin-Huang/generative-ai-go/genai/internal/gensupport"
 	googleapi "google.golang.org/api/googleapi"
 	option "google.golang.org/api/option"
 	internaloption "google.golang.org/api/option/internaloption"

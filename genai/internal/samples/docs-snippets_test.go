@@ -29,8 +29,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/generative-ai-go/genai"
-	"github.com/google/generative-ai-go/genai/internal/testhelpers"
+	"github.com/Bin-Huang/generative-ai-go/genai"
+	"github.com/Bin-Huang/generative-ai-go/genai/internal/testhelpers"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"

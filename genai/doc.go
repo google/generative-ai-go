@@ -27,6 +27,6 @@
 //
 // # Errors
 //
-// [examples]: https://pkg.go.dev/github.com/google/generative-ai-go/genai#pkg-examples
+// [examples]: https://pkg.go.dev/github.com/Bin-Huang/generative-ai-go/genai#pkg-examples
 // [setup tutorial]: https://ai.google.dev/tutorials/setup
 package genai
