@@ -31,8 +31,8 @@ import (
 
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
-	"github.com/Bin-Huang/generative-ai-go/genai/internal"
-	gld "github.com/Bin-Huang/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
+	"github.com/google/generative-ai-go/genai/internal"
+	gld "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -76,7 +76,7 @@ Import the option package as "google.golang.org/api/option".`)
 		return nil, fmt.Errorf("creating file client: %w", err)
 	}
 
-	// Workaround for https://github.com/Bin-Huang/generative-ai-go/issues/151
+	// Workaround for https://github.com/google/generative-ai-go/issues/151
 	optsForCache := removeHTTPClientOption(opts)
 	cc, err := gl.NewCacheClient(ctx, optsForCache...)
 	if err != nil {

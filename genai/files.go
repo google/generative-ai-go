@@ -24,7 +24,7 @@ import (
 
 	gl "cloud.google.com/go/ai/generativelanguage/apiv1beta"
 	pb "cloud.google.com/go/ai/generativelanguage/apiv1beta/generativelanguagepb"
-	gld "github.com/Bin-Huang/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
+	gld "github.com/google/generative-ai-go/genai/internal/generativelanguage/v1beta" // discovery client
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
