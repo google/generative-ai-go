@@ -47,11 +47,11 @@ func (cs *ChatSession) SendMessage(ctx context.Context, parts ...Part) (*Generat
 }
 
 // SendMessageStream is like SendMessage, but with a streaming request.
-func (cs *ChatSession) SendMessageStream(ctx context.Context, parts ...Part) (*GenerateContentResponseIterator, error) {
+func (cs *ChatSession) SendMessageStream(ctx context.Context, parts ...Part) *GenerateContentResponseIterator {
 	cs.History = append(cs.History, NewUserContent(parts...))
 	req, err := cs.m.newGenerateContentRequest(cs.History...)
 	if err != nil {
-		return &GenerateContentResponseIterator{err: err}, err
+		return &GenerateContentResponseIterator{err: err}
 	}
 	req.GenerationConfig.CandidateCount = Ptr[int32](1)
 	streamClient, err := cs.m.c.gc.StreamGenerateContent(ctx, req)
@@ -59,7 +59,7 @@ func (cs *ChatSession) SendMessageStream(ctx context.Context, parts ...Part) (*G
 		sc:  streamClient,
 		err: err,
 		cs:  cs,
-	}, err
+	}
 }
 
 // By default, use the first candidate for history. The user can modify that if they want.

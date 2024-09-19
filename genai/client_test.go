@@ -101,10 +101,7 @@ func TestLive(t *testing.T) {
 			t.Logf("sending %q", msg)
 			nh := len(session.History)
 			if streaming {
-				iter, err := session.SendMessageStream(ctx, Text(msg))
-				if err != nil {
-					t.Fatal(err)
-				}
+				iter := session.SendMessageStream(ctx, Text(msg))
 				for {
 					_, err := iter.Next()
 					if err == iterator.Done {
