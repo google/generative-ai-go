@@ -1017,7 +1017,10 @@ func ExampleChatSession_streaming() {
 		},
 	}
 
-	iter := cs.SendMessageStream(ctx, genai.Text("How many paws are in my house?"))
+	iter, err := cs.SendMessageStream(ctx, genai.Text("How many paws are in my house?"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
@@ -1050,9 +1053,12 @@ func ExampleChatSession_streamingWithImage() {
 		log.Fatal(err)
 	}
 
-	iter := cs.SendMessageStream(ctx,
+	iter, err := cs.SendMessageStream(ctx,
 		genai.Text("What family of instruments does this instrument belong to?"),
 		genai.ImageData("jpeg", imgData))
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
