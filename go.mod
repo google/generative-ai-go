@@ -1,4 +1,4 @@
-module github.com/google/generative-ai-go
+module github.com/Bin-Huang/generative-ai-go
 
 go 1.21
 
