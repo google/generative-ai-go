@@ -175,7 +175,7 @@ func (rx *ResumableUpload) Upload(ctx context.Context) (resp *http.Response, err
 		// set to a very small value, in which case no requests will be sent before
 		// the deadline. Return an error to avoid causing a panic.
 		if resp == nil {
-			return nil, fmt.Errorf("upload request to %v not sent, choose larger value for ChunkRetryDealine", rx.URI)
+			return nil, fmt.Errorf("upload request to %v not sent, choose larger value for ChunkRetryDeadline", rx.URI)
 		}
 		return resp, nil
 	}
