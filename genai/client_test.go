@@ -465,7 +465,8 @@ func TestLive(t *testing.T) {
 
 		// Use the uploaded file to generate content.
 		model := client.GenerativeModel("gemini-1.5-pro-latest")
-		resp, err := model.GenerateContent(ctx, FileData{URI: file.URI})
+		resp, err := model.GenerateContent(ctx,
+			Text("describe this image"), FileData{URI: file.URI})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -476,7 +477,8 @@ func TestLive(t *testing.T) {
 		if got, want := file.MIMEType, "audio/mpeg"; got != want {
 			t.Errorf("got MIME type %q, want %q", got, want)
 		}
-		resp, err = model.GenerateContent(ctx, FileData{URI: file.URI})
+		resp, err = model.GenerateContent(ctx,
+			Text("describe this"), FileData{URI: file.URI})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -501,6 +503,31 @@ func TestLive(t *testing.T) {
 			}()
 			// TODO(jba): verify metadata when it is populated.
 			t.Logf("Metadata: %+v\n", file.Metadata)
+		})
+
+		t.Run("txt-encoding-valid", func(t *testing.T) {
+			// Upload a file that has valid UTF-8 encoding (ASCII).
+			poem := uploadFile(t, ctx, client, filepath.Join("testdata", "poem.txt"))
+			model := client.GenerativeModel("gemini-1.5-flash")
+			_, err := model.GenerateContent(ctx,
+				Text("summarize this"),
+				FileData{URI: poem.URI})
+			if err != nil {
+				t.Error(err)
+			}
+		})
+
+		t.Run("txt-encoding-invalid", func(t *testing.T) {
+			// Try uploading a "text" file with garbled encoding (this is just random
+			// data).
+			f := uploadFile(t, ctx, client, filepath.Join("testdata", "badencoding.txt"))
+			model := client.GenerativeModel("gemini-1.5-flash")
+			_, err := model.GenerateContent(ctx,
+				Text("summarize this"),
+				FileData{URI: f.URI})
+			if err == nil {
+				t.Errorf("want encoding error")
+			}
 		})
 	})
 
