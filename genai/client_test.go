@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/googleapis/gax-go/v2/apierror"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -391,13 +392,17 @@ func TestLive(t *testing.T) {
 			if c := "Mountain View"; !strings.Contains(locArg, c) {
 				t.Errorf(`FunctionCall.Args["location"]: got %q, want string containing %q`, locArg, c)
 			}
-			res, err = session.SendMessage(ctx, FunctionResponse{
+			res, err = session.SendMessage(ctx, Text("response:"), FunctionResponse{
 				Name: movieTool.FunctionDeclarations[0].Name,
 				Response: map[string]any{
 					"theater": "AMC16",
 				},
 			})
 			if err != nil {
+				if ae, ok := err.(*apierror.APIError); ok {
+					t.Fatal(ae.Unwrap())
+
+				}
 				t.Fatal(err)
 			}
 			checkMatch(t, responseString(res), "AMC")
