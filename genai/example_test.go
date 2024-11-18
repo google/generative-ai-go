@@ -586,7 +586,7 @@ func ExampleGenerativeModel_CountTokens_tools() {
 	// ( total_tokens: 23 )
 
 	tools := []*genai.Tool{
-		&genai.Tool{FunctionDeclarations: []*genai.FunctionDeclaration{
+		{FunctionDeclarations: []*genai.FunctionDeclaration{
 			{Name: "add"},
 			{Name: "subtract"},
 			{Name: "multiply"},
@@ -1188,6 +1188,9 @@ func ExampleTool() {
 			"theater": "AMC16",
 		},
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 	printResponse(res)
 }
 
