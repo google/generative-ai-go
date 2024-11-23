@@ -510,7 +510,7 @@ func TestLive(t *testing.T) {
 			t.Logf("Metadata: %+v\n", file.Metadata)
 		})
 
-		t.Run("txt-encoding-valid", func(t *testing.T) {
+		t.Run("txt-encoding-valid-utf-8", func(t *testing.T) {
 			// Upload a file that has valid UTF-8 encoding (ASCII).
 			poem := uploadFile(t, ctx, client, filepath.Join("testdata", "poem.txt"))
 			model := client.GenerativeModel("gemini-1.5-flash")
@@ -518,6 +518,19 @@ func TestLive(t *testing.T) {
 				Text("summarize this"),
 				FileData{URI: poem.URI})
 			if err != nil {
+				t.Error(err)
+			}
+		})
+
+		t.Run("txt-encoding-1251", func(t *testing.T) {
+			// Upload a file that has Windows-1251 encoding. This is not currently
+			// supported and the API will return an error.
+			poem := uploadFile(t, ctx, client, filepath.Join("testdata", "1251.txt"))
+			model := client.GenerativeModel("gemini-1.5-flash")
+			_, err := model.GenerateContent(ctx,
+				Text("summarize this"),
+				FileData{URI: poem.URI})
+			if err == nil {
 				t.Error(err)
 			}
 		})
