@@ -114,7 +114,7 @@ func hasAuthOption(opts []option.ClientOption) bool {
 
 		case "option.withHTTPClient",
 			"option.withTokenSource",
-			"option.withCredentialsFile",
+			"option.withCredFile",
 			"option.withCredentialsJSON":
 			return true
 		}
