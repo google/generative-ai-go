@@ -27,7 +27,7 @@
 
 
 if [[ $GEMINI_API_KEY = '' ]]; then
-  echo >&2 "need to set GEMINI_API_KEY"
+  echo >&2 "need to set GEMINI_API_KEY at https://aistudio.google.com"
   exit 1
 fi
 
@@ -47,4 +47,7 @@ google-api-go-generator -api_json_file $docfile \
 # Replace license with the proper one for this repo.
 file=internal/generativelanguage/v1beta/generativelanguage-gen.go
 cat license.txt <(tail +5 $file) | sponge $file
+
+#Send Notification
+echo "Succesfully generated discovery client!"
 
