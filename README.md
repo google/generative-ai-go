@@ -1,45 +1,19 @@
-# Go SDK for Google Generative AI
+# [Deprecated] Google AI Go SDK for the Gemini API
 
-![Go](https://github.com/google/generative-ai-go/actions/workflows/go.yml/badge.svg?event=push) [![Go Reference](https://pkg.go.dev/badge/github.com/google/generative-ai-go.svg)](https://pkg.go.dev/github.com/google/generative-ai-go)
+With Gemini 2.0, we took the chance to create a single unified SDK for all developers who want to use Google's GenAI models (Gemini, Veo, Imagen, etc). As part of that process, we took all of the feedback from this SDK and what developers like about other SDKs in the ecosystem to create the [Google Gen AI SDK](https://github.com/googleapis/go-genai). 
 
-This SDK enables developers to use Google's state-of-the-art generative
-AI models (like Gemini) to build AI-powered features and applications. It
-supports use cases like:
+The Gemini API docs are fully updated to show examples of the new Google Gen AI SDK: [Get started](https://ai.google.dev/gemini-api/docs/quickstart?lang=go).
 
-- Generate text from text-only input
-- Generate text from text-and-images input (multimodal)
-- Build multi-turn conversations (chat)
-- Embedding
+We know how disruptive an SDK change can be and don't take this change lightly, but our goal is to create an extremely simple and clear path for developers to build with our models so it felt necessary to make this change.
 
-## Try out the API
+Thank you for building with Gemini and [let us know](https://discuss.ai.google.dev/c/gemini-api/4) if you need any help!
 
-1.  [Obtain an API key](https://makersuite.google.com/app/apikey) to use with the Google AI SDKs.
-2.  Add the SDK to your module with `go get github.com/google/generative-ai-go`
-3.  Follow [the examples](https://pkg.go.dev/github.com/google/generative-ai-go/genai#pkg-examples)
+**Please be advised that this repository is now considered legacy.** For the latest features, performance improvements, and active development, we strongly recommend migrating to the official **[Google Generative AI SDK for Go](https://github.com/googleapis/go-genai)**.
 
-## Documentation
+**Support Plan for this Repository:**
 
-The documentation of the Google AI Go SDK is [on pkg.go.dev](https://pkg.go.dev/github.com/google/generative-ai-go/genai)
+*   **Limited Maintenance:** Development is now restricted to **critical bug fixes only**. No new features will be added.
+*   **Purpose:** This limited support aims to provide stability for users while they transition to the new SDK.
+*   **End-of-Life Date:** All support for this repository (including bug fixes) will permanently end on **August 31st, 2025**.
 
-Find complete documentation for the Google AI SDKs and the Gemini model in the
-Google documentation: https://ai.google.dev/docs
-
-For a list of the supported models and their capabilities, see https://ai.google.dev/models/gemini
-
-## Getting help
-
-For general Gemini API questions (not specific to the Go SDK), check out the
-[public discussion forum](https://discuss.ai.google.dev/).
-
-For questions specific to the Go SDK, create a new issue and tag it with
-a `question` label.
-
-## Contributing
-
-See [Contributing](https://github.com/google/generative-ai-go/blob/main/CONTRIBUTING.md) for
-more information on contributing to the Google AI Go SDK.
-
-## License
-
-The contents of this repository are licensed under the
-[Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+We encourage all users to begin planning their migration to the [Google Generative AI SDK](https://github.com/googleapis/go-genai) to ensure continued access to the latest capabilities and support.
